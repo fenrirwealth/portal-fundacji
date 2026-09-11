@@ -1,42 +1,34 @@
 #!/bin/sh
 set -e
 
-echo "[start] Czekam na baze danych..."
+echo "[start] Synchronizuje schemat bazy danych..."
 
-# Baza bywa gotowa kilka sekund po kontenerze aplikacji. Bez tej petli
-# pierwszy start po restarcie serwera potrafi sie wywalic bez powodu.
-PROBA=0
-until npx prisma db execute --stdin <<'KONIEC' 2>/dev/null
-SELECT 1;
-KONIEC
-do
-  PROBA=$((PROBA+1))
-  if [ "$PROBA" -ge 12 ]; then
-    echo "[start] Baza nieosiagalna po 12 probach. Przerywam."
+# Bledow NIE ukrywamy. Poprzednia wersja przekierowywala je do /dev/null
+# i kazdy problem wygladal tak samo: "baza nieosiagalna". Przy awarii
+# chcemy widziec, co naprawde sie stalo.
+#
+# Dwie sciezki, bo projekt moze byc na jednym z dwoch etapow:
+#  1. Sa migracje w prisma/migrations — uzywamy ich, bo daja historie zmian.
+#  2. Migracji jeszcze nie ma (pierwsze wdrozenie) — "db push" tworzy
+#     tabele wprost ze schematu.
+# Gdy pojawi sie pierwsza migracja, skrypt przelaczy sie sam.
+
+if [ -d "prisma/migrations" ] && [ "$(ls -A prisma/migrations 2>/dev/null)" ]; then
+  KOMENDA="npx prisma migrate deploy"
+else
+  KOMENDA="npx prisma db push --skip-generate --accept-data-loss"
+fi
+
+PROBA=1
+until $KOMENDA; do
+  if [ "$PROBA" -ge 10 ]; then
+    echo "[start] Nie udalo sie po 10 probach. Przerywam — zobacz blad powyzej."
     exit 1
   fi
-  echo "[start] Baza jeszcze nie odpowiada. Proba $PROBA z 12, czekam 5 s..."
+  echo "[start] Proba $PROBA z 10 nieudana. Czekam 5 s i ponawiam..."
+  PROBA=$((PROBA+1))
   sleep 5
 done
-
-echo "[start] Baza odpowiada. Synchronizuje schemat..."
-
-# Dwie sciezki, bo projekt moze byc na jednym z dwoch etapow:
-#
-# 1. Sa wygenerowane migracje (katalog prisma/migrations) — uzywamy ich,
-#    bo daja historie zmian i przewidywalnosc na produkcji.
-# 2. Migracji jeszcze nie ma — pierwsze wdrozenie. Wtedy "db push"
-#    tworzy tabele wprost ze schematu. Bez tego pierwszy start zawsze
-#    konczy sie bledem "No migration found in prisma/migrations".
-#
-# Gdy dojdzie pierwsza migracja, ta sama komenda przelaczy sie sama.
-if [ -d "prisma/migrations" ] && [ "$(ls -A prisma/migrations 2>/dev/null)" ]; then
-  echo "[start] Znaleziono migracje. Wykonuje migrate deploy."
-  npx prisma migrate deploy
-else
-  echo "[start] Brak migracji. Synchronizuje schemat przez db push."
-  npx prisma db push --skip-generate --accept-data-loss
-fi
 
 echo "[start] Schemat gotowy. Uruchamiam aplikacje."
 exec "$@"
