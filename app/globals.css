@@ -1,0 +1,118 @@
+:root{
+  --papier:#F1F0EA; --papier2:#E4E1D7; --biel:#FCFBF8;
+  --atrament:#16233C; --atrament2:#3A4A6B;
+  --bursztyn:#E19B2E; --bursztyn2:#A96A14;
+  --zielen:#3F6B54; --czerwien:#8C3B2E;
+  --linia:rgba(22,35,60,.15); --linia2:rgba(22,35,60,.3);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--papier);color:var(--atrament);
+  font-family:"IBM Plex Sans",system-ui,sans-serif;font-size:16px;line-height:1.65;
+  -webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:"Bricolage Grotesque","IBM Plex Sans",sans-serif;
+  font-weight:800;line-height:1.06;letter-spacing:-.02em;margin:0}
+p{margin:0 0 1em}
+a{color:var(--bursztyn2);text-underline-offset:3px}
+a:focus-visible,button:focus-visible{outline:3px solid var(--bursztyn);outline-offset:3px;border-radius:2px}
+img{max-width:100%;height:auto}
+
+.wrap{max-width:1040px;margin:0 auto;padding:0 24px}
+.skip{position:absolute;left:-9999px}
+.skip:focus{left:12px;top:12px;background:var(--bursztyn);color:var(--atrament);padding:10px 16px;z-index:99}
+
+header{border-bottom:1px solid var(--linia);background:var(--papier);position:sticky;top:0;z-index:20}
+.nawig{display:flex;align-items:center;gap:26px;padding:15px 0}
+.logo{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:17px;
+  line-height:1.05;text-decoration:none;color:var(--atrament)}
+.logo span{display:block;font-family:"IBM Plex Sans",sans-serif;font-weight:400;
+  font-size:11px;color:var(--atrament2)}
+nav{margin-left:auto;display:flex;gap:22px;font-size:14.5px}
+nav a{color:var(--atrament2);text-decoration:none}
+nav a:hover{color:var(--atrament)}
+
+footer{background:var(--papier2);padding:32px 0 26px;margin-top:60px}
+.nota{font-size:13px;color:var(--atrament2);margin:0 0 6px}
+
+.sekcja{padding:50px 0}
+.tytul{font-size:clamp(25px,3.6vw,34px);margin-bottom:10px}
+.wstep{color:var(--atrament2);max-width:62ch}
+
+.hero{background:var(--atrament);color:var(--papier);padding:64px 0 56px}
+.hero h1{font-size:clamp(30px,5vw,48px);max-width:17ch;margin-bottom:18px}
+.hero p{color:rgba(241,240,234,.78);font-size:17px;max-width:50ch}
+.btn-duzy{display:inline-block;background:var(--bursztyn);color:var(--atrament);
+  text-decoration:none;font-weight:600;padding:13px 24px;border-radius:3px;margin-top:24px}
+.btn-duzy:hover{background:var(--bursztyn2);color:var(--biel)}
+
+.filtry{display:flex;gap:9px;flex-wrap:wrap;align-items:center;
+  margin:26px 0 22px;padding-bottom:22px;border-bottom:1px solid var(--linia)}
+.filtr{border:1px solid var(--linia2);background:var(--biel);border-radius:20px;
+  padding:7px 15px;font-size:13.5px;text-decoration:none;color:var(--atrament)}
+.filtr[data-on="1"]{background:var(--atrament);color:var(--papier);border-color:var(--atrament)}
+.wynik{margin-left:auto;font-size:13.5px;color:var(--atrament2)}
+
+.siatka{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.list{background:var(--biel);border:1px solid var(--linia);border-radius:4px;
+  overflow:hidden;display:flex;flex-direction:column;text-decoration:none;color:inherit}
+.list:hover{border-color:var(--linia2)}
+.kartka{background:#fff;border-bottom:1px solid var(--linia);padding:18px;
+  min-height:148px;position:relative}
+.kartka .linie{position:absolute;inset:18px;background:repeating-linear-gradient(
+  transparent,transparent 21px,rgba(22,35,60,.09) 21px,rgba(22,35,60,.09) 22px)}
+.kartka .pismo{position:relative;font-family:"Bricolage Grotesque",cursive,sans-serif;
+  font-weight:400;font-size:15px;line-height:22px;color:#2B3A52}
+.tresc{padding:16px 18px;flex:1}
+.tresc h3{font-size:16px;margin-bottom:4px}
+.meta{font-size:12.5px;color:var(--atrament2);margin-bottom:10px}
+.tag{display:inline-block;font-size:11.5px;border:1px solid var(--linia2);
+  border-radius:20px;padding:2px 9px;color:var(--atrament2)}
+.stopka-listu{padding:13px 18px;border-top:1px solid var(--linia);
+  display:flex;align-items:center;gap:10px;font-size:12.5px;font-weight:600}
+.st-wolny{color:var(--zielen)}
+.st-zajety{color:var(--atrament2)}
+.st-gotowy{color:var(--bursztyn2)}
+
+.pusto{background:var(--biel);border:1px dashed var(--linia2);border-radius:4px;
+  padding:44px 24px;text-align:center;color:var(--atrament2);grid-column:1/-1}
+.pusto h3{font-size:18px;margin-bottom:8px;color:var(--atrament)}
+
+.licznik{display:flex;gap:28px;background:var(--atrament);color:var(--papier);
+  padding:20px 24px;border-radius:4px;margin-bottom:8px;flex-wrap:wrap}
+.licznik b{font-family:"Bricolage Grotesque",sans-serif;font-size:26px;
+  display:block;line-height:1}
+.licznik span{font-size:12.5px;color:rgba(241,240,234,.65)}
+
+.szczegol{display:grid;grid-template-columns:1.1fr .9fr;gap:36px;align-items:start;margin-top:26px}
+.skan{background:#fff;border:1px solid var(--linia2);border-radius:4px;
+  padding:32px;position:relative;min-height:400px}
+.skan .linie{position:absolute;inset:32px;background:repeating-linear-gradient(
+  transparent,transparent 25px,rgba(22,35,60,.1) 25px,rgba(22,35,60,.1) 26px)}
+.skan .pismo{position:relative;font-family:"Bricolage Grotesque",cursive,sans-serif;
+  font-size:18px;line-height:26px;color:#2B3A52}
+.skan .podpis{position:relative;margin-top:24px;font-family:"Bricolage Grotesque",cursive;
+  font-size:21px;color:#2B3A52}
+.panel{background:var(--biel);border:1px solid var(--linia);border-radius:4px;
+  padding:24px;position:sticky;top:88px}
+.panel h1{font-size:23px;margin-bottom:6px}
+.info{background:var(--papier);border-left:2px solid var(--bursztyn);
+  padding:12px 14px;font-size:13px;color:var(--atrament2);margin:16px 0}
+.zasady{font-size:13px;color:var(--atrament2);line-height:1.55;
+  margin-top:16px;padding-top:16px;border-top:1px solid var(--linia)}
+.btn{display:block;width:100%;text-align:center;background:var(--bursztyn);
+  color:var(--atrament);border:0;border-radius:3px;padding:13px 18px;
+  font:600 15px "IBM Plex Sans",sans-serif;cursor:pointer;text-decoration:none}
+.btn:hover{background:var(--bursztyn2);color:var(--biel)}
+.btn[disabled],.btn.stop{background:var(--papier2);color:var(--atrament2);cursor:not-allowed}
+.wroc{display:inline-block;font-size:13.5px;color:var(--atrament2);
+  text-decoration:none;margin-bottom:16px}
+.wroc:hover{color:var(--atrament);text-decoration:underline}
+
+@media(max-width:900px){
+  nav{gap:14px;font-size:13.5px}
+  .siatka{grid-template-columns:1fr 1fr}
+  .szczegol{grid-template-columns:1fr}
+  .panel{position:static}
+}
+@media(max-width:560px){.siatka{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
