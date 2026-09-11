@@ -31,13 +31,22 @@ ENV PORT=3000
 RUN addgroup --system --gid 1001 nodejs \
  && adduser --system --uid 1001 nextjs
 
+# Wynik trybu standalone: serwer z wbudowanymi zaleznosciami aplikacji.
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
-COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/node_modules/.bin/prisma ./node_modules/.bin/prisma
-COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
-COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
+# Pelne node_modules sa tu potrzebne SWIADOMIE.
+#
+# Wczesniej kopiowalem tylko katalogi "prisma" i "@prisma", zeby obraz byl
+# mniejszy. Efekt: narzedzie wiersza polecen Prismy nie mialo swoich
+# zaleznosci, wywalalo sie przy starcie, a skrypt raportowal to jako
+# "baza nieosiagalna" — komunikat mylacy, bo baza dzialala.
+#
+# Obraz rosnie o kilkaset megabajtow. Przy 100 GB dysku to nie problem,
+# a start kontenera staje sie przewidywalny.
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
+COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
+COPY --from=builder --chown=nextjs:nodejs /app/package.json ./package.json
 
 COPY docker-entrypoint.sh ./
 RUN chmod +x docker-entrypoint.sh
