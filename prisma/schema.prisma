@@ -1,6 +1,11 @@
 // ============================================================
 //  Fundacja Lepszy Dom Lepsze Jutro — schemat bazy danych
 //  PostgreSQL + Prisma
+//
+//  Modele dziedzinowe po polsku, modele wymagane przez Auth.js po
+//  angielsku (User, Account, Session, VerificationToken). Adapter
+//  wymaga dokladnie tych nazw — tlumaczenie ich konczy sie walka
+//  z biblioteka.
 // ============================================================
 
 generator client {
@@ -12,77 +17,182 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ------------------------------------------------------------
+//  TOZSAMOSC
+//
+//  Jedno konto = jeden adres e-mail. Niezaleznie od tego, czy
+//  uzytkownik zaloguje sie linkiem, czy w przyszlosci przez Google,
+//  trafia na to samo konto — kluczem jest zweryfikowany adres,
+//  a nie dostawca logowania.
+//
+//  Administrator i darczynca uzywaja tego samego logowania.
+//  Rozdziela ich wylacznie rola w bazie.
+// ------------------------------------------------------------
+
 enum Rola {
   DARCZYNCA
   REDAKCJA
   ZARZAD
 }
 
-model Uzytkownik {
-  id            String   @id @default(cuid())
-  email         String   @unique
-  imieNazwisko  String
-  telefon       String?
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  emailVerified DateTime?
+  name          String?
+  image         String?
+
+  telefon             String?
   telefonPotwierdzony DateTime?
-  rola          Rola     @default(DARCZYNCA)
+  rola                Rola      @default(DARCZYNCA)
 
-  // Logowanie przez Google/Facebook. Hasla nie przechowujemy w ogole —
-  // nie ma czego wykrasc i nie ma czego resetowac w grudniu.
-  dostawcaAuth  String?
-  idZewnetrzne  String?
+  // Zgody zapisujemy dopiero po faktycznym zaznaczeniu pola, nigdy
+  // domyslnie. Przechowujemy tez wersje tresci — bez niej nie da sie
+  // wykazac, na co uzytkownik sie zgodzil.
+  zgodaRegulamin       DateTime?
+  wersjaRegulaminu     String?
+  zgodaMarketing       DateTime?
+  wersjaZgodyMarketing String?
 
-  emailPotwierdzony DateTime?
-  zgodaRegulamin    DateTime @default(now())
-  zgodaMarketing    DateTime?
+  accounts    Account[]
+  sessions    Session[]
+  rezerwacje  Rezerwacja[]
+  weryfikacje Weryfikacja[]
 
-  rezerwacje    Rezerwacja[]
-  weryfikacje   Weryfikacja[]
-
-  utworzony     DateTime @default(now())
+  utworzony      DateTime @default(now())
   zaktualizowany DateTime @updatedAt
 
   @@index([email])
-  @@unique([dostawcaAuth, idZewnetrzne])
 }
 
-// Przelaczniki zmieniane z panelu, bez wdrazania nowej wersji.
-model Ustawienie {
-  klucz     String   @id
-  wartosc   String
-  opis      String?
-  zmienione DateTime @updatedAt
+// Modele wymagane przez Auth.js. Nie zmieniac nazw pol.
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
 }
 
-enum StatusPlacowki {
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ------------------------------------------------------------
+//  EDYCJE AKCJI
+//
+//  Bez tego listy z 2026 i 2027 wpadlyby do jednej puli, a licznik
+//  i filtry zaczelyby mieszac lata.
+// ------------------------------------------------------------
+
+model EdycjaAkcji {
+  id                 String   @id @default(cuid())
+  rok                Int      @unique
+  nazwa              String
+  dataStart          DateTime
+  dataKoniec         DateTime
+  terminDostarczenia DateTime
+  aktywna            Boolean  @default(false)
+
+  listy   List[]
+  udzialy UdzialPlacowki[]
+
+  utworzona DateTime @default(now())
+
+  @@index([aktywna])
+}
+
+// ------------------------------------------------------------
+//  PLACOWKI
+//
+//  Placowka jest rekordem stalym — instytucja, ktora moze wracac
+//  co roku. Jej status w konkretnej akcji to osobny rekord udzialu.
+//  Placowki NIE MAJA kont w portalu: zglaszaja udzial formularzem,
+//  a materialy przekazuja poza systemem.
+// ------------------------------------------------------------
+
+model Placowka {
+  id          String  @id @default(cuid())
+  nazwa       String
+  ulica       String?
+  kodPocztowy String?
+  miejscowosc String?
+  wojewodztwo String
+
+  osobaKontaktowa String?
+  email           String?
+  telefon         String?
+  notatki         String?
+
+  listy            List[]
+  udzialyWEdycjach UdzialPlacowki[]
+  dostawy          Dostawa[]
+
+  utworzona      DateTime @default(now())
+  zaktualizowana DateTime @updatedAt
+
+  @@index([wojewodztwo])
+}
+
+enum StatusUdzialu {
   ZGLOSZONA
   POTWIERDZILA
   ODMOWILA
   ZAKONCZONA
 }
 
-// Dane wrazliwe. Widoczne wylacznie dla roli ZARZAD.
-model Placowka {
-  id              String   @id @default(cuid())
-  nazwa           String
-  ulica           String?
-  kodPocztowy     String?
-  miejscowosc     String?
-  wojewodztwo     String
+model UdzialPlacowki {
+  id         String      @id @default(cuid())
+  placowkaId String
+  placowka   Placowka    @relation(fields: [placowkaId], references: [id], onDelete: Cascade)
+  edycjaId   String
+  edycja     EdycjaAkcji @relation(fields: [edycjaId], references: [id], onDelete: Cascade)
 
-  osobaKontaktowa String?
-  email           String?
-  telefon         String?
-
-  status          StatusPlacowki @default(ZGLOSZONA)
+  status             StatusUdzialu @default(ZGLOSZONA)
+  deklarowaneDzieci  Int?
   zakazanePrzedmioty String?
-  notatki         String?
+  uwagi              String?
 
-  listy           List[]
-  dostawy         Dostawa[]
+  utworzony      DateTime @default(now())
+  zaktualizowany DateTime @updatedAt
 
-  utworzona       DateTime @default(now())
-  zaktualizowana  DateTime @updatedAt
+  @@unique([placowkaId, edycjaId])
+  @@index([status])
 }
+
+// ------------------------------------------------------------
+//  LISTY
+//
+//  Listy tworzy WYLACZNIE administrator (rola REDAKCJA lub ZARZAD).
+//  Kazdy zaczyna jako SZKIC i wymaga swiadomej publikacji.
+// ------------------------------------------------------------
 
 enum StatusListu {
   SZKIC
@@ -104,62 +214,84 @@ enum Kategoria {
 }
 
 model List {
-  id           String   @id @default(cuid())
-  numer        Int      @unique @default(autoincrement())
+  id    String @id @default(cuid())
+  numer Int    @unique @default(autoincrement())
+
+  edycjaId String
+  edycja   EdycjaAkcji @relation(fields: [edycjaId], references: [id])
 
   // --- dane publiczne ---
-  imie         String
-  wiek         Int
-  wojewodztwo  String
-  kategoria    Kategoria
-  marzenie     String
-  rozmiar      String?
-  skanUrl      String?
-  trescOdczytana String?
+  imie        String
+  wiek        Int
+  wojewodztwo String
+  kategoria   Kategoria
+  marzenie    String
+  rozmiar     String?
+
+  // Opis pisze administrator. To nie jest transkrypcja listu.
+  opis String?
+
+  // JEDNO pole, swiadomie. Oryginalu skanu nie przechowujemy w portalu
+  // w ogole: zdjecie przygotowuje i sprawdza administrator przed
+  // wgraniem. Czego nie ma, tego nie da sie wyciec.
+  zdjecieUrl String?
 
   // --- dane wewnetrzne ---
-  placowkaId   String
-  placowka     Placowka @relation(fields: [placowkaId], references: [id])
-  zgodaPlik    String?
-  zgodaData    DateTime?
-  zgodaCofnieta DateTime?
+  placowkaId String
+  placowka   Placowka @relation(fields: [placowkaId], references: [id])
 
-  status       StatusListu @default(SZKIC)
+  // Podpisana zgoda dyrektora zostaje w dokumentacji fundacji, NIE
+  // w portalu. To najbardziej wrazliwy dokument w calej akcji: podpis,
+  // imie dziecka, nazwa placowki. W bazie odnotowujemy wylacznie fakt
+  // jej otrzymania i osobe, ktora to potwierdzila.
+  zgodaData      DateTime?
+  zgodaPrzyjalId String?
+  zgodaCofnieta  DateTime?
 
-  rezerwacje   Rezerwacja[]
-  weryfikacje  Weryfikacja[]
+  status StatusListu @default(SZKIC)
 
-  utworzony    DateTime @default(now())
+  rezerwacje  Rezerwacja[]
+  weryfikacja Weryfikacja?
+
+  utworzony      DateTime @default(now())
   zaktualizowany DateTime @updatedAt
 
   @@index([status])
+  @@index([edycjaId, status])
   @@index([kategoria, wiek])
 }
 
-// Odpowiednik papierowej karty weryfikacji. List nie moze zostac
-// opublikowany, dopoki wszystkie pozycje nie sa odhaczone.
 model Weryfikacja {
-  id                 String  @id @default(cuid())
-  listId             String  @unique
-  list               List    @relation(fields: [listId], references: [id])
-  osobaId            String
-  osoba              Uzytkownik @relation(fields: [osobaId], references: [id])
+  id      String @id @default(cuid())
+  listId  String @unique
+  list    List   @relation(fields: [listId], references: [id], onDelete: Cascade)
+  osobaId String
+  osoba   User   @relation(fields: [osobaId], references: [id])
 
-  zgodaDolaczona     Boolean @default(false)
-  brakNazwiska       Boolean @default(false)
-  brakPlacowki       Boolean @default(false)
-  brakMiejscowosci   Boolean @default(false)
-  brakInnychOsob     Boolean @default(false)
+  zgodaDolaczona       Boolean @default(false)
+  brakNazwiska         Boolean @default(false)
+  brakPlacowki         Boolean @default(false)
+  brakMiejscowosci     Boolean @default(false)
+  brakInnychOsob       Boolean @default(false)
   brakDanychWrazliwych Boolean @default(false)
-  brakWizerunku      Boolean @default(false)
-  metadaneUsuniete   Boolean @default(false)
-  nazwaPlikuPoprawna Boolean @default(false)
-  opisPoprawny       Boolean @default(false)
+  brakWizerunku        Boolean @default(false)
+  metadaneUsuniete     Boolean @default(false)
+  nazwaPlikuPoprawna   Boolean @default(false)
+  opisPoprawny         Boolean @default(false)
 
-  uwagi              String?
-  zakonczona         DateTime?
-  utworzona          DateTime @default(now())
+  uwagi      String?
+  zakonczona DateTime?
+  utworzona  DateTime @default(now())
 }
+
+// ------------------------------------------------------------
+//  REZERWACJE
+//
+//  Limit "jedno konto — jeden aktywny list" wymusza CZESCIOWY INDEKS
+//  UNIKALNY dopisany w migracji recznie. Sprawdzanie tego w kodzie
+//  przed transakcja przepuszcza dwa rownolegle zadania; baza nie
+//  przepusci nigdy.
+// ------------------------------------------------------------
 
 enum StatusRezerwacji {
   OCZEKUJE
@@ -170,23 +302,23 @@ enum StatusRezerwacji {
 }
 
 model Rezerwacja {
-  id            String   @id @default(cuid())
-  listId        String
-  list          List     @relation(fields: [listId], references: [id])
-  uzytkownikId  String
-  uzytkownik    Uzytkownik @relation(fields: [uzytkownikId], references: [id])
+  id     String @id @default(cuid())
+  listId String
+  list   List   @relation(fields: [listId], references: [id])
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
 
-  status        StatusRezerwacji @default(OCZEKUJE)
-  wygasa        DateTime
-  potwierdzona  DateTime?
-  anulowana     DateTime?
+  status               StatusRezerwacji @default(OCZEKUJE)
+  wygasa               DateTime
+  potwierdzona         DateTime?
+  anulowana            DateTime?
   przypomnienieWyslane DateTime?
 
-  prezent       Prezent?
-  utworzona     DateTime @default(now())
+  prezent   Prezent?
+  utworzona DateTime @default(now())
 
   @@index([status, wygasa])
-  @@index([uzytkownikId])
+  @@index([userId])
 }
 
 enum StanPrezentu {
@@ -199,45 +331,45 @@ enum StanPrezentu {
 }
 
 model Prezent {
-  id             String   @id @default(cuid())
-  rezerwacjaId   String   @unique
-  rezerwacja     Rezerwacja @relation(fields: [rezerwacjaId], references: [id])
+  id           String     @id @default(cuid())
+  rezerwacjaId String     @unique
+  rezerwacja   Rezerwacja @relation(fields: [rezerwacjaId], references: [id], onDelete: Cascade)
 
-  stan           StanPrezentu @default(ZAPOWIEDZIANY)
-  dataPrzyjecia  DateTime?
-  przyjetyPrzez  String?
-  opisZawartosci String?
+  stan            StanPrezentu @default(ZAPOWIEDZIANY)
+  dataPrzyjecia   DateTime?
+  przyjetyPrzez   String?
+  opisZawartosci  String?
   powodOdrzucenia String?
 
-  dostawaId      String?
-  dostawa        Dostawa? @relation(fields: [dostawaId], references: [id])
+  dostawaId String?
+  dostawa   Dostawa? @relation(fields: [dostawaId], references: [id])
 
   utworzony      DateTime @default(now())
   zaktualizowany DateTime @updatedAt
 }
 
 model Dostawa {
-  id           String   @id @default(cuid())
+  id           String    @id @default(cuid())
   placowkaId   String
-  placowka     Placowka @relation(fields: [placowkaId], references: [id])
+  placowka     Placowka  @relation(fields: [placowkaId], references: [id])
   dataWydania  DateTime?
   odebralOsoba String?
   protokolPlik String?
 
-  prezenty     Prezent[]
-  utworzona    DateTime @default(now())
+  prezenty  Prezent[]
+  utworzona DateTime @default(now())
 }
 
 model Aktualnosc {
-  id            String   @id @default(cuid())
-  slug          String   @unique
-  tytul         String
-  zajawka       String
-  tresc         String
-  obrazUrl      String?
-  opublikowana  DateTime?
+  id           String    @id @default(cuid())
+  slug         String    @unique
+  tytul        String
+  zajawka      String
+  tresc        String
+  obrazUrl     String?
+  opublikowana DateTime?
 
-  utworzona     DateTime @default(now())
+  utworzona      DateTime @default(now())
   zaktualizowana DateTime @updatedAt
 
   @@index([opublikowana])
@@ -251,18 +383,18 @@ enum StatusZgloszenia {
 }
 
 model ZgloszeniePotrzeby {
-  id            String   @id @default(cuid())
-  ktoZglasza    String
-  nazwa         String
-  miejscowosc   String?
+  id             String  @id @default(cuid())
+  ktoZglasza     String
+  nazwa          String
+  miejscowosc    String?
   rodzajPotrzeby String
-  opis          String
-  kontakt       String
+  opis           String
+  kontakt        String
 
-  status        StatusZgloszenia @default(NOWE)
-  notatki       String?
+  status  StatusZgloszenia @default(NOWE)
+  notatki String?
 
-  utworzone     DateTime @default(now())
+  utworzone      DateTime @default(now())
   zaktualizowane DateTime @updatedAt
 
   @@index([status])
