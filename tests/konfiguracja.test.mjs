@@ -8,6 +8,7 @@ test("przyklad srodowiska zawiera wszystkie wymagane sekrety i adresy", () => {
     "DATABASE_URL",
     "AUTH_URL",
     "AUTH_SECRET",
+    "CRON_SECRET",
     "SMTP_HOST",
     "SMTP_PORT",
     "SMTP_USER",

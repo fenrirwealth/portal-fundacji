@@ -42,3 +42,19 @@ npm run admin:set-role -- osoba@example.com ZARZAD
 
 Wyloguj sie i zaloguj ponownie. W nawigacji pojawi sie „Panel redakcji”.
 Nie ustawiaj roli przez publiczny formularz ani zmienna srodowiskowa.
+
+## Przypomnienia o rezerwacjach
+
+W Coolify dodaj zadanie cykliczne uruchamiane raz na godzine. Powinno
+wykonac zadanie HTTP:
+
+```sh
+curl --fail --silent --show-error \
+  -X POST \
+  -H "Authorization: Bearer $CRON_SECRET" \
+  https://portal.fundacjalepszydomlepszejutro.pl/api/zadania/przypomnienia
+```
+
+`CRON_SECRET` musi byc innym losowym sekretem niz `AUTH_SECRET`. Zadanie
+wysyla jedno przypomnienie, gdy do wygaśnięcia niepotwierdzonej rezerwacji
+pozostalo najwyzej 24 godziny.

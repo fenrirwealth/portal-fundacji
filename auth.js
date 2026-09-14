@@ -2,6 +2,7 @@ import NextAuth from "next-auth";
 import Nodemailer from "next-auth/providers/nodemailer";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { db } from "./lib/db";
+import { konfiguracjaSmtp, nadawca } from "./lib/poczta";
 
 // ------------------------------------------------------------
 //  Logowanie linkiem jednorazowym
@@ -78,20 +79,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
   providers: [
     Nodemailer({
-      server: {
-        host: process.env.SMTP_HOST,
-        port: Number(process.env.SMTP_PORT || 587),
-        secure: Number(process.env.SMTP_PORT || 587) === 465,
-        requireTLS: Number(process.env.SMTP_PORT || 587) !== 465,
-        auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
-        tls: { minVersion: "TLSv1.2", rejectUnauthorized: true },
-        connectionTimeout: 10_000,
-        greetingTimeout: 10_000,
-        socketTimeout: 20_000,
-        disableFileAccess: true,
-        disableUrlAccess: true,
-      },
-      from: process.env.SMTP_FROM || process.env.SMTP_USER,
+      server: konfiguracjaSmtp(),
+      from: nadawca(),
       // 30 minut, nie domyslne 24 godziny. Link daje pelny dostep do
       // konta i lezy w skrzynce — doba to za dlugo, zwlaszcza przy
       // komputerach wspoldzielonych.
