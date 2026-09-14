@@ -1,6 +1,7 @@
 import { db } from "../../lib/db";
 import { wymagajRedakcji } from "../../lib/admin";
 import { rozpatrzZgloszenie, utworzEdycje } from "./actions";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Panel redakcji", robots: { index: false, follow: false } };
@@ -93,7 +94,7 @@ export default async function Admin({ searchParams }) {
       <section style={{ marginTop: 40 }}>
         <div className="naglowek-rzad">
           <h2>Listy ({listy.length})</h2>
-          <a className="btn" href="/admin/listy/nowy">Dodaj list</a>
+          <Link className="btn" href="/admin/listy/nowy">Dodaj list</Link>
         </div>
         {listy.length === 0 ? <p className="wstep">Nie dodano jeszcze zadnych listow.</p> : (
           <div className="tabela-przewijana"><table className="tabela">

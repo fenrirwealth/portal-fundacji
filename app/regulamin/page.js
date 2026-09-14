@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth } from "../../auth";
 import { db, WERSJA_REGULAMINU, bezpiecznaSciezka } from "../../lib/db";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
@@ -22,11 +23,11 @@ export default async function Regulamin({ searchParams }) {
     konto?.zgodaRegulamin && konto.wersjaRegulaminu === WERSJA_REGULAMINU;
 
   return (
-    <div className="wrap sekcja">
-      <h1 className="tytul">Regulamin akcji „Listy do Swietego Mikolaja"</h1>
-      <p className="wstep">Wersja {WERSJA_REGULAMINU}</p>
+    <div className="wrap sekcja"><div className="waski" style={{ marginInline: "auto" }}>
+      <h1 style={{ fontSize: "var(--t-2xl)" }}>Regulamin akcji &bdquo;Listy do Świętego Mikołaja&rdquo;</h1>
+      <p className="drobny cichy" style={{ marginTop: "var(--o-2)" }}>Wersja {WERSJA_REGULAMINU}</p>
 
-      <div className="wstep" style={{ marginTop: 24 }}>
+      <div className="czytanie" style={{ marginTop: "var(--o-6)" }}>
         <p><b>1.</b> Organizatorem akcji jest Fundacja Lepszy Dom Lepsze Jutro,
         KRS 0000971976.</p>
         <p><b>2.</b> Darczynca rezerwuje jeden list naraz. Rezerwacje nalezy
@@ -47,21 +48,21 @@ export default async function Regulamin({ searchParams }) {
         wylacznie obsludze akcji. Przysluguje prawo dostepu, sprostowania,
         usuniecia oraz wniesienia skargi do Prezesa UODO.</p>
         <p><b>8.</b> Udzial w akcji jest nieodplatny i dobrowolny. Rezerwacje
-        mozna anulowac w kazdej chwili w panelu „Moje rezerwacje".</p>
+        mozna anulowac w kazdej chwili w panelu &bdquo;Moje rezerwacje&rdquo;.</p>
       </div>
 
       {!sesja?.user?.id && (
-        <p style={{ marginTop: 26 }}>
-          <a className="btn" href={"/zaloguj?wroc=" + encodeURIComponent("/regulamin?wroc=" + wroc)}>
+        <p style={{ marginTop: "var(--o-6)" }}>
+          <Link className="btn" href={"/zaloguj?wroc=" + encodeURIComponent("/regulamin?wroc=" + wroc)}>
             Zaloguj sie, zeby zaakceptowac
-          </a>
+          </Link>
         </p>
       )}
 
       {sesja?.user?.id && zaakceptowany && (
-        <p className="info" style={{ marginTop: 26 }}>
+        <p className="komunikat komunikat-sukces" style={{ marginTop: "var(--o-6)" }}>
           Regulamin w wersji {WERSJA_REGULAMINU} zostal juz przez Ciebie
-          zaakceptowany. <a href={wroc}>Wroc do listow</a>.
+          zaakceptowany. <Link href={wroc}>Wroc do listow</Link>.
         </p>
       )}
 
@@ -84,14 +85,14 @@ export default async function Regulamin({ searchParams }) {
             // takze pochodzi od uzytkownika i moglo zostac podmienione.
             redirect(bezpiecznaSciezka(formData.get("wroc")));
           }}
-          style={{ marginTop: 26 }}
+          style={{ marginTop: "var(--o-6)" }}
         >
           <input type="hidden" name="wroc" value={wroc} />
-          <button className="btn" type="submit" style={{ width: "auto" }}>
+          <button className="btn btn-duzy" type="submit">
             Akceptuje regulamin
           </button>
         </form>
       )}
-    </div>
+    </div></div>
   );
 }

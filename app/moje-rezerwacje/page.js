@@ -3,6 +3,7 @@ import { auth } from "../../auth";
 import { db, aktywnaEdycja, formatujTermin } from "../../lib/db";
 import { zwolnijWygasle } from "../api/rezerwacja/route";
 import Akcje from "./Akcje";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
@@ -47,31 +48,32 @@ export default async function MojeRezerwacje({ searchParams }) {
 
   return (
     <div className="wrap sekcja">
-      <h1 className="tytul">Moje rezerwacje</h1>
+      <h1 style={{ fontSize: "var(--t-3xl)" }}>Moje rezerwacje</h1>
 
       {p.nowa === "1" && (
-        <p className="info" role="status">
-          Rezerwacja przyjeta. Potwierdz ja w ciagu 3 dni — po tym czasie
-          list wraca do puli.
-        </p>
+        <div className="komunikat komunikat-sukces" role="status" style={{ margin: "var(--o-5) 0" }}>
+          <span aria-hidden="true">✓</span>
+          <span><b>Rezerwacja przyjęta.</b> Potwierdź ją w ciągu 3 dni — po tym czasie list wraca do puli.</span>
+        </div>
       )}
 
-      <p className="wstep">
+      <p className="czytanie cichy" style={{ marginTop: "var(--o-3)" }}>
         Mozesz trzymac jeden list naraz. Po potwierdzeniu masz czas
         {termin ? " do " + termin : ""} na dostarczenie prezentu do siedziby
         fundacji.
       </p>
 
       {rezerwacje.length === 0 && (
-        <div className="pusto" style={{ marginTop: 26 }}>
+        <div className="pusto" style={{ marginTop: "var(--o-6)" }}>
           <h3>Nie masz jeszcze rezerwacji</h3>
-          <p>Wybierz list z listy dzieci — przy kazdym widac, czy jest wolny.</p>
-          <p style={{ marginTop: 12 }}><a className="btn" href="/listy">Zobacz listy</a></p>
+          <p>Wybierz list z listy dzieci — przy każdym widać, czy jest jeszcze wolny.</p>
+          <Link className="btn" href="/listy" style={{ marginTop: "var(--o-4)" }}>Zobacz listy dzieci</Link>
         </div>
       )}
 
       {rezerwacje.length > 0 && (
-        <table className="tabela" style={{ marginTop: 26, width: "100%" }}>
+        <div className="karta" style={{ marginTop: "var(--o-6)" }}>
+          <table className="tabela">
           <thead>
             <tr>
               <th>Dziecko</th>
@@ -84,28 +86,33 @@ export default async function MojeRezerwacje({ searchParams }) {
           <tbody>
             {rezerwacje.map((r) => (
               <tr key={r.id}>
-                <td><b>{r.list.imie}</b>, {r.list.wiek} lat</td>
-                <td>{r.list.marzenie}</td>
-                <td>{OPISY[r.status] || r.status}</td>
-                <td>
+                <td data-etykieta="Dziecko"><b>{r.list.imie}</b>, {r.list.wiek} lat</td>
+                <td data-etykieta="Marzenie">{r.list.marzenie}</td>
+                <td data-etykieta="Status">
+                  <span className={"plakietka " + (r.status === "POTWIERDZONA" ? "plakietka-wolny" : r.status === "OCZEKUJE" ? "plakietka-gotowy" : "plakietka-zajety")}>
+                    {OPISY[r.status] || r.status}
+                  </span>
+                </td>
+                <td data-etykieta="Termin">
                   {r.status === "OCZEKUJE"
                     ? "potwierdz do " + new Date(r.wygasa).toLocaleDateString("pl-PL")
                     : r.status === "POTWIERDZONA"
                       ? (termin ? "prezent do " + termin : "prezent w terminie akcji")
                       : "—"}
                 </td>
-                <td style={{ textAlign: "right" }}>
-                  <Akcje id={r.id} status={r.status} />
+                <td data-etykieta="Akcje" style={{ textAlign: "right" }}>
+                  <Akcje id={r.id} status={r.status} imie={r.list.imie} />
                 </td>
               </tr>
             ))}
           </tbody>
-        </table>
+          </table>
+        </div>
       )}
 
       {aktywne.length === 0 && rezerwacje.length > 0 && (
         <p style={{ marginTop: 18 }}>
-          <a href="/listy">Wybierz kolejny list</a>
+          <Link href="/listy">Wybierz kolejny list</Link>
         </p>
       )}
     </div>

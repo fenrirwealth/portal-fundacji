@@ -1,10 +1,8 @@
 import { signIn } from "../../auth";
 import { bezpiecznaSciezka } from "../../lib/db";
+import Pole from "../ui/Pole";
 
-export const metadata = {
-  title: "Zaloguj sie",
-  robots: { index: false, follow: false },
-};
+export const metadata = { title: "Zaloguj się", robots: { index: false, follow: false } };
 
 export default async function Zaloguj({ searchParams }) {
   const p = (await searchParams) || {};
@@ -12,55 +10,48 @@ export default async function Zaloguj({ searchParams }) {
 
   return (
     <div className="wrap sekcja">
-      <h1 className="tytul">Zaloguj sie</h1>
-      <p className="wstep">
-        Nie zakladamy hasel. Podaj adres e-mail, a wyslemy na niego link
-        do logowania. Tego samego adresu uzyjemy do kontaktu w sprawie
-        rezerwacji.
-      </p>
+      <div className="waski" style={{ marginInline: "auto" }}>
+        <h1 style={{ fontSize: "var(--t-2xl)" }}>Zaloguj się</h1>
+        <p className="cichy" style={{ marginTop: "var(--o-3)" }}>
+          Nie zakładamy haseł. Podaj adres e-mail, a wyślemy na niego link
+          do logowania. Tego samego adresu użyjemy do kontaktu w sprawie akcji.
+        </p>
 
-      <form
-        action={async (formData) => {
-          "use server";
-          // Adres normalizuje adapter Auth.js, wiec nie powielamy tego tutaj.
-          await signIn("nodemailer", {
-            email: formData.get("email"),
-            // Filtrujemy takze tutaj: pole formularza jest danymi
-            // od uzytkownika, nie zaufanym parametrem.
-            redirectTo: bezpiecznaSciezka(formData.get("wroc")),
-          });
-        }}
-        style={{ maxWidth: 420, marginTop: 26 }}
-      >
-        <input type="hidden" name="wroc" value={wroc} />
-
-        <label htmlFor="email">Adres e-mail</label>
-        <input
-          id="email"
-          name="email"
-          type="email"
-          required
-          autoComplete="email"
-          placeholder="anna@example.com"
-          style={{
-            width: "100%",
-            border: "1px solid var(--linia2)",
-            borderRadius: 3,
-            padding: "11px 12px",
-            font: "15px 'IBM Plex Sans', sans-serif",
-            marginBottom: 16,
-            background: "var(--biel)",
-            color: "var(--atrament)",
+        <form
+          action={async (formData) => {
+            "use server";
+            await signIn("nodemailer", {
+              email: formData.get("email"),
+              // Filtrujemy także tutaj: pole formularza jest danymi
+              // od użytkownika, nie zaufanym parametrem.
+              redirectTo: bezpiecznaSciezka(formData.get("wroc")),
+            });
           }}
-        />
+          style={{ marginTop: "var(--o-6)" }}
+        >
+          <input type="hidden" name="wroc" value={wroc} />
 
-        <button className="btn" type="submit">Wyslij link do logowania</button>
-      </form>
+          <Pole
+            id="email"
+            name="email"
+            typ="email"
+            etykieta="Adres e-mail"
+            wymagane
+            autoComplete="email"
+            placeholder="anna@example.com"
+            podpowiedz="Link jest ważny 30 minut i działa jeden raz."
+          />
 
-      <p style={{ fontSize: 13, color: "var(--atrament2)", marginTop: 18, maxWidth: "52ch" }}>
-        Link jest wazny 30 minut i dziala jeden raz. Jesli korzystasz ze
-        wspoldzielonego komputera, wyloguj sie po zakonczeniu.
-      </p>
+          <button className="btn btn-pelny btn-duzy" type="submit">
+            Wyślij link do logowania
+          </button>
+        </form>
+
+        <p className="drobny cichy" style={{ marginTop: "var(--o-5)" }}>
+          Jeśli korzystasz ze wspólnego komputera, pamiętaj o wylogowaniu —
+          przycisk jest w nagłówku.
+        </p>
+      </div>
     </div>
   );
 }
