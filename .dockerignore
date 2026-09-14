@@ -1,5 +1,6 @@
 .git
 .gitignore
+.github
 .next
 node_modules
 .env
@@ -7,4 +8,6 @@ node_modules
 *.log
 *.zip
 INSTRUKCJA.md
+WDROZENIE.md
 SHA256SUMS*.txt
+tests

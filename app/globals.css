@@ -5,6 +5,24 @@
   --zielen:#3F6B54; --czerwien:#8C3B2E;
   --linia:rgba(22,35,60,.15); --linia2:rgba(22,35,60,.3);
 }
+
+/* Panel redakcji */
+.formularz-admin{display:grid;gap:15px;max-width:720px;margin-top:20px}
+.formularz-admin label:not(.checkbox){display:grid;gap:6px;font-weight:600}
+.formularz-admin input:not([type="checkbox"]),.formularz-admin select,.formularz-admin textarea{width:100%;border:1px solid var(--linia2);border-radius:3px;padding:10px 12px;font:15px "IBM Plex Sans",sans-serif;background:var(--biel);color:var(--atrament)}
+.formularz-admin fieldset{display:grid;gap:10px;border:1px solid var(--linia2);padding:18px;margin:8px 0}
+.formularz-admin legend{font-weight:600;padding:0 7px}
+.checkbox{display:flex;align-items:flex-start;gap:9px;font-weight:400}
+.checkbox input{margin-top:5px}
+.naglowek-rzad{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.tabela-przewijana{overflow-x:auto;margin-top:18px}
+.tabela-przewijana .tabela{width:100%;min-width:700px}
+.tabela{border-collapse:collapse;background:var(--biel)}
+.tabela th,.tabela td{padding:11px 12px;border-bottom:1px solid var(--linia);text-align:left;vertical-align:top}
+.tabela th{font-size:13px;color:var(--atrament2)}
+.btn.drugorzedny{background:transparent;color:var(--atrament);border:1px solid var(--linia2);margin-left:8px}
+.btn.niebezpieczny{background:#8b1e2d;margin-left:8px}
+.blad{padding:12px 14px;border-left:3px solid var(--czerwien);background:#fff3f3;margin-top:18px}
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
 body{margin:0;background:var(--papier);color:var(--atrament);

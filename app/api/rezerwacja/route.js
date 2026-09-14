@@ -1,5 +1,6 @@
 import { auth } from "../../../auth";
 import { db, WARUNKI_PUBLIKACJI, WERSJA_REGULAMINU } from "../../../lib/db";
+import { jsonZLimitem, odpowiedzBleduHttp } from "../../../lib/http.mjs";
 
 const DNI_NA_POTWIERDZENIE = 3;
 
@@ -71,7 +72,15 @@ export async function POST(request) {
     );
   }
 
-  const { listId } = await request.json();
+  let dane;
+  try {
+    dane = await jsonZLimitem(request, 2 * 1024);
+  } catch (e) {
+    const odpowiedz = odpowiedzBleduHttp(e);
+    if (odpowiedz) return odpowiedz;
+    throw e;
+  }
+  const { listId } = dane;
   if (!listId) {
     return Response.json({ blad: "Brak identyfikatora listu." }, { status: 400 });
   }

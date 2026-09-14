@@ -1,5 +1,6 @@
 import { auth } from "../../../../auth";
 import { db } from "../../../../lib/db";
+import { jsonZLimitem, odpowiedzBleduHttp } from "../../../../lib/http.mjs";
 
 // Potwierdzenie i rezygnacja. Obie operacje sprawdzaja wlasciciela —
 // bez tego znajomosc identyfikatora pozwalalaby ruszyc cudza rezerwacje.
@@ -13,7 +14,15 @@ export async function PATCH(request, { params }) {
   }
 
   const { id } = await params;
-  const { akcja } = await request.json();
+  let dane;
+  try {
+    dane = await jsonZLimitem(request, 2 * 1024);
+  } catch (e) {
+    const odpowiedz = odpowiedzBleduHttp(e);
+    if (odpowiedz) return odpowiedz;
+    throw e;
+  }
+  const { akcja } = dane;
 
   const rezerwacja = await db.rezerwacja.findFirst({
     where: { id, userId: sesja.user.id },

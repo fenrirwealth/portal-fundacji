@@ -137,7 +137,7 @@ model EdycjaAkcji {
 // ------------------------------------------------------------
 
 model Placowka {
-  id          String  @id @default(cuid())
+  id String @id @default(cuid())
 
   // Trwala tozsamosc placowki, wymuszona przez baze.
   //
@@ -155,7 +155,7 @@ model Placowka {
   // "Dom dziecka nr 1 w Radomiu" — jako dwie. Docelowo powiazanie
   // wniosku z placowka powinien potwierdzac administrator; do czasu
   // powstania panelu ta heurystyka jest kompromisem, nie rozwiazaniem.
-  klucz       String? @unique
+  klucz String? @unique
 
   nazwa       String
   ulica       String?
@@ -256,12 +256,12 @@ model List {
   edycja   EdycjaAkcji @relation(fields: [edycjaId], references: [id])
 
   // --- dane publiczne ---
-  imie           String
-  wiek           Int
-  wojewodztwo    String
-  kategoria      Kategoria
-  marzenie String
-  rozmiar  String?
+  imie        String
+  wiek        Int
+  wojewodztwo String
+  kategoria   Kategoria
+  marzenie    String
+  rozmiar     String?
 
   // Opis pisze administrator, to nie jest transkrypcja listu.
   // Dziecko pisze odrecznie, administrator formuluje tresc publiczna.
@@ -318,7 +318,7 @@ model Weryfikacja {
 
   uwagi      String?
   zakonczona DateTime?
-  utworzona  DateTime @default(now())
+  utworzona  DateTime  @default(now())
 }
 
 // ------------------------------------------------------------
@@ -394,7 +394,7 @@ model Dostawa {
   protokolPlik String?
 
   prezenty  Prezent[]
-  utworzona DateTime @default(now())
+  utworzona DateTime  @default(now())
 }
 
 model Aktualnosc {

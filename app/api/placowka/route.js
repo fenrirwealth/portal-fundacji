@@ -1,4 +1,5 @@
 import { db } from "../../../lib/db";
+import { jsonZLimitem, odpowiedzBleduHttp } from "../../../lib/http.mjs";
 
 // Zgloszenie placowki do akcji. Formularz jest publiczny, wiec musi byc
 // odporny na boty i na przypadkowe podwojne wyslanie.
@@ -14,7 +15,14 @@ const WOJEWODZTWA = [
 ];
 
 export async function POST(request) {
-  const dane = await request.json();
+  let dane;
+  try {
+    dane = await jsonZLimitem(request, 16 * 1024);
+  } catch (e) {
+    const odpowiedz = odpowiedzBleduHttp(e);
+    if (odpowiedz) return odpowiedz;
+    throw e;
+  }
 
   // Pulapka na boty: pole ukryte w CSS, ktorego czlowiek nie widzi.
   // Automat wypelnia wszystko i zdradza sie sam. Odpowiadamy sukcesem,

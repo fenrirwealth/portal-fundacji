@@ -43,6 +43,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 # nieosiagalna" — komunikat mylacy, bo baza dzialala.
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
+COPY --from=builder --chown=nextjs:nodejs /app/scripts ./scripts
 COPY --from=builder --chown=nextjs:nodejs /app/package.json ./package.json
 
 COPY docker-entrypoint.sh ./
@@ -50,6 +51,12 @@ RUN chmod +x docker-entrypoint.sh
 
 USER nextjs
 EXPOSE 3000
+
+# Coolify moze korzystac z tego samego punktu kontrolnego. Start-period
+# obejmuje oczekiwanie na PostgreSQL i wykonanie migracji przy pierwszym
+# uruchomieniu kontenera.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=90s --retries=3 \
+  CMD wget -q -O - http://127.0.0.1:3000/api/zdrowie >/dev/null || exit 1
 
 ENTRYPOINT ["./docker-entrypoint.sh"]
 CMD ["node", "server.js"]

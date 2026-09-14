@@ -35,6 +35,9 @@ export default async function Layout({ children }) {
               {sesja?.user ? (
                 <>
                   <a href="/moje-rezerwacje">Moje rezerwacje</a>
+                  {["REDAKCJA", "ZARZAD"].includes(sesja.user.rola) && (
+                    <a href="/admin">Panel redakcji</a>
+                  )}
                   {/* Wylogowanie musi byc widoczne, skoro prosimy o nie
                       przy komputerach wspoldzielonych. Jako formularz,
                       nie odnosnik — wylogowanie zmienia stan i nie moze

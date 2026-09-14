@@ -5,6 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate && next build",
+    "check": "prisma validate && node --test tests/*.test.mjs",
+    "admin:set-role": "node scripts/ustaw-role.mjs",
     "start": "node server.js",
     "postinstall": "prisma generate"
   },
