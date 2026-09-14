@@ -54,8 +54,9 @@ EXPOSE 3000
 
 # Coolify moze korzystac z tego samego punktu kontrolnego. Start-period
 # obejmuje oczekiwanie na PostgreSQL i wykonanie migracji przy pierwszym
-# uruchomieniu kontenera.
-HEALTHCHECK --interval=30s --timeout=5s --start-period=90s --retries=3 \
+# uruchomieniu kontenera. Dluzszy okres startowy obejmuje rowniez
+# pierwszy cold start i pobranie silnika Prisma.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=240s --retries=5 \
   CMD wget -q -O - http://127.0.0.1:3000/api/zdrowie >/dev/null || exit 1
 
 ENTRYPOINT ["./docker-entrypoint.sh"]
