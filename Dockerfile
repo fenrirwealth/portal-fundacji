@@ -30,6 +30,7 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3000
+ENV HOSTNAME=0.0.0.0
 
 RUN addgroup --system --gid 1001 nodejs \
  && adduser --system --uid 1001 nextjs
@@ -54,9 +55,8 @@ EXPOSE 3000
 
 # Coolify moze korzystac z tego samego punktu kontrolnego. Start-period
 # obejmuje oczekiwanie na PostgreSQL i wykonanie migracji przy pierwszym
-# uruchomieniu kontenera. Dluzszy okres startowy obejmuje rowniez
-# pierwszy cold start i pobranie silnika Prisma.
-HEALTHCHECK --interval=30s --timeout=5s --start-period=240s --retries=5 \
+# uruchomieniu kontenera.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=5 \
   CMD wget -q -O - http://127.0.0.1:3000/api/zdrowie >/dev/null || exit 1
 
 ENTRYPOINT ["./docker-entrypoint.sh"]
