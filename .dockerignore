@@ -1,0 +1,10 @@
+.git
+.gitignore
+.next
+node_modules
+.env
+.env.*
+*.log
+*.zip
+INSTRUKCJA.md
+SHA256SUMS*.txt

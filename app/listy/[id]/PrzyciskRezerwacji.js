@@ -29,6 +29,10 @@ export default function PrzyciskRezerwacji({ listId, wolny, status }) {
       });
       const dane = await odp.json();
 
+      if (odp.status === 403 && dane.wymagaZgody) {
+        window.location.href = "/regulamin?wroc=/listy/" + listId;
+        return;
+      }
       if (odp.status === 401) {
         // Niezalogowany — po powrocie wracamy dokladnie na ten list,
         // zeby nie trzeba bylo szukac go od nowa.

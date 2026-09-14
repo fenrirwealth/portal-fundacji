@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 // Licznik odswiezany strumieniem Server-Sent Events.
 // Gdy ktos nie potwierdzi rezerwacji w terminie, liczba wolnych listow
 // rosnie na oczach osob, ktore akurat sa na stronie.
-export default function LicznikNaZywo({ poczatkowy }) {
+export default function LicznikNaZywo({ poczatkowy, termin }) {
   const [stan, setStan] = useState(poczatkowy);
 
   useEffect(() => {
@@ -17,9 +17,11 @@ export default function LicznikNaZywo({ poczatkowy }) {
     zrodlo.onmessage = (e) => {
       try { setStan(JSON.parse(e.data)); } catch {}
     };
-    // Przy bledzie nie ponawiamy w petli — przegladarka robi to sama,
-    // a my zostawiamy ostatnia znana wartosc.
-    zrodlo.onerror = () => zrodlo.close();
+    // Przy bledzie NIE zamykamy strumienia. EventSource ponawia
+    // polaczenie sam, z rosnacym odstepem; wywolanie close() wylaczaloby
+    // ten mechanizm i licznik zamarzalby do konca wizyty. Zostawiamy
+    // ostatnia znana wartosc na ekranie i czekamy na wznowienie.
+    zrodlo.onerror = () => {};
 
     return () => zrodlo.close();
   }, []);
@@ -34,10 +36,12 @@ export default function LicznikNaZywo({ poczatkowy }) {
         <b>{stan.wolne}</b>
         <span>czeka na darczynce</span>
       </div>
-      <div>
-        <b>7 grudnia</b>
-        <span>ostatni dzien na dostarczenie prezentu</span>
-      </div>
+      {termin && (
+        <div>
+          <b>{termin}</b>
+          <span>ostatni dzien na dostarczenie prezentu</span>
+        </div>
+      )}
     </div>
   );
 }

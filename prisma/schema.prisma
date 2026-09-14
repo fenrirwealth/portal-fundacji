@@ -2,9 +2,10 @@
 //  Fundacja Lepszy Dom Lepsze Jutro — schemat bazy danych
 //  PostgreSQL + Prisma
 //
-//  Modele dziedzinowe po polsku, modele wymagane przez Auth.js po
-//  angielsku (User, Account, Session, VerificationToken). Adapter
-//  wymaga dokladnie tych nazw — tlumaczenie ich konczy sie walka
+//  Konwencja nazw: modele dziedzinowe po polsku, modele wymagane
+//  przez Auth.js po angielsku (User, Account, Session,
+//  VerificationToken). Adapter Auth.js wymaga dokladnie tych nazw
+//  pol i modeli — probowanie tlumaczenia ich konczy sie walka
 //  z biblioteka.
 // ============================================================
 
@@ -22,11 +23,8 @@ datasource db {
 //
 //  Jedno konto = jeden adres e-mail. Niezaleznie od tego, czy
 //  uzytkownik zaloguje sie linkiem, czy w przyszlosci przez Google,
-//  trafia na to samo konto — kluczem jest zweryfikowany adres,
+//  trafia na to samo konto — bo kluczem jest zweryfikowany adres,
 //  a nie dostawca logowania.
-//
-//  Administrator i darczynca uzywaja tego samego logowania.
-//  Rozdziela ich wylacznie rola w bazie.
 // ------------------------------------------------------------
 
 enum Rola {
@@ -47,8 +45,8 @@ model User {
   rola                Rola      @default(DARCZYNCA)
 
   // Zgody zapisujemy dopiero po faktycznym zaznaczeniu pola, nigdy
-  // domyslnie. Przechowujemy tez wersje tresci — bez niej nie da sie
-  // wykazac, na co uzytkownik sie zgodzil.
+  // domyslnie. Przechowujemy tez wersje tresci, na ktora uzytkownik
+  // wyrazil zgode — bez tego nie da sie wykazac, co zaakceptowal.
   zgodaRegulamin       DateTime?
   wersjaRegulaminu     String?
   zgodaMarketing       DateTime?
@@ -134,12 +132,31 @@ model EdycjaAkcji {
 //
 //  Placowka jest rekordem stalym — instytucja, ktora moze wracac
 //  co roku. Jej status w konkretnej akcji to osobny rekord udzialu.
-//  Placowki NIE MAJA kont w portalu: zglaszaja udzial formularzem,
-//  a materialy przekazuja poza systemem.
+//  Wczesniej status siedzial na samej placowce, co po drugiej edycji
+//  przestaloby miec sens.
 // ------------------------------------------------------------
 
 model Placowka {
   id          String  @id @default(cuid())
+
+  // Trwala tozsamosc placowki, wymuszona przez baze.
+  //
+  // Klucz budujemy jako lower(nazwa)|wojewodztwo i CELOWO nie wchodzi
+  // do niego adres e-mail ani osoba kontaktowa. Dyrektor moze sie
+  // zmienic miedzy edycjami, a placowka pozostaje ta sama instytucja —
+  // klucz oparty na kontakcie tworzylby co roku nowy rekord i rozbijal
+  // historie udzialow.
+  //
+  // Dane kontaktowe zyja we wniosku (UdzialPlacowki), nie tutaj.
+  //
+  // OGRANICZENIE: to nadal heurystyka. Dwie rozne instytucje o tej samej
+  // nazwie w jednym wojewodztwie zostana potraktowane jako jedna, a ta
+  // sama placowka zapisana raz jako "Dom Dziecka nr 1", raz jako
+  // "Dom dziecka nr 1 w Radomiu" — jako dwie. Docelowo powiazanie
+  // wniosku z placowka powinien potwierdzac administrator; do czasu
+  // powstania panelu ta heurystyka jest kompromisem, nie rozwiazaniem.
+  klucz       String? @unique
+
   nazwa       String
   ulica       String?
   kodPocztowy String?
@@ -180,6 +197,21 @@ model UdzialPlacowki {
   zakazanePrzedmioty String?
   uwagi              String?
 
+  // Dane kontaktowe PODANE WE WNIOSKU, osobno od danych zweryfikowanej
+  // placowki.
+  //
+  // Dwa powody. Po pierwsze: dyrektor moze poprawic literowke w numerze
+  // telefonu, dopoki wniosek czeka na rozpatrzenie — i robi to tutaj,
+  // nie w rekordzie instytucji. Po drugie: ktokolwiek znajacy nazwe
+  // i adres placowki mogl by inaczej podmienic kontakt zatwierdzonej
+  // instytucji przez publiczny formularz.
+  //
+  // Przy zatwierdzaniu wniosku administrator swiadomie przenosi te dane
+  // do Placowka albo je odrzuca.
+  zgloszonaOsoba   String?
+  zgloszonyTelefon String?
+  zgloszonyEmail   String?
+
   utworzony      DateTime @default(now())
   zaktualizowany DateTime @updatedAt
 
@@ -191,7 +223,10 @@ model UdzialPlacowki {
 //  LISTY
 //
 //  Listy tworzy WYLACZNIE administrator (rola REDAKCJA lub ZARZAD).
-//  Kazdy zaczyna jako SZKIC i wymaga swiadomej publikacji.
+//  Placowki nie maja kont w portalu i niczego nie publikuja — ich
+//  udzial konczy sie na zgloszeniu i przekazaniu materialow poza
+//  systemem. Kazdy list zaczyna jako SZKIC i wymaga swiadomej
+//  publikacji.
 // ------------------------------------------------------------
 
 enum StatusListu {
@@ -221,19 +256,21 @@ model List {
   edycja   EdycjaAkcji @relation(fields: [edycjaId], references: [id])
 
   // --- dane publiczne ---
-  imie        String
-  wiek        Int
-  wojewodztwo String
-  kategoria   Kategoria
-  marzenie    String
-  rozmiar     String?
+  imie           String
+  wiek           Int
+  wojewodztwo    String
+  kategoria      Kategoria
+  marzenie String
+  rozmiar  String?
 
-  // Opis pisze administrator. To nie jest transkrypcja listu.
+  // Opis pisze administrator, to nie jest transkrypcja listu.
+  // Dziecko pisze odrecznie, administrator formuluje tresc publiczna.
   opis String?
 
   // JEDNO pole, swiadomie. Oryginalu skanu nie przechowujemy w portalu
   // w ogole: zdjecie przygotowuje i sprawdza administrator przed
-  // wgraniem. Czego nie ma, tego nie da sie wyciec.
+  // wgraniem, wiec trzymanie surowej wersji dokladaloby ryzyko
+  // bez zadnej korzysci. Czego nie ma, tego nie da sie wyciec.
   zdjecieUrl String?
 
   // --- dane wewnetrzne ---
@@ -241,9 +278,9 @@ model List {
   placowka   Placowka @relation(fields: [placowkaId], references: [id])
 
   // Podpisana zgoda dyrektora zostaje w dokumentacji fundacji, NIE
-  // w portalu. To najbardziej wrazliwy dokument w calej akcji: podpis,
-  // imie dziecka, nazwa placowki. W bazie odnotowujemy wylacznie fakt
-  // jej otrzymania i osobe, ktora to potwierdzila.
+  // w portalu. To najbardziej wrazliwy dokument w calej akcji —
+  // podpis, imie dziecka, nazwa placowki. W bazie odnotowujemy
+  // wylacznie fakt jej otrzymania i osobe, ktora to potwierdzila.
   zgodaData      DateTime?
   zgodaPrzyjalId String?
   zgodaCofnieta  DateTime?
