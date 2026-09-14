@@ -5,43 +5,50 @@ import { useEffect, useState } from "react";
 // Licznik odswiezany strumieniem Server-Sent Events.
 // Gdy ktos nie potwierdzi rezerwacji w terminie, liczba wolnych listow
 // rosnie na oczach osob, ktore akurat sa na stronie.
-export default function LicznikNaZywo({ poczatkowy, termin }) {
+/**
+ * @param {object} p
+ * @param {{wszystkie: number, wolne: number}} p.poczatkowy
+ * @param {string|null} [p.termin]
+ */
+export default function LicznikNaZywo({ poczatkowy, termin = null }) {
   const [stan, setStan] = useState(poczatkowy);
 
   useEffect(() => {
     // Szanujemy ustawienie oszczedzania danych — bez tego strumien
     // trzymalby otwarte polaczenie takze na komorce w roamingu.
-    if (navigator.connection && navigator.connection.saveData) return;
+    // navigator.connection nie jest jeszcze w standardowych typach
+    // przegladarki, choc dziala w Chrome i Edge.
+    const polaczenie = /** @type {any} */ (navigator).connection;
+    if (polaczenie?.saveData) return;
 
     const zrodlo = new EventSource("/api/licznik");
     zrodlo.onmessage = (e) => {
       try { setStan(JSON.parse(e.data)); } catch {}
     };
     // Przy bledzie NIE zamykamy strumienia. EventSource ponawia
-    // polaczenie sam, z rosnacym odstepem; wywolanie close() wylaczaloby
-    // ten mechanizm i licznik zamarzalby do konca wizyty. Zostawiamy
-    // ostatnia znana wartosc na ekranie i czekamy na wznowienie.
+    // polaczenie sam, z rosnacym odstepem; close() wylaczyloby ten
+    // mechanizm i licznik zamarzlby do konca wizyty.
     zrodlo.onerror = () => {};
 
     return () => zrodlo.close();
   }, []);
 
+  if (!stan || stan.wszystkie === 0) return null;
+
+  const pozycje = [
+    [stan.wszystkie, stan.wszystkie === 1 ? "list w akcji" : "listów w akcji"],
+    [stan.wolne, "czeka na darczyńcę"],
+  ];
+  if (termin) pozycje.push([termin, "ostatni dzień na prezent"]);
+
   return (
-    <div className="licznik" aria-live="polite">
-      <div>
-        <b>{stan.wszystkie}</b>
-        <span>{stan.wszystkie === 1 ? "list w akcji" : "listow w akcji"}</span>
-      </div>
-      <div>
-        <b>{stan.wolne}</b>
-        <span>czeka na darczynce</span>
-      </div>
-      {termin && (
-        <div>
-          <b>{termin}</b>
-          <span>ostatni dzien na dostarczenie prezentu</span>
+    <dl className="licznik" aria-live="polite">
+      {pozycje.map(([wartosc, opis]) => (
+        <div key={opis}>
+          <dd>{wartosc}</dd>
+          <dt>{opis}</dt>
         </div>
-      )}
-    </div>
+      ))}
+    </dl>
   );
 }

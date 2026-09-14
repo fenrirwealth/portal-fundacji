@@ -1,41 +1,28 @@
+import { Suspense } from "react";
 import { listyPubliczne, licznik, aktywnaEdycja, formatujTermin } from "../../lib/db";
 import { zwolnijWygasle } from "../api/rezerwacja/route";
 import LicznikNaZywo from "./LicznikNaZywo";
+import KartaListu from "../ui/KartaListu";
+import { SzkieletListy } from "../ui/Szkielet";
+import Szukajka from "./Szukajka";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "Listy dzieci",
   description:
-    "Dzieci z placowek opiekunczo-wychowawczych napisaly, o czym marza. Wybierz list i sprawdz, jak przekazac prezent.",
+    "Dzieci z placówek opiekuńczo-wychowawczych napisały, o czym marzą. Wybierz list i sprawdź, jak przekazać prezent.",
 };
 
 const KATEGORIE = [
-  ["", "Wszystkie"],
-  ["ZABAWKI", "Zabawki"],
-  ["SPORT", "Sport"],
-  ["KSIAZKI", "Ksiazki"],
-  ["NAUKA", "Nauka"],
-  ["UBRANIA", "Ubrania"],
-  ["INNE", "Inne"],
+  ["", "Wszystkie"], ["ZABAWKI", "Zabawki"], ["SPORT", "Sport"],
+  ["KSIAZKI", "Książki"], ["NAUKA", "Nauka"], ["UBRANIA", "Ubrania"], ["INNE", "Inne"],
 ];
 
 const WIEKI = [
-  ["", "Kazdy wiek"],
-  ["0-7", "do 7 lat"],
-  ["8-11", "8-11 lat"],
-  ["12-99", "12 lat i wiecej"],
+  ["", "Każdy wiek"], ["0-7", "do 7 lat"], ["8-11", "8–11 lat"], ["12-99", "12 lat i więcej"],
 ];
-
-function etykieta(status) {
-  if (status === "OPUBLIKOWANY")
-    return <span className="st-wolny">Czeka na darczynce</span>;
-  if (status === "ZAREZERWOWANY")
-    return <span className="st-zajety">Zarezerwowany</span>;
-  if (status === "OPLACONY")
-    return <span className="st-gotowy">Prezent dostarczony</span>;
-  return <span className="st-gotowy">Prezent przekazany</span>;
-}
 
 function link(params, zmiana) {
   const p = new URLSearchParams(params);
@@ -46,92 +33,122 @@ function link(params, zmiana) {
   return s ? "/listy?" + s : "/listy";
 }
 
+async function Wyniki({ params }) {
+  const kategoria = params.kategoria || "";
+  const wiek = params.wiek || "";
+  const wolne = params.wolne === "1";
+  const szukaj = (params.szukaj || "").trim().toLowerCase().slice(0, 60);
+
+  // Przy każdym wejściu zwalniamy listy, których nikt nie potwierdził
+  // w terminie — pula jest aktualna bez osobnego zadania cyklicznego.
+  await zwolnijWygasle();
+
+  const zakres = wiek ? wiek.split("-").map(Number) : [null, null];
+
+  let listy = await listyPubliczne({
+    kategoria: kategoria || undefined,
+    wiekOd: zakres[0] || undefined,
+    wiekDo: zakres[1] || undefined,
+    tylkoWolne: wolne,
+  });
+
+  // Wyszukiwanie po danych, które i tak są publiczne: imię, marzenie,
+  // opis. Świadomie po stronie serwera na już pobranym zbiorze — przy
+  // skali kilkuset listów to szybsze niż zapytanie z LIKE, a nie
+  // wymaga rozszerzeń pełnotekstowych w bazie.
+  if (szukaj) {
+    listy = listy.filter((l) =>
+      [l.imie, l.marzenie, l.opis].filter(Boolean).join(" ").toLowerCase().includes(szukaj)
+    );
+  }
+
+  const cos = listy.length > 0;
+  const stan = await licznik();
+
+  return (
+    <>
+      <p className="maly cichy" role="status" style={{ marginBottom: "var(--o-4)" }}>
+        {cos
+          ? `Pokazujemy ${listy.length} z ${stan.wszystkie} listów`
+          : stan.wszystkie === 0 ? "" : "Żaden list nie pasuje do wybranych filtrów"}
+      </p>
+
+      <div className="siatka siatka-listy">
+        {cos && listy.map((l) => <KartaListu key={l.id} list={l} />)}
+
+        {!cos && (
+          <div className="pusto">
+            <h3>{stan.wszystkie === 0 ? "Listy pojawią się wkrótce" : "Nic tu nie ma przy tych filtrach"}</h3>
+            <p>
+              {stan.wszystkie === 0
+                ? "Zbieramy listy od placówek opiekuńczo-wychowawczych. Każdy przechodzi weryfikację, zanim trafi na stronę."
+                : "Spróbuj zmienić wiek, kategorię albo wyczyścić wyszukiwanie."}
+            </p>
+            {stan.wszystkie > 0 && (
+              <Link className="btn btn-cichy" href="/listy" style={{ marginTop: "var(--o-4)" }}>
+                Wyczyść filtry
+              </Link>
+            )}
+          </div>
+        )}
+      </div>
+    </>
+  );
+}
+
 export default async function Listy({ searchParams }) {
   const params = (await searchParams) || {};
   const kategoria = params.kategoria || "";
   const wiek = params.wiek || "";
   const wolne = params.wolne === "1";
 
-  // Przy kazdym wejsciu zwalniamy listy, ktorych nikt nie potwierdzil
-  // w terminie. Pula jest zawsze aktualna bez zadania cyklicznego.
-  await zwolnijWygasle();
-
-  const zakres = wiek ? wiek.split("-").map(Number) : [null, null];
-
-  const [listy, stan, edycja] = await Promise.all([
-    listyPubliczne({
-      kategoria: kategoria || undefined,
-      wiekOd: zakres[0] || undefined,
-      wiekDo: zakres[1] || undefined,
-      tylkoWolne: wolne,
-    }),
-    licznik(),
-    aktywnaEdycja(),
-  ]);
+  const [stan, edycja] = await Promise.all([licznik(), aktywnaEdycja()]);
+  const klucz = JSON.stringify(params);
 
   return (
     <div className="wrap sekcja">
-      <h1 className="tytul">Listy dzieci</h1>
-      <p className="wstep">
-        Kazdy list przeszedl weryfikacje placowki i fundacji. Publikujemy
-        imie, wiek, wojewodztwo, opis marzenia i kategorie prezentu, w razie potrzeby rozmiar ubrania lub buta, oraz zdjecie listu przygotowane przez Fundacje. Nie publikujemy nazwisk, nazwy placowki, miejscowosci, adresu ani wizerunku dziecka.
-      </p>
+      <header style={{ marginBottom: "var(--o-6)" }}>
+        <h1 style={{ fontSize: "var(--t-3xl)" }}>Listy dzieci</h1>
+        <p className="czytanie cichy" style={{ marginTop: "var(--o-3)" }}>
+          Każdy list przeszedł weryfikację placówki i Fundacji. Publikujemy imię,
+          wiek, województwo, opis marzenia i kategorię prezentu, w razie potrzeby
+          rozmiar, oraz zdjęcie listu przygotowane przez Fundację. Nie publikujemy
+          nazwisk, nazwy placówki, miejscowości, adresu ani wizerunku dziecka.
+        </p>
+      </header>
 
       <LicznikNaZywo poczatkowy={stan} termin={formatujTermin(edycja?.terminDostarczenia)} />
 
-      <div className="filtry">
-        {KATEGORIE.map(([wartosc, nazwa]) => (
-          <a key={wartosc || "all"} className="filtr"
-             data-on={kategoria === wartosc ? "1" : "0"}
-             href={link(params, { kategoria: wartosc })}>{nazwa}</a>
-        ))}
-        <span style={{ width: 12 }} />
-        {WIEKI.map(([wartosc, nazwa]) => (
-          <a key={wartosc || "any"} className="filtr"
-             data-on={wiek === wartosc ? "1" : "0"}
-             href={link(params, { wiek: wartosc })}>{nazwa}</a>
-        ))}
-        <a className="filtr" data-on={wolne ? "1" : "0"}
-           href={link(params, { wolne: wolne ? "" : "1" })}>Tylko wolne</a>
-        <span className="wynik">
-          {listy.length === 1 ? "1 list" : listy.length + " listow"}
-        </span>
-      </div>
+      <section aria-label="Filtry" style={{ margin: "var(--o-6) 0 var(--o-5)" }}>
+        <Szukajka poczatkowa={params.szukaj || ""} />
 
-      <div className="siatka">
-        {listy.length === 0 && (
-          <div className="pusto">
-            <h3>
-              {stan.wszystkie === 0
-                ? "Listy pojawia sie wkrotce"
-                : "Nic nie pasuje do tych filtrow"}
-            </h3>
-            <p>
-              {stan.wszystkie === 0
-                ? "Zbieramy listy od placowek. Zajrzyj za kilka dni."
-                : "Zmien wiek albo kategorie — listy czekaja gdzie indziej."}
-            </p>
+        <div className="filtry" style={{ marginTop: "var(--o-4)" }}>
+          <div className="filtry-grupa">
+            {KATEGORIE.map(([w, n]) => (
+              <Link key={w || "all"} className="filtr" aria-pressed={kategoria === w}
+                 href={link(params, { kategoria: w })}>{n}</Link>
+            ))}
           </div>
-        )}
+          <div className="filtry-grupa">
+            {WIEKI.map(([w, n]) => (
+              <Link key={w || "any"} className="filtr" aria-pressed={wiek === w}
+                 href={link(params, { wiek: w })}>{n}</Link>
+            ))}
+          </div>
+          <div className="filtry-grupa">
+            <Link className="filtr" aria-pressed={wolne} href={link(params, { wolne: wolne ? "" : "1" })}>
+              Tylko wolne
+            </Link>
+          </div>
+        </div>
+      </section>
 
-        {listy.map((l) => (
-          <a key={l.id} className="list" href={"/listy/" + l.id}>
-            <div className="kartka">
-              <div className="linie" />
-              <div className="pismo">
-                {(l.opis || l.marzenie).slice(0, 96)}…
-              </div>
-            </div>
-            <div className="tresc">
-              <h3>{l.imie}, {l.wiek} lat</h3>
-              <div className="meta">woj. {l.wojewodztwo.toLowerCase()}</div>
-              <span className="tag">{l.kategoria.toLowerCase()}</span>
-              <div style={{ marginTop: 10, fontSize: 14 }}>{l.marzenie}</div>
-            </div>
-            <div className="stopka-listu">{etykieta(l.status)}</div>
-          </a>
-        ))}
-      </div>
+      {/* Suspense z szkieletem: przy wolnym łączu użytkownik widzi układ
+          docelowy zamiast pustej strony, a wymiary się zgadzają, więc nic
+          nie przeskakuje po wczytaniu. */}
+      <Suspense key={klucz} fallback={<SzkieletListy />}>
+        <Wyniki params={params} />
+      </Suspense>
     </div>
   );
 }

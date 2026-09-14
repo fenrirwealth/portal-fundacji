@@ -33,6 +33,55 @@ function wrocZBledem(sciezka, komunikat) {
   redirect(sciezka + (sciezka.includes("?") ? "&" : "?") + "blad=" + encodeURIComponent(komunikat));
 }
 
+// Bledy walidacji ZWRACAMY zamiast przekierowywac z komunikatem w adresie.
+//
+// Poprzednio kazdy blad konczyl sie przeladowaniem strony i utrata
+// wszystkiego, co redaktor wpisal — przy formularzu listu to kilkanascie
+// pol. Teraz formularz dostaje bledy przypisane do konkretnych pol oraz
+// wartosci, ktore przyszly, i odtwarza je bez przeladowania.
+//
+// Przekierowanie zostaje wylacznie przy POWODZENIU oraz przy bledach
+// nie-walidacyjnych (brak uprawnien, konflikt wersji, nieistniejacy rekord),
+// bo tam nie ma czego odtwarzac.
+function bledy(mapa, wartosci) {
+  return { ok: false, bledy: mapa, wartosci };
+}
+
+// Wartosci formularza odsylane z powrotem, zeby nic nie przepadlo.
+function wartosciListu(formData) {
+  return {
+    imie: tekst(formData, "imie", 80),
+    wiek: tekst(formData, "wiek", 3),
+    wojewodztwo: tekst(formData, "wojewodztwo", 40).toLowerCase(),
+    kategoria: tekst(formData, "kategoria", 20),
+    marzenie: tekst(formData, "marzenie", 300),
+    rozmiar: tekst(formData, "rozmiar", 80),
+    opis: tekst(formData, "opis", 1200),
+    zdjecieUrl: tekst(formData, "zdjecieUrl", 1000),
+    udzialId: tekst(formData, "udzialId", 80),
+  };
+}
+
+// Wspolna walidacja pol publicznych listu. Te same reguly dla tworzenia
+// i edycji — wczesniej byly powielone i mogly sie rozjechac.
+function sprawdzPolaListu(w) {
+  const mapa = {};
+  if (!w.imie) mapa.imie = "Podaj imie dziecka.";
+  else if (w.imie.length > 80) mapa.imie = "Imie jest za dlugie.";
+
+  const wiek = Number(w.wiek);
+  if (!Number.isInteger(wiek) || wiek < 1 || wiek > 25) {
+    mapa.wiek = "Wiek musi byc liczba od 1 do 25.";
+  }
+  if (!WOJEWODZTWA.includes(w.wojewodztwo)) mapa.wojewodztwo = "Wybierz wojewodztwo z listy.";
+  if (!KATEGORIE.includes(w.kategoria)) mapa.kategoria = "Wybierz kategorie z listy.";
+  if (w.marzenie.length < 3) mapa.marzenie = "Opisz marzenie — co najmniej 3 znaki.";
+  if (w.zdjecieUrl && !/^https:\/\//i.test(w.zdjecieUrl)) {
+    mapa.zdjecieUrl = "Adres zdjecia musi zaczynac sie od https://";
+  }
+  return mapa;
+}
+
 export async function utworzEdycje(formData) {
   await wymagajRedakcji();
 
@@ -120,48 +169,35 @@ export async function rozpatrzZgloszenie(formData) {
   redirect("/admin?sukces=zgloszenie");
 }
 
-export async function utworzList(formData) {
+// Sygnatura (poprzedniStan, formData) — wymagana przez useActionState.
+export async function utworzList(_poprzedni, formData) {
   const redaktor = await wymagajRedakcji("/admin/listy/nowy");
-  const udzialId = tekst(formData, "udzialId", 80);
-  const imie = tekst(formData, "imie", 80);
-  const wiek = Number(tekst(formData, "wiek", 3));
-  const wojewodztwo = tekst(formData, "wojewodztwo", 40).toLowerCase();
-  const kategoria = tekst(formData, "kategoria", 20);
-  const marzenie = tekst(formData, "marzenie", 300);
-  const rozmiar = tekst(formData, "rozmiar", 80) || null;
-  const opis = tekst(formData, "opis", 1200) || null;
-  const zdjecieUrl = tekst(formData, "zdjecieUrl", 1000) || null;
+  const w = wartosciListu(formData);
 
-  if (!imie || !Number.isInteger(wiek) || wiek < 1 || wiek > 25 || marzenie.length < 3) {
-    wrocZBledem("/admin/listy/nowy", "Podaj poprawne imie, wiek i marzenie.");
-  }
-  if (!KATEGORIE.includes(kategoria) || !WOJEWODZTWA.includes(wojewodztwo)) {
-    wrocZBledem("/admin/listy/nowy", "Wybierz poprawna kategorie i wojewodztwo.");
-  }
-  if (zdjecieUrl && !/^https:\/\//i.test(zdjecieUrl)) {
-    wrocZBledem("/admin/listy/nowy", "Adres zdjecia musi zaczynac sie od https://.");
-  }
+  const mapa = sprawdzPolaListu(w);
+  if (!w.udzialId) mapa.udzialId = "Wybierz placowke.";
+  if (Object.keys(mapa).length) return bledy(mapa, w);
 
   const udzial = await db.udzialPlacowki.findFirst({
-    where: { id: udzialId, status: "POTWIERDZILA", edycja: { aktywna: true } },
+    where: { id: w.udzialId, status: "POTWIERDZILA", edycja: { aktywna: true } },
     select: { placowkaId: true, edycjaId: true },
   });
   if (!udzial) {
-    wrocZBledem("/admin/listy/nowy", "Wybierz zatwierdzona placowke z aktywnej edycji.");
+    return bledy({ udzialId: "Ta placowka nie jest zatwierdzona w aktywnej edycji." }, w);
   }
 
   const list = await db.list.create({
     data: {
       edycjaId: udzial.edycjaId,
       placowkaId: udzial.placowkaId,
-      imie,
-      wiek,
-      wojewodztwo,
-      kategoria,
-      marzenie,
-      rozmiar,
-      opis,
-      zdjecieUrl,
+      imie: w.imie,
+      wiek: Number(w.wiek),
+      wojewodztwo: w.wojewodztwo,
+      kategoria: w.kategoria,
+      marzenie: w.marzenie,
+      rozmiar: w.rozmiar || null,
+      opis: w.opis || null,
+      zdjecieUrl: w.zdjecieUrl || null,
       status: "SZKIC",
       weryfikacja: { create: { osobaId: redaktor.id } },
     },
@@ -172,7 +208,7 @@ export async function utworzList(formData) {
   redirect("/admin/listy/" + list.id + "?sukces=utworzony");
 }
 
-export async function zapiszList(formData) {
+export async function zapiszList(_poprzedni, formData) {
   const redaktor = await wymagajRedakcji();
   const id = tekst(formData, "id", 80);
   const operacja = tekst(formData, "operacja", 20) || "zapisz";
@@ -181,21 +217,21 @@ export async function zapiszList(formData) {
   const obecny = await db.list.findUnique({
     where: { id },
     select: {
-      id: true,
-      status: true,
-      zgodaData: true,
-      zgodaPrzyjalId: true,
-      zgodaCofnieta: true,
-      zaktualizowany: true,
+      id: true, status: true, zgodaData: true, zgodaPrzyjalId: true,
+      zgodaCofnieta: true, zaktualizowany: true,
     },
   });
+  // Braki rekordu i konflikty wersji nadal przekierowuja: nie ma tu
+  // czego odtwarzac, a uzytkownik musi zobaczyc aktualny stan.
   if (!obecny) wrocZBledem("/admin", "List nie istnieje.");
   if (wersja !== obecny.zaktualizowany.toISOString()) {
     wrocZBledem("/admin/listy/" + id, "List zostal zmieniony przez inna osobe. Odswiez strone.");
   }
 
+  const wRealizacji = ["ZAREZERWOWANY", "OPLACONY", "PRZEKAZANY"].includes(obecny.status);
+
   if (operacja === "wycofaj") {
-    if (["ZAREZERWOWANY", "OPLACONY", "PRZEKAZANY"].includes(obecny.status)) {
+    if (wRealizacji) {
       wrocZBledem("/admin/listy/" + id, "Nie mozna wycofac listu z aktywna realizacja.");
     }
     const wynik = await db.list.updateMany({
@@ -210,18 +246,32 @@ export async function zapiszList(formData) {
     redirect("/admin/listy/" + id + "?sukces=wycofany");
   }
 
-  if (["ZAREZERWOWANY", "OPLACONY", "PRZEKAZANY"].includes(obecny.status)) {
+  // Przywrocenie wycofanego listu.
+  //
+  // WYLACZNIE do szkicu i wylacznie z WYCOFANY. List nie wraca na strone
+  // automatycznie: publikacja wymaga ponownego, swiadomego dzialania
+  // z kompletem listy kontrolnej. Warunek na statusie jest w zapytaniu,
+  // wiec dwie rownoczesne proby nie moga sie nalozyc.
+  if (operacja === "przywroc") {
+    if (obecny.status !== "WYCOFANY") {
+      wrocZBledem("/admin/listy/" + id, "Przywrocic mozna wylacznie list wycofany.");
+    }
+    const wynik = await db.list.updateMany({
+      where: { id, status: "WYCOFANY", zaktualizowany: obecny.zaktualizowany },
+      data: { status: "SZKIC" },
+    });
+    if (wynik.count !== 1) {
+      wrocZBledem("/admin/listy/" + id, "List zostal zmieniony przez inna osobe. Odswiez strone.");
+    }
+    revalidatePath("/admin");
+    redirect("/admin/listy/" + id + "?sukces=przywrocony");
+  }
+
+  if (wRealizacji) {
     wrocZBledem("/admin/listy/" + id, "List w realizacji jest zablokowany do edycji.");
   }
 
-  const imie = tekst(formData, "imie", 80);
-  const wiek = Number(tekst(formData, "wiek", 3));
-  const wojewodztwo = tekst(formData, "wojewodztwo", 40).toLowerCase();
-  const kategoria = tekst(formData, "kategoria", 20);
-  const marzenie = tekst(formData, "marzenie", 300);
-  const rozmiar = tekst(formData, "rozmiar", 80) || null;
-  const opis = tekst(formData, "opis", 1200) || null;
-  const zdjecieUrl = tekst(formData, "zdjecieUrl", 1000) || null;
+  const w = wartosciListu(formData);
   const zgoda = formData.get("zgoda") === "on";
   const weryfikacja = Object.fromEntries(
     POLA_WERYFIKACJI.map((pole) => [pole, formData.get(pole) === "on"])
@@ -229,17 +279,16 @@ export async function zapiszList(formData) {
   const kompletna = POLA_WERYFIKACJI.every((pole) => weryfikacja[pole]);
   const publikuj = operacja === "publikuj";
 
-  if (!imie || !Number.isInteger(wiek) || wiek < 1 || wiek > 25 || marzenie.length < 3) {
-    wrocZBledem("/admin/listy/" + id, "Podaj poprawne imie, wiek i marzenie.");
+  const mapa = sprawdzPolaListu(w);
+  if (publikuj && !zgoda) {
+    mapa.zgoda = "Publikacja wymaga przyjetej zgody dyrektora.";
   }
-  if (!KATEGORIE.includes(kategoria) || !WOJEWODZTWA.includes(wojewodztwo)) {
-    wrocZBledem("/admin/listy/" + id, "Wybierz poprawna kategorie i wojewodztwo.");
+  if (publikuj && !kompletna) {
+    const brakuje = POLA_WERYFIKACJI.filter((pole) => !weryfikacja[pole]).length;
+    mapa.weryfikacja = `Do publikacji brakuje jeszcze ${brakuje} z ${POLA_WERYFIKACJI.length} pozycji listy kontrolnej.`;
   }
-  if (zdjecieUrl && !/^https:\/\//i.test(zdjecieUrl)) {
-    wrocZBledem("/admin/listy/" + id, "Adres zdjecia musi zaczynac sie od https://.");
-  }
-  if (publikuj && (!zgoda || !kompletna)) {
-    wrocZBledem("/admin/listy/" + id, "Publikacja wymaga zgody dyrektora i calej listy kontrolnej.");
+  if (Object.keys(mapa).length) {
+    return bledy(mapa, { ...w, zgoda, ...weryfikacja });
   }
 
   const teraz = new Date();
@@ -248,26 +297,20 @@ export async function zapiszList(formData) {
       const wynik = await tx.list.updateMany({
         where: { id, zaktualizowany: obecny.zaktualizowany },
         data: {
-        imie,
-        wiek,
-        wojewodztwo,
-        kategoria,
-        marzenie,
-        rozmiar,
-        opis,
-        zdjecieUrl,
-        // Historii zgody nie kasujemy po jej cofnieciu. Data przyjecia
-        // zostaje, a osobne pole zapisuje wycofanie.
-        zgodaData: zgoda ? (obecny.zgodaData || teraz) : obecny.zgodaData,
-        zgodaPrzyjalId: zgoda
-          ? (obecny.zgodaPrzyjalId || redaktor.id)
-          : obecny.zgodaPrzyjalId,
-        zgodaCofnieta: zgoda
-          ? null
-          : obecny.zgodaData
-            ? (obecny.zgodaCofnieta || teraz)
-            : null,
-        status: publikuj ? "OPUBLIKOWANY" : "SZKIC",
+          imie: w.imie,
+          wiek: Number(w.wiek),
+          wojewodztwo: w.wojewodztwo,
+          kategoria: w.kategoria,
+          marzenie: w.marzenie,
+          rozmiar: w.rozmiar || null,
+          opis: w.opis || null,
+          zdjecieUrl: w.zdjecieUrl || null,
+          // Historii zgody nie kasujemy po jej cofnieciu. Data przyjecia
+          // zostaje, a osobne pole zapisuje wycofanie.
+          zgodaData: zgoda ? (obecny.zgodaData || teraz) : obecny.zgodaData,
+          zgodaPrzyjalId: zgoda ? (obecny.zgodaPrzyjalId || redaktor.id) : obecny.zgodaPrzyjalId,
+          zgodaCofnieta: zgoda ? null : obecny.zgodaData ? (obecny.zgodaCofnieta || teraz) : null,
+          status: publikuj ? "OPUBLIKOWANY" : "SZKIC",
         },
       });
       if (wynik.count !== 1) throw new Error("STARA_WERSJA");

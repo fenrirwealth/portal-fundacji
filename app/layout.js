@@ -1,5 +1,8 @@
 import "./globals.css";
-import { auth, signOut } from "../auth";
+import { auth } from "../auth";
+import { wyloguj } from "./akcje-sesji";
+import { ToastProvider } from "./ui/Toast";
+import Link from "next/link";
 
 export const metadata = {
   title: {
@@ -10,76 +13,85 @@ export const metadata = {
     "Pomagamy osobom w trudnej sytuacji mieszkaniowej i wspieramy dzieci z placowek opiekunczo-wychowawczych.",
 };
 
+export const viewport = {
+  themeColor: "#F5F3EE",
+  width: "device-width",
+  initialScale: 1,
+};
+
 export default async function Layout({ children }) {
   const sesja = await auth();
+
   return (
     <html lang="pl">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+        {/* Fraunces: krój o zmiennej optycznej wielkości — nagłówki mają
+            inną proporcję niż tekst, tak jak w składzie książkowym.
+            Inter do interfejsu, bo ma komplet polskich znaków i świetnie
+            czyta się w małych rozmiarach. */}
         <link
-          href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap"
           rel="stylesheet"
         />
       </head>
       <body>
-        <a className="skip" href="#tresc">Przejdz do tresci</a>
+        <ToastProvider>
+          <a className="skip" href="#tresc">Przejdź do treści</a>
 
-        <header>
-          <div className="wrap nawig">
-            <a className="logo" href="/">
-              Lepszy Dom<span>Lepsze Jutro</span>
-            </a>
-            <nav>
-              <a href="/listy">Listy dzieci</a>
-              {sesja?.user ? (
-                <>
-                  <a href="/moje-rezerwacje">Moje rezerwacje</a>
-                  {["REDAKCJA", "ZARZAD"].includes(sesja.user.rola) && (
-                    <a href="/admin">Panel redakcji</a>
-                  )}
-                  {/* Wylogowanie musi byc widoczne, skoro prosimy o nie
-                      przy komputerach wspoldzielonych. Jako formularz,
-                      nie odnosnik — wylogowanie zmienia stan i nie moze
-                      sie wykonac przez samo wejscie na adres. */}
-                  <form
-                    action={async () => {
-                      "use server";
-                      await signOut({ redirectTo: "/" });
-                    }}
-                    style={{ display: "inline" }}
-                  >
-                    <button
-                      type="submit"
-                      style={{ background: "none", border: 0, padding: 0,
-                               font: "inherit", color: "var(--atrament2)", cursor: "pointer" }}
-                    >
-                      Wyloguj ({sesja.user.email})
-                    </button>
-                  </form>
-                </>
-              ) : (
-                <a href="/zaloguj">Zaloguj sie</a>
-              )}
-              <a href="https://fundacjalepszydomlepszejutro.pl">Strona fundacji</a>
-            </nav>
-          </div>
-        </header>
+          <header className="naglowek">
+            <div className="wrap naglowek-tresc">
+              <Link className="znak" href="/">
+                <b>Lepszy Dom</b>
+                <span>Lepsze Jutro</span>
+              </Link>
 
-        <main id="tresc">{children}</main>
+              <nav className="menu" aria-label="Główna">
+                <Link href="/listy">Listy dzieci</Link>
+                {sesja?.user ? (
+                  <>
+                    <Link href="/moje-rezerwacje">Moje rezerwacje</Link>
+                    <span className="konto" title={sesja.user.email}>{sesja.user.email}</span>
+                    {/* Wylogowanie jako formularz, nie odnośnik: zmienia stan,
+                        więc nie może wykonać się przez samo wejście na adres.
+                        Akcja jest nazwana i leży w osobnym module — łatwiej
+                        ją wtedy wskazać w testach i nie powiela się w układzie. */}
+                    <form action={wyloguj}>
+                      <button type="submit" className="btn btn-tekstowy">Wyloguj</button>
+                    </form>
+                  </>
+                ) : (
+                  <Link href="/zaloguj">Zaloguj się</Link>
+                )}
+              </nav>
+            </div>
+          </header>
 
-        <footer>
-          <div className="wrap">
-            <p className="nota">
-              Fundacja Lepszy Dom Lepsze Jutro · Zlota 75A/7, 00-819 Warszawa ·
-              KRS 0000971976 · NIP 5273002294 · REGON 522030190
-            </p>
-            <p className="nota">
-              Przy kazdym liscie publikujemy imie, wiek, wojewodztwo, opis marzenia i kategorie prezentu, w razie potrzeby rozmiar ubrania lub buta, oraz zdjecie listu przygotowane przez Fundacje. Nie
-              publikujemy nazwisk, nazwy placowki, miejscowosci, adresu ani wizerunku dziecka.
-            </p>
-          </div>
-        </footer>
+          <main id="tresc">{children}</main>
+
+          <footer style={{ borderTop: "1px solid var(--linia)", marginTop: "var(--o-9)" }}>
+            <div className="wrap sekcja-ciasna">
+              <div className="siatka siatka-2" style={{ alignItems: "start" }}>
+                <div>
+                  <p style={{ fontFamily: "var(--krój-tytuł)", fontSize: "var(--t-lg)", fontWeight: 600, marginBottom: "var(--o-2)" }}>
+                    Fundacja Lepszy Dom Lepsze Jutro
+                  </p>
+                  <p className="maly cichy">
+                    Złota 75A/7, 00-819 Warszawa<br />
+                    KRS 0000971976 · NIP 5273002294 · REGON 522030190
+                  </p>
+                </div>
+                <p className="drobny cichy czytanie">
+                  Przy każdym liście publikujemy imię, wiek, województwo, opis marzenia
+                  i kategorię prezentu, w razie potrzeby rozmiar ubrania lub buta, oraz
+                  zdjęcie listu przygotowane przez Fundację. Nie publikujemy nazwisk,
+                  nazwy placówki, miejscowości, adresu ani wizerunku dziecka.
+                </p>
+              </div>
+            </div>
+          </footer>
+        </ToastProvider>
       </body>
     </html>
   );

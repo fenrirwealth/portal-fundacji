@@ -1,7 +1,9 @@
+import Link from "next/link";
 import { db } from "../../../../lib/db";
 import { wymagajRedakcji } from "../../../../lib/admin";
-import { WOJEWODZTWA } from "../../../../lib/slowniki";
+import { WOJEWODZTWA, KATEGORIE } from "../../../../lib/slowniki";
 import { utworzList } from "../../actions";
+import FormularzNowy from "../../ui/FormularzNowy";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Nowy list", robots: { index: false, follow: false } };
@@ -9,6 +11,7 @@ export const metadata = { title: "Nowy list", robots: { index: false, follow: fa
 export default async function NowyList({ searchParams }) {
   await wymagajRedakcji("/admin/listy/nowy");
   const p = (await searchParams) || {};
+
   const udzialy = await db.udzialPlacowki.findMany({
     where: { status: "POTWIERDZILA", edycja: { aktywna: true } },
     include: { placowka: { select: { nazwa: true, wojewodztwo: true } } },
@@ -17,40 +20,36 @@ export default async function NowyList({ searchParams }) {
 
   return (
     <div className="wrap sekcja">
-      <p><a href="/admin">← Panel redakcji</a></p>
-      <h1 className="tytul">Nowy list</h1>
+      <Link className="btn btn-tekstowy" href="/admin" style={{ marginLeft: "calc(var(--o-2) * -1)" }}>
+        ← Panel redakcji
+      </Link>
+
+      <h1 className="tytul" style={{ marginTop: "var(--o-4)" }}>Nowy list</h1>
+      <p className="wstep" style={{ marginTop: "var(--o-2)" }}>
+        List powstaje jako szkic. Publikacja będzie możliwa dopiero po przyjęciu
+        zgody dyrektora i zaznaczeniu całej listy kontrolnej.
+      </p>
+
       {p.blad && <p className="blad" role="alert">{p.blad}</p>}
+
       {udzialy.length === 0 ? (
-        <p className="blad">Najpierw zatwierdz zgloszenie placowki w aktywnej edycji.</p>
+        <div className="pusto" style={{ marginTop: "var(--o-6)" }}>
+          <h3>Brak zatwierdzonych placówek</h3>
+          <p>
+            Listy można dodawać tylko dla placówek, których zgłoszenie zostało
+            zatwierdzone w aktywnej edycji.
+          </p>
+          <Link className="btn" href="/admin" style={{ marginTop: "var(--o-4)" }}>
+            Przejdź do zgłoszeń
+          </Link>
+        </div>
       ) : (
-        <form action={utworzList} className="formularz-admin">
-          <label>Placowka
-            <select name="udzialId" required defaultValue="">
-              <option value="" disabled>wybierz</option>
-              {udzialy.map((u) => <option key={u.id} value={u.id}>{u.placowka.nazwa} — {u.placowka.wojewodztwo}</option>)}
-            </select>
-          </label>
-          <label>Imie dziecka<input name="imie" required maxLength={80} /></label>
-          <label>Wiek<input name="wiek" type="number" min="1" max="25" required /></label>
-          <label>Wojewodztwo
-            <select name="wojewodztwo" required defaultValue="">
-              <option value="" disabled>wybierz</option>
-              {WOJEWODZTWA.map((w) => <option key={w}>{w}</option>)}
-            </select>
-          </label>
-          <label>Kategoria
-            <select name="kategoria" required defaultValue="">
-              <option value="" disabled>wybierz</option>
-              {['ZABAWKI','SPORT','KSIAZKI','NAUKA','UBRANIA','INNE'].map((k) => <option key={k}>{k}</option>)}
-            </select>
-          </label>
-          <label>Marzenie<textarea name="marzenie" required maxLength={300} rows={3} /></label>
-          <label>Rozmiar (opcjonalnie)<input name="rozmiar" maxLength={80} /></label>
-          <label>Opis publiczny<textarea name="opis" maxLength={1200} rows={5} /></label>
-          <label>Adres przygotowanego zdjecia listu (HTTPS)<input name="zdjecieUrl" type="url" /></label>
-          <p className="wstep">Po zapisaniu list pozostanie szkicem. Publikacja bedzie mozliwa dopiero po uzupelnieniu zgody i calej listy kontrolnej.</p>
-          <button className="btn" type="submit">Utworz szkic</button>
-        </form>
+        <FormularzNowy
+          akcja={utworzList}
+          udzialy={udzialy.map((u) => ({ id: u.id, nazwa: u.placowka.nazwa, wojewodztwo: u.placowka.wojewodztwo }))}
+          wojewodztwa={WOJEWODZTWA}
+          kategorie={KATEGORIE}
+        />
       )}
     </div>
   );

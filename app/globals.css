@@ -1,139 +1,744 @@
-:root{
-  --papier:#F1F0EA; --papier2:#E4E1D7; --biel:#FCFBF8;
-  --atrament:#16233C; --atrament2:#3A4A6B;
-  --bursztyn:#E19B2E; --bursztyn2:#A96A14;
-  --zielen:#3F6B54; --czerwien:#8C3B2E;
-  --linia:rgba(22,35,60,.15); --linia2:rgba(22,35,60,.3);
+/* ============================================================
+   SYSTEM PROJEKTOWY — Portal Fundacji Lepszy Dom Lepsze Jutro
+   ============================================================
+
+   Zasada nadrzedna: to jest serwis o dzieciach, ktore czekaja na
+   prezent. Kazda decyzja wizualna ma wspierac tresc, nigdy z nia
+   konkurowac. Powsciagliwosc, kontrast i jakosc detalu zamiast ruchu.
+
+   Wszystko ponizej jest tokenem albo komponentem. Zaden widok nie
+   definiuje wlasnych kolorow, odstepow ani cieni.
+   ============================================================ */
+
+:root {
+  /* --- kolor: atrament i papier --------------------------- */
+  --atrament-900: #0E1727;
+  --atrament-800: #16233C;
+  --atrament-700: #22304C;
+  --atrament-500: #3A4A6B;
+  --atrament-400: #5B6B8A;
+  --atrament-300: #8A96AC;
+
+  --papier-50:  #FBFAF7;
+  --papier-100: #F5F3EE;
+  --papier-200: #EAE7DF;
+  --papier-300: #D9D5CA;
+
+  /* Bursztyn — jedyny akcent. Uzywany oszczednie: wezwanie do
+     dzialania, aktywny filtr, podkreslenie. Nigdy jako tlo duzych
+     powierzchni, bo przy kolorze o tej sile robi sie halas. */
+  --bursztyn-600: #A96A14;
+  --bursztyn-500: #C8811F;
+  --bursztyn-400: #E19B2E;
+  --bursztyn-100: #F7E9D1;
+
+  --szalwia-600: #3F6B54;   /* powodzenie */
+  --szalwia-100: #E4EFE8;
+  --glina-600:   #96402F;   /* blad */
+  --glina-100:   #F6E4DF;
+
+  /* --- powierzchnie --------------------------------------- */
+  --tlo:            var(--papier-100);
+  --tlo-uniesione:  var(--papier-50);
+  --tlo-odwrocone:  var(--atrament-800);
+  --tekst:          var(--atrament-800);
+  --tekst-cichy:    var(--atrament-500);
+  --tekst-odwrocony: var(--papier-100);
+
+  /* Krawedzie zamiast cieni. Cien na papierze wyglada sztucznie,
+     a przy duzej liczbie kart robi sie brudny. */
+  --linia:      color-mix(in srgb, var(--atrament-800) 12%, transparent);
+  --linia-mocna: color-mix(in srgb, var(--atrament-800) 24%, transparent);
+
+  /* --- typografia ----------------------------------------- */
+  --krój-tytuł: "Fraunces", Georgia, serif;
+  --krój-tekst: "Inter", system-ui, -apple-system, sans-serif;
+
+  /* Skala modularna 1.25, plynna. Duza roznica miedzy poziomami
+     to podstawa hierarchii — bez niej wszystko wazy tyle samo. */
+  --t-xs:   0.8125rem;
+  --t-sm:   0.9375rem;
+  --t-base: 1.0625rem;
+  --t-lg:   1.1875rem;
+  --t-xl:   clamp(1.35rem, 1.1rem + 1vw, 1.6rem);
+  --t-2xl:  clamp(1.7rem, 1.3rem + 1.8vw, 2.2rem);
+  --t-3xl:  clamp(2.1rem, 1.5rem + 3vw, 3.2rem);
+  --t-4xl:  clamp(2.6rem, 1.7rem + 4.4vw, 4.4rem);
+
+  /* --- rytm ----------------------------------------------- */
+  --o-1: 4px;  --o-2: 8px;  --o-3: 12px; --o-4: 16px;
+  --o-5: 24px; --o-6: 32px; --o-7: 48px; --o-8: 64px; --o-9: 96px;
+
+  --r-sm: 6px; --r-md: 10px; --r-lg: 16px; --r-pigulka: 999px;
+
+  --szer-tresc: 1120px;
+  --szer-czytanie: 68ch;
+
+  /* Jeden czas i jedna krzywa dla calego serwisu. Mikrointerakcje
+     maja byc niezauwazalne — 120 ms to prog, przy ktorym ruch
+     przestaje byc widoczny jako animacja, a zaczyna jako reakcja. */
+  --ruch: 120ms cubic-bezier(.2, .6, .3, 1);
 }
 
-/* Panel redakcji */
-.formularz-admin{display:grid;gap:15px;max-width:720px;margin-top:20px}
-.formularz-admin label:not(.checkbox){display:grid;gap:6px;font-weight:600}
-.formularz-admin input:not([type="checkbox"]),.formularz-admin select,.formularz-admin textarea{width:100%;border:1px solid var(--linia2);border-radius:3px;padding:10px 12px;font:15px "IBM Plex Sans",sans-serif;background:var(--biel);color:var(--atrament)}
-.formularz-admin fieldset{display:grid;gap:10px;border:1px solid var(--linia2);padding:18px;margin:8px 0}
-.formularz-admin legend{font-weight:600;padding:0 7px}
-.checkbox{display:flex;align-items:flex-start;gap:9px;font-weight:400}
-.checkbox input{margin-top:5px}
-.naglowek-rzad{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
-.tabela-przewijana{overflow-x:auto;margin-top:18px}
-.tabela-przewijana .tabela{width:100%;min-width:700px}
-.tabela{border-collapse:collapse;background:var(--biel)}
-.tabela th,.tabela td{padding:11px 12px;border-bottom:1px solid var(--linia);text-align:left;vertical-align:top}
-.tabela th{font-size:13px;color:var(--atrament2)}
-.btn.drugorzedny{background:transparent;color:var(--atrament);border:1px solid var(--linia2);margin-left:8px}
-.btn.niebezpieczny{background:#8b1e2d;margin-left:8px}
-.blad{padding:12px 14px;border-left:3px solid var(--czerwien);background:#fff3f3;margin-top:18px}
-.realizacja{margin:24px 0;padding:20px;background:var(--biel);border:1px solid var(--linia);border-radius:4px}
-.realizacja h2{font-size:20px;margin-bottom:8px}
-.realizacja .btn{width:auto}
-*{box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{margin:0;background:var(--papier);color:var(--atrament);
-  font-family:"IBM Plex Sans",system-ui,sans-serif;font-size:16px;line-height:1.65;
-  -webkit-font-smoothing:antialiased}
-h1,h2,h3{font-family:"Bricolage Grotesque","IBM Plex Sans",sans-serif;
-  font-weight:800;line-height:1.06;letter-spacing:-.02em;margin:0}
-p{margin:0 0 1em}
-a{color:var(--bursztyn2);text-underline-offset:3px}
-a:focus-visible,button:focus-visible{outline:3px solid var(--bursztyn);outline-offset:3px;border-radius:2px}
-img{max-width:100%;height:auto}
-
-.wrap{max-width:1040px;margin:0 auto;padding:0 24px}
-.skip{position:absolute;left:-9999px}
-.skip:focus{left:12px;top:12px;background:var(--bursztyn);color:var(--atrament);padding:10px 16px;z-index:99}
-
-header{border-bottom:1px solid var(--linia);background:var(--papier);position:sticky;top:0;z-index:20}
-.nawig{display:flex;align-items:center;gap:26px;padding:15px 0}
-.logo{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:17px;
-  line-height:1.05;text-decoration:none;color:var(--atrament)}
-.logo span{display:block;font-family:"IBM Plex Sans",sans-serif;font-weight:400;
-  font-size:11px;color:var(--atrament2)}
-nav{margin-left:auto;display:flex;gap:22px;font-size:14.5px}
-nav a{color:var(--atrament2);text-decoration:none}
-nav a:hover{color:var(--atrament)}
-
-footer{background:var(--papier2);padding:32px 0 26px;margin-top:60px}
-.nota{font-size:13px;color:var(--atrament2);margin:0 0 6px}
-
-.sekcja{padding:50px 0}
-.tytul{font-size:clamp(25px,3.6vw,34px);margin-bottom:10px}
-.wstep{color:var(--atrament2);max-width:62ch}
-
-.hero{background:var(--atrament);color:var(--papier);padding:64px 0 56px}
-.hero h1{font-size:clamp(30px,5vw,48px);max-width:17ch;margin-bottom:18px}
-.hero p{color:rgba(241,240,234,.78);font-size:17px;max-width:50ch}
-.btn-duzy{display:inline-block;background:var(--bursztyn);color:var(--atrament);
-  text-decoration:none;font-weight:600;padding:13px 24px;border-radius:3px;margin-top:24px}
-.btn-duzy:hover{background:var(--bursztyn2);color:var(--biel)}
-
-.filtry{display:flex;gap:9px;flex-wrap:wrap;align-items:center;
-  margin:26px 0 22px;padding-bottom:22px;border-bottom:1px solid var(--linia)}
-.filtr{border:1px solid var(--linia2);background:var(--biel);border-radius:20px;
-  padding:7px 15px;font-size:13.5px;text-decoration:none;color:var(--atrament)}
-.filtr[data-on="1"]{background:var(--atrament);color:var(--papier);border-color:var(--atrament)}
-.wynik{margin-left:auto;font-size:13.5px;color:var(--atrament2)}
-
-.siatka{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
-.list{background:var(--biel);border:1px solid var(--linia);border-radius:4px;
-  overflow:hidden;display:flex;flex-direction:column;text-decoration:none;color:inherit}
-.list:hover{border-color:var(--linia2)}
-.kartka{background:#fff;border-bottom:1px solid var(--linia);padding:18px;
-  min-height:148px;position:relative}
-.kartka .linie{position:absolute;inset:18px;background:repeating-linear-gradient(
-  transparent,transparent 21px,rgba(22,35,60,.09) 21px,rgba(22,35,60,.09) 22px)}
-.kartka .pismo{position:relative;font-family:"Bricolage Grotesque",cursive,sans-serif;
-  font-weight:400;font-size:15px;line-height:22px;color:#2B3A52}
-.tresc{padding:16px 18px;flex:1}
-.tresc h3{font-size:16px;margin-bottom:4px}
-.meta{font-size:12.5px;color:var(--atrament2);margin-bottom:10px}
-.tag{display:inline-block;font-size:11.5px;border:1px solid var(--linia2);
-  border-radius:20px;padding:2px 9px;color:var(--atrament2)}
-.stopka-listu{padding:13px 18px;border-top:1px solid var(--linia);
-  display:flex;align-items:center;gap:10px;font-size:12.5px;font-weight:600}
-.st-wolny{color:var(--zielen)}
-.st-zajety{color:var(--atrament2)}
-.st-gotowy{color:var(--bursztyn2)}
-
-.pusto{background:var(--biel);border:1px dashed var(--linia2);border-radius:4px;
-  padding:44px 24px;text-align:center;color:var(--atrament2);grid-column:1/-1}
-.pusto h3{font-size:18px;margin-bottom:8px;color:var(--atrament)}
-
-.licznik{display:flex;gap:28px;background:var(--atrament);color:var(--papier);
-  padding:20px 24px;border-radius:4px;margin-bottom:8px;flex-wrap:wrap}
-.licznik b{font-family:"Bricolage Grotesque",sans-serif;font-size:26px;
-  display:block;line-height:1}
-.licznik span{font-size:12.5px;color:rgba(241,240,234,.65)}
-
-.szczegol{display:grid;grid-template-columns:1.1fr .9fr;gap:36px;align-items:start;margin-top:26px}
-.skan{background:#fff;border:1px solid var(--linia2);border-radius:4px;
-  padding:32px;position:relative;min-height:400px}
-.skan .linie{position:absolute;inset:32px;background:repeating-linear-gradient(
-  transparent,transparent 25px,rgba(22,35,60,.1) 25px,rgba(22,35,60,.1) 26px)}
-.skan .pismo{position:relative;font-family:"Bricolage Grotesque",cursive,sans-serif;
-  font-size:18px;line-height:26px;color:#2B3A52}
-.skan .podpis{position:relative;margin-top:24px;font-family:"Bricolage Grotesque",cursive;
-  font-size:21px;color:#2B3A52}
-.panel{background:var(--biel);border:1px solid var(--linia);border-radius:4px;
-  padding:24px;position:sticky;top:88px}
-.panel h1{font-size:23px;margin-bottom:6px}
-.info{background:var(--papier);border-left:2px solid var(--bursztyn);
-  padding:12px 14px;font-size:13px;color:var(--atrament2);margin:16px 0}
-.zasady{font-size:13px;color:var(--atrament2);line-height:1.55;
-  margin-top:16px;padding-top:16px;border-top:1px solid var(--linia)}
-.btn{display:block;width:100%;text-align:center;background:var(--bursztyn);
-  color:var(--atrament);border:0;border-radius:3px;padding:13px 18px;
-  font:600 15px "IBM Plex Sans",sans-serif;cursor:pointer;text-decoration:none}
-.btn:hover{background:var(--bursztyn2);color:var(--biel)}
-.btn[disabled],.btn.stop{background:var(--papier2);color:var(--atrament2);cursor:not-allowed}
-.wroc{display:inline-block;font-size:13.5px;color:var(--atrament2);
-  text-decoration:none;margin-bottom:16px}
-.wroc:hover{color:var(--atrament);text-decoration:underline}
-
-@media(max-width:900px){
-  nav{gap:14px;font-size:13.5px}
-  .siatka{grid-template-columns:1fr 1fr}
-  .szczegol{grid-template-columns:1fr}
-  .panel{position:static}
+@media (prefers-reduced-motion: reduce) {
+  :root { --ruch: 1ms; }
+  *, *::before, *::after { animation-duration: 1ms !important; animation-iteration-count: 1 !important; }
+  html { scroll-behavior: auto; }
 }
-@media(max-width:560px){.siatka{grid-template-columns:1fr}}
-@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+
+/* ============================================================
+   PODSTAWY
+   ============================================================ */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--tlo);
+  color: var(--tekst);
+  font-family: var(--krój-tekst);
+  font-size: var(--t-base);
+  line-height: 1.65;
+  font-feature-settings: "cv05" 1, "ss01" 1;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3 {
+  font-family: var(--krój-tytuł);
+  font-weight: 600;
+  font-variation-settings: "SOFT" 20, "WONK" 1;
+  line-height: 1.08;
+  letter-spacing: -0.015em;
+  margin: 0;
+  text-wrap: balance;
+}
+
+p { margin: 0 0 1em; text-wrap: pretty; }
+p:last-child { margin-bottom: 0; }
+
+a { color: var(--bursztyn-600); text-underline-offset: 3px; text-decoration-thickness: 1px; }
+a:hover { color: var(--atrament-800); }
+
+img, svg { max-width: 100%; height: auto; display: block; }
+
+/* Widoczny, jednolity focus w calym serwisie. Wymog WCAG 2.2 AA
+   i jedyny sposob, zeby nawigacja klawiatura byla uzywalna. */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 3px solid var(--bursztyn-400);
+  outline-offset: 2px;
+  border-radius: var(--r-sm);
+}
+
+::selection { background: var(--bursztyn-100); color: var(--atrament-900); }
+
+/* ============================================================
+   UKŁAD
+   ============================================================ */
+
+.wrap { max-width: var(--szer-tresc); margin-inline: auto; padding-inline: var(--o-5); }
+.waski { max-width: 640px; }
+.czytanie { max-width: var(--szer-czytanie); }
+
+.sekcja { padding-block: var(--o-8); }
+.sekcja-ciasna { padding-block: var(--o-7); }
+
+.stos > * + * { margin-top: var(--o-4); }
+.stos-l > * + * { margin-top: var(--o-6); }
+
+.skip {
+  position: absolute; left: -9999px;
+  background: var(--bursztyn-400); color: var(--atrament-900);
+  padding: var(--o-3) var(--o-4); border-radius: var(--r-sm);
+  font-weight: 600; z-index: 100;
+}
+.skip:focus { left: var(--o-3); top: var(--o-3); }
+
+/* ============================================================
+   NAGŁÓWEK
+   ============================================================ */
+
+.naglowek {
+  position: sticky; top: 0; z-index: 30;
+  background: color-mix(in srgb, var(--tlo) 88%, transparent);
+  backdrop-filter: saturate(1.4) blur(10px);
+  border-bottom: 1px solid var(--linia);
+}
+.naglowek-tresc {
+  display: flex; align-items: center; gap: var(--o-5);
+  min-height: 64px; padding-block: var(--o-3);
+}
+
+.znak {
+  display: inline-flex; align-items: baseline; gap: var(--o-2);
+  min-height: 44px; text-decoration: none; color: var(--tekst);
+}
+.znak b {
+  font-family: var(--krój-tytuł); font-weight: 600; font-size: var(--t-lg);
+  letter-spacing: -0.02em; line-height: 1;
+}
+.znak span { font-size: var(--t-xs); color: var(--tekst-cichy); letter-spacing: .01em; }
+
+.menu { margin-left: auto; display: flex; align-items: center; gap: var(--o-3); font-size: var(--t-sm); }
+/* Minimalny cel dotykowy 44 px — kryterium 2.5.8 WCAG 2.2 AA.
+   Sam tekst odnośnika ma ok. 20 px wysokości, więc bez wyściółki
+   nawigacja byłaby niedostępna dla osób z drżeniem rąk i na ekranach
+   dotykowych. */
+.menu a, .menu .btn-tekstowy {
+  display: inline-flex; align-items: center;
+  min-height: 44px; padding-inline: var(--o-2);
+  color: var(--tekst-cichy); text-decoration: none;
+  transition: color var(--ruch);
+}
+.menu a:hover { color: var(--tekst); }
+.menu .konto { color: var(--tekst-cichy); font-size: var(--t-xs); }
+
+/* ============================================================
+   PRZYCISKI
+   ============================================================ */
+
+.btn {
+  --btn-tlo: var(--bursztyn-400);
+  --btn-tekst: var(--atrament-900);
+  --btn-krawedz: transparent;
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--o-2);
+  background: var(--btn-tlo); color: var(--btn-tekst);
+  border: 1px solid var(--btn-krawedz); border-radius: var(--r-sm);
+  padding: var(--o-3) var(--o-5);
+  font: 600 var(--t-sm)/1.2 var(--krój-tekst);
+  cursor: pointer; text-decoration: none;
+  transition: background var(--ruch), transform var(--ruch), opacity var(--ruch);
+  min-height: 44px;              /* cel dotykowy wg WCAG 2.2 */
+}
+.btn:hover { --btn-tlo: var(--bursztyn-500); color: var(--btn-tekst); }
+.btn:active { transform: translateY(1px); }
+.btn[disabled], .btn[aria-disabled="true"] {
+  --btn-tlo: var(--papier-200); --btn-tekst: var(--tekst-cichy);
+  cursor: not-allowed; transform: none;
+}
+
+.btn-cichy { --btn-tlo: transparent; --btn-tekst: var(--tekst); --btn-krawedz: var(--linia-mocna); }
+.btn-cichy:hover { --btn-tlo: var(--papier-200); }
+
+.btn-tekstowy {
+  --btn-tlo: transparent; --btn-tekst: var(--tekst-cichy);
+  padding-inline: var(--o-2); font-weight: 500;
+}
+.btn-tekstowy:hover { --btn-tlo: transparent; --btn-tekst: var(--tekst); }
+
+.btn-pelny { width: 100%; }
+.btn-duzy { padding: var(--o-4) var(--o-6); font-size: var(--t-base); min-height: 52px; }
+
+/* ============================================================
+   KARTY I POWIERZCHNIE
+   ============================================================ */
+
+.karta {
+  background: var(--tlo-uniesione);
+  border: 1px solid var(--linia);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+}
+.karta-tresc { padding: var(--o-5); }
+
+.plakietka {
+  display: inline-flex; align-items: center; gap: var(--o-2);
+  font-size: var(--t-xs); font-weight: 500;
+  padding: var(--o-1) var(--o-3);
+  border-radius: var(--r-pigulka);
+  background: var(--papier-200); color: var(--tekst-cichy);
+  white-space: nowrap;
+}
+.plakietka::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.plakietka-wolny  { background: var(--szalwia-100); color: var(--szalwia-600); }
+.plakietka-zajety { background: var(--papier-200); color: var(--tekst-cichy); }
+.plakietka-gotowy { background: var(--bursztyn-100); color: var(--bursztyn-600); }
+.plakietka-bez-kropki::before { display: none; }
+
+/* ============================================================
+   FORMULARZE
+   ============================================================ */
+
+.pole { display: block; margin-bottom: var(--o-5); }
+.pole-etykieta {
+  display: block; font-size: var(--t-sm); font-weight: 500;
+  color: var(--tekst); margin-bottom: var(--o-2);
+}
+.pole-wymagane { color: var(--glina-600); margin-left: 2px; }
+.pole-podpowiedz { display: block; font-size: var(--t-xs); color: var(--tekst-cichy); margin-top: var(--o-2); }
+
+.pole-kontrolka {
+  width: 100%;
+  background: var(--tlo-uniesione);
+  color: var(--tekst);
+  border: 1px solid var(--linia-mocna);
+  border-radius: var(--r-sm);
+  padding: var(--o-3) var(--o-4);
+  font: 400 var(--t-base)/1.5 var(--krój-tekst);
+  min-height: 48px;
+  transition: border-color var(--ruch), background var(--ruch);
+}
+.pole-kontrolka::placeholder { color: var(--atrament-300); }
+.pole-kontrolka:hover { border-color: var(--atrament-400); }
+.pole-kontrolka[aria-invalid="true"] { border-color: var(--glina-600); background: var(--glina-100); }
+textarea.pole-kontrolka { min-height: 120px; resize: vertical; }
+
+.pole-blad {
+  display: flex; align-items: flex-start; gap: var(--o-2);
+  font-size: var(--t-sm); color: var(--glina-600); margin-top: var(--o-2); font-weight: 500;
+}
+
+.zgoda { display: flex; gap: var(--o-3); align-items: flex-start; font-size: var(--t-sm); color: var(--tekst-cichy); }
+.zgoda input { margin-top: 3px; width: 18px; height: 18px; accent-color: var(--bursztyn-500); flex-shrink: 0; }
+
+/* ============================================================
+   KOMUNIKATY
+   ============================================================ */
+
+.komunikat {
+  display: flex; gap: var(--o-3); align-items: flex-start;
+  padding: var(--o-4) var(--o-5);
+  border-radius: var(--r-md);
+  border: 1px solid var(--linia);
+  background: var(--tlo-uniesione);
+  font-size: var(--t-sm);
+}
+.komunikat-info   { background: var(--papier-200); }
+.komunikat-sukces { background: var(--szalwia-100); border-color: color-mix(in srgb, var(--szalwia-600) 25%, transparent); color: var(--szalwia-600); }
+.komunikat-blad   { background: var(--glina-100);  border-color: color-mix(in srgb, var(--glina-600) 25%, transparent);  color: var(--glina-600); }
+.komunikat b { font-weight: 600; }
+
+/* Toast — jeden na raz, u dolu, nie zaslania tresci na telefonie. */
+.toast-obszar {
+  position: fixed; inset-inline: 0; bottom: var(--o-5);
+  display: flex; justify-content: center; padding-inline: var(--o-4);
+  pointer-events: none; z-index: 60;
+}
+.toast {
+  pointer-events: auto;
+  display: flex; align-items: center; gap: var(--o-3);
+  background: var(--atrament-800); color: var(--tekst-odwrocony);
+  padding: var(--o-3) var(--o-5); border-radius: var(--r-pigulka);
+  font-size: var(--t-sm); max-width: 560px;
+  box-shadow: 0 8px 28px color-mix(in srgb, var(--atrament-900) 22%, transparent);
+  animation: toast-wejscie 200ms cubic-bezier(.2,.8,.3,1);
+}
+.toast-blad { background: var(--glina-600); }
+@keyframes toast-wejscie { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+/* ============================================================
+   SZKIELETY ŁADOWANIA
+   ============================================================ */
+
+.szkielet {
+  background: linear-gradient(90deg,
+    var(--papier-200) 25%,
+    color-mix(in srgb, var(--papier-300) 60%, transparent) 37%,
+    var(--papier-200) 63%);
+  background-size: 400% 100%;
+  animation: szkielet-puls 1.6s ease-in-out infinite;
+  border-radius: var(--r-sm);
+}
+@keyframes szkielet-puls { from { background-position: 100% 50%; } to { background-position: 0 50%; } }
+.szkielet-tekst { height: 1em; margin-bottom: var(--o-2); }
+
+/* ============================================================
+   SIATKI
+   ============================================================ */
+
+.siatka { display: grid; gap: var(--o-5); }
+.siatka-listy { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+.siatka-2 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+.siatka-4 { grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
+
+/* ============================================================
+   FILTRY
+   ============================================================ */
+
+.filtry { display: flex; flex-wrap: wrap; gap: var(--o-2); align-items: center; }
+.filtry-grupa { display: flex; flex-wrap: wrap; gap: var(--o-2); }
+.filtry-grupa + .filtry-grupa { padding-left: var(--o-3); border-left: 1px solid var(--linia); }
+
+.filtr {
+  display: inline-flex; align-items: center; min-height: 40px;
+  padding: var(--o-2) var(--o-4);
+  border: 1px solid var(--linia-mocna); border-radius: var(--r-pigulka);
+  background: var(--tlo-uniesione); color: var(--tekst);
+  font-size: var(--t-sm); text-decoration: none;
+  transition: background var(--ruch), border-color var(--ruch), color var(--ruch);
+}
+.filtr:hover { background: var(--papier-200); color: var(--tekst); }
+.filtr[aria-pressed="true"] {
+  background: var(--atrament-800); border-color: var(--atrament-800); color: var(--tekst-odwrocony);
+}
+
+/* ============================================================
+   MOBILNY PASEK AKCJI
+   ============================================================ */
+
+.pasek-mobilny {
+  position: fixed; inset-inline: 0; bottom: 0; z-index: 40;
+  display: none;
+  gap: var(--o-4); align-items: center;
+  padding: var(--o-3) var(--o-4) calc(var(--o-3) + env(safe-area-inset-bottom));
+  background: color-mix(in srgb, var(--tlo-uniesione) 94%, transparent);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid var(--linia);
+}
+.pasek-mobilny .opis { font-size: var(--t-xs); color: var(--tekst-cichy); line-height: 1.3; }
+.pasek-mobilny .btn { margin-left: auto; }
+
+@media (max-width: 860px) {
+  .pasek-mobilny { display: flex; }
+  .ma-pasek-mobilny { padding-bottom: 88px; }
+  .menu { gap: var(--o-4); font-size: var(--t-xs); }
+  .menu .konto { display: none; }
+}
+
+/* ============================================================
+   TABELE
+   ============================================================ */
+
+.tabela { width: 100%; border-collapse: collapse; font-size: var(--t-sm); }
+.tabela th {
+  text-align: left; font-weight: 600; font-size: var(--t-xs);
+  color: var(--tekst-cichy); text-transform: uppercase; letter-spacing: .04em;
+  padding: var(--o-3) var(--o-4); border-bottom: 1px solid var(--linia-mocna);
+}
+.tabela td { padding: var(--o-4); border-bottom: 1px solid var(--linia); vertical-align: top; }
+.tabela tr:last-child td { border-bottom: 0; }
+
+@media (max-width: 720px) {
+  .tabela, .tabela tbody, .tabela tr, .tabela td { display: block; width: 100%; }
+  .tabela thead { display: none; }
+  .tabela tr { border: 1px solid var(--linia); border-radius: var(--r-md); margin-bottom: var(--o-4); background: var(--tlo-uniesione); }
+  .tabela td { border: 0; padding: var(--o-2) var(--o-4); }
+  .tabela td:first-child { padding-top: var(--o-4); }
+  .tabela td:last-child { padding-bottom: var(--o-4); }
+  .tabela td[data-etykieta]::before {
+    content: attr(data-etykieta) ": ";
+    font-size: var(--t-xs); color: var(--tekst-cichy); font-weight: 600;
+  }
+}
+
+/* ============================================================
+   POMOCNICZE
+   ============================================================ */
+
+.cichy { color: var(--tekst-cichy); }
+.maly { font-size: var(--t-sm); }
+.drobny { font-size: var(--t-xs); }
+.tylko-dla-czytnika {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+}
+
+/* ============================================================
+   KARTA LISTU
+   ============================================================ */
+
+.karta-listu {
+  display: flex; flex-direction: column;
+  text-decoration: none; color: inherit;
+  transition: border-color var(--ruch), transform var(--ruch);
+}
+.karta-listu:hover { border-color: var(--linia-mocna); color: inherit; }
+.karta-listu:hover .karta-listu-akcja { color: var(--bursztyn-600); }
+
+/* Stałe proporcje niezależnie od obecności zdjęcia — układ nie skacze
+   po dograniu fotografii, a szkielet ma dokładnie te same wymiary. */
+.karta-listu-zdjecie {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  background: var(--papier-200);
+  overflow: hidden;
+}
+.karta-listu-zdjecie img { width: 100%; height: 100%; object-fit: cover; }
+
+.karta-listu-zastepnik {
+  display: grid; place-items: center; height: 100%;
+  background:
+    repeating-linear-gradient(transparent, transparent 23px, var(--linia) 23px, var(--linia) 24px),
+    var(--papier-50);
+}
+.karta-listu-zastepnik span {
+  font-family: var(--krój-tytuł); font-size: var(--t-sm);
+  color: var(--atrament-300); letter-spacing: .04em;
+  background: var(--papier-50); padding-inline: var(--o-3);
+}
+
+.karta-listu .karta-tresc { flex: 1; display: flex; flex-direction: column; }
+.karta-listu-akcja {
+  margin-top: auto; padding-top: var(--o-4);
+  font-size: var(--t-sm); font-weight: 600; color: var(--tekst-cichy);
+  transition: color var(--ruch);
+}
+
+/* ============================================================
+   WIDOK POJEDYNCZEGO LISTU
+   ============================================================ */
+
+.list-uklad { display: grid; gap: var(--o-7); grid-template-columns: minmax(0, 1.15fr) minmax(320px, .85fr); align-items: start; }
+.list-zdjecie { border-radius: var(--r-lg); overflow: hidden; border: 1px solid var(--linia); background: var(--papier-200); }
+.list-zdjecie img { width: 100%; }
+.list-zdjecie .zastepnik { aspect-ratio: 3 / 4; }
+
+.panel-rezerwacji { position: sticky; top: 88px; }
+
+@media (max-width: 860px) {
+  .list-uklad { grid-template-columns: 1fr; gap: var(--o-5); }
+  .panel-rezerwacji { position: static; }
+}
+
+/* ============================================================
+   PUSTE STANY
+   ============================================================ */
+
+.pusto {
+  grid-column: 1 / -1;
+  display: grid; place-items: center; text-align: center;
+  padding: var(--o-9) var(--o-5);
+  border: 1px dashed var(--linia-mocna); border-radius: var(--r-lg);
+  background: var(--tlo-uniesione);
+}
+.pusto h3 { font-size: var(--t-xl); margin-bottom: var(--o-3); }
+.pusto p { color: var(--tekst-cichy); max-width: 46ch; }
+
+/* ============================================================
+   LICZNIK
+   ============================================================ */
+
+.licznik {
+  display: flex; flex-wrap: wrap; gap: var(--o-7);
+  margin: 0; padding: var(--o-5) var(--o-6);
+  background: var(--tlo-odwrocone); color: var(--tekst-odwrocony);
+  border-radius: var(--r-lg);
+}
+.licznik div { display: flex; flex-direction: column-reverse; gap: var(--o-1); }
+.licznik dd {
+  margin: 0; font-family: var(--krój-tytuł); font-weight: 600;
+  font-size: var(--t-2xl); line-height: 1; letter-spacing: -0.02em;
+}
+.licznik dt { font-size: var(--t-xs); color: color-mix(in srgb, var(--papier-100) 62%, transparent); }
+
+@media (max-width: 640px) {
+  .licznik { gap: var(--o-5); padding: var(--o-4) var(--o-5); }
+  .licznik dd { font-size: var(--t-xl); }
+}
+
+.rezygnacja {
+  display: inline-flex; align-items: center; gap: var(--o-2); flex-wrap: wrap;
+  padding: var(--o-2) var(--o-3);
+  background: var(--glina-100); border-radius: var(--r-md);
+}
+
+select.pole-kontrolka {
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, var(--tekst-cichy) 50%),
+                    linear-gradient(135deg, var(--tekst-cichy) 50%, transparent 50%);
+  background-position: calc(100% - 20px) 21px, calc(100% - 14px) 21px;
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+  padding-right: var(--o-8);
+}
+
+/* ============================================================
+   KOREKTY MOBILNE — wynik przeglądu zrzutów
+   ============================================================ */
+
+@media (max-width: 860px) {
+  /* Znak łamał się na dwie linie i przepychał nawigację do czterech.
+     Na wąskim ekranie zostaje sam człon główny. */
+  .znak { flex-shrink: 0; }
+  .znak b { white-space: nowrap; }
+  .znak span { display: none; }
+
+  .naglowek-tresc { gap: var(--o-3); }
+  .menu { gap: var(--o-3); white-space: nowrap; overflow-x: auto; scrollbar-width: none; }
+  .menu::-webkit-scrollbar { display: none; }
+
+  /* Przycisk w panelu dublował ten z paska dolnego. Dwa identyczne
+     wezwania do działania na jednym ekranie to szum, nie wygoda. */
+  .panel-rezerwacji .btn-duzy.btn-pelny { display: none; }
+  .panel-rezerwacji .komunikat { margin-bottom: 0; }
+}
+
+@media (min-width: 861px) {
+  .pasek-mobilny { display: none !important; }
+}
+
+/* Pasek zachęty dla placówek — na wąskim ekranie układ kolumnowy,
+   inaczej tekst ściska się do kilku słów w linii. */
+.pasek-zachety {
+  display: grid; gap: var(--o-5);
+  grid-template-columns: 1fr auto; align-items: center;
+}
+@media (max-width: 720px) {
+  .pasek-zachety { grid-template-columns: 1fr; }
+  .pasek-zachety .btn { justify-self: start; }
+}
+
+/* ============================================================
+   PANEL REDAKCJI
+   ============================================================
+
+   Panel korzysta z klas semantycznych zdefiniowanych wcześniej
+   w projekcie (.formularz-admin, .tabela-przewijana, .realizacja).
+   Zamiast przepisywać jego widoki, przenosimy te klasy na nowe
+   tokeny — dzięki temu panel wygląda jak reszta serwisu, a logika
+   i struktura pozostają nietknięte.
+   ============================================================ */
+
+.tytul { font-family: var(--krój-tytuł); font-weight: 600; font-size: var(--t-3xl); line-height: 1.08; letter-spacing: -0.015em; }
+.wstep { color: var(--tekst-cichy); max-width: var(--szer-czytanie); }
+
+.naglowek-rzad {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: var(--o-4); flex-wrap: wrap;
+}
+
+.formularz-admin { display: grid; gap: var(--o-5); max-width: 720px; margin-top: var(--o-5); }
+.formularz-admin label:not(.checkbox) { display: grid; gap: var(--o-2); font-size: var(--t-sm); font-weight: 500; }
+.formularz-admin input:not([type="checkbox"]),
+.formularz-admin select,
+.formularz-admin textarea {
+  width: 100%; background: var(--tlo-uniesione); color: var(--tekst);
+  border: 1px solid var(--linia-mocna); border-radius: var(--r-sm);
+  padding: var(--o-3) var(--o-4); min-height: 48px;
+  font: 400 var(--t-base)/1.5 var(--krój-tekst);
+  transition: border-color var(--ruch);
+}
+.formularz-admin input:hover, .formularz-admin select:hover, .formularz-admin textarea:hover { border-color: var(--atrament-400); }
+.formularz-admin textarea { min-height: 120px; resize: vertical; }
+
+.formularz-admin fieldset {
+  display: grid; gap: var(--o-3);
+  border: 1px solid var(--linia); border-radius: var(--r-md);
+  padding: var(--o-5); margin: var(--o-2) 0;
+  background: var(--tlo-uniesione);
+}
+.formularz-admin legend { font-weight: 600; padding-inline: var(--o-2); font-size: var(--t-sm); }
+
+.checkbox { display: flex; align-items: flex-start; gap: var(--o-3); font-weight: 400; font-size: var(--t-sm); }
+.checkbox input { margin-top: 4px; width: 18px; height: 18px; accent-color: var(--bursztyn-500); flex-shrink: 0; }
+
+.tabela-przewijana {
+  overflow-x: auto; margin-top: var(--o-5);
+  border: 1px solid var(--linia); border-radius: var(--r-lg);
+  background: var(--tlo-uniesione);
+}
+.tabela-przewijana .tabela { width: 100%; min-width: 700px; }
+/* W kontenerze przewijanym tabela zostaje tabelą także na telefonie —
+   układ kartowy z reszty serwisu rozbiłby porównywanie wierszy, które
+   jest w panelu sensem widoku. */
+@media (max-width: 720px) {
+  .tabela-przewijana .tabela,
+  .tabela-przewijana .tabela tbody,
+  .tabela-przewijana .tabela tr,
+  .tabela-przewijana .tabela td { display: revert; }
+  .tabela-przewijana .tabela thead { display: table-header-group; }
+  .tabela-przewijana .tabela tr { border: 0; border-radius: 0; margin: 0; background: transparent; }
+  .tabela-przewijana .tabela td { border-bottom: 1px solid var(--linia); padding: var(--o-3) var(--o-4); }
+  .tabela-przewijana .tabela td[data-etykieta]::before { content: none; }
+}
+
+.realizacja {
+  margin: var(--o-6) 0; padding: var(--o-5);
+  background: var(--tlo-uniesione); border: 1px solid var(--linia);
+  border-radius: var(--r-lg);
+}
+.realizacja h2 { font-size: var(--t-xl); margin-bottom: var(--o-2); }
+.realizacja .btn { width: auto; }
+
+.btn.drugorzedny { --btn-tlo: transparent; --btn-tekst: var(--tekst); --btn-krawedz: var(--linia-mocna); margin-left: var(--o-2); }
+.btn.drugorzedny:hover { --btn-tlo: var(--papier-200); }
+.btn.niebezpieczny { --btn-tlo: var(--glina-600); --btn-tekst: var(--papier-50); margin-left: var(--o-2); }
+.btn.niebezpieczny:hover { --btn-tlo: color-mix(in srgb, var(--glina-600) 85%, black); }
+
+/* Klasy komunikatów używane przez panel i starsze widoki. */
+.blad {
+  padding: var(--o-4) var(--o-5); margin-top: var(--o-5);
+  background: var(--glina-100); color: var(--glina-600);
+  border: 1px solid color-mix(in srgb, var(--glina-600) 25%, transparent);
+  border-radius: var(--r-md); font-size: var(--t-sm); font-weight: 500;
+}
+.info {
+  padding: var(--o-4) var(--o-5); margin-top: var(--o-5);
+  background: var(--szalwia-100); color: var(--szalwia-600);
+  border: 1px solid color-mix(in srgb, var(--szalwia-600) 25%, transparent);
+  border-radius: var(--r-md); font-size: var(--t-sm);
+}
+
+/* ============================================================
+   PANEL — WYSZUKIWANIE, AKCJE, LISTA KONTROLNA, PODGLĄD
+   ============================================================ */
+
+.szukajka-admin {
+  display: flex; gap: var(--o-2); align-items: center; flex-wrap: wrap;
+  margin-top: var(--o-5); max-width: 640px;
+}
+.szukajka-admin .pole-kontrolka { flex: 1; min-width: 240px; }
+
+/* Pasek akcji przy dole formularza. Na telefonie przykleja się do dołu —
+   formularz listu jest długi, a przyciski publikacji muszą być
+   w zasięgu bez przewijania na sam koniec. */
+.pasek-akcji-admin {
+  display: flex; gap: var(--o-2); align-items: center; flex-wrap: wrap;
+  padding-top: var(--o-5); border-top: 1px solid var(--linia);
+}
+.pasek-akcji-admin .btn { margin-left: 0; }
+
+@media (max-width: 720px) {
+  .pasek-akcji-admin {
+    position: sticky; bottom: 0;
+    background: color-mix(in srgb, var(--tlo) 94%, transparent);
+    backdrop-filter: blur(10px);
+    margin-inline: calc(var(--o-5) * -1);
+    padding: var(--o-3) var(--o-5) calc(var(--o-3) + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--linia);
+  }
+  .pasek-akcji-admin span { display: none; }
+  .pasek-akcji-admin .btn { flex: 1 1 auto; }
+}
+
+.kontrolna-postep {
+  margin: 0 0 var(--o-2);
+  padding: var(--o-3) var(--o-4);
+  border-radius: var(--r-md);
+  background: var(--papier-200); color: var(--tekst-cichy);
+  font-size: var(--t-sm); font-weight: 500;
+}
+.kontrolna-gotowa {
+  background: var(--szalwia-100); color: var(--szalwia-600);
+}
+
+.podglad-tlo {
+  position: fixed; inset: 0; z-index: 70;
+  display: grid; place-items: start center;
+  padding: var(--o-5);
+  background: color-mix(in srgb, var(--atrament-900) 55%, transparent);
+  overflow-y: auto;
+}
+.podglad-okno {
+  background: var(--tlo); border-radius: var(--r-lg);
+  padding: var(--o-6); max-width: 720px; width: 100%;
+  margin-block: var(--o-5);
+  box-shadow: 0 24px 64px color-mix(in srgb, var(--atrament-900) 35%, transparent);
+}
+
+/* Podsumowanie <details> jako przycisk — domyślny trójkącik ma
+   kilkanaście pikseli i nie spełnia minimum celu dotykowego. */
+summary.btn { list-style: none; cursor: pointer; }
+summary.btn::-webkit-details-marker { display: none; }
+
+/* Pole panelu z błędem — obramowanie kontrolki i komunikat pod spodem,
+   zamiast jednego zbiorczego komunikatu na górze formularza. */
+.formularz-admin .pole-z-bledem input,
+.formularz-admin .pole-z-bledem select,
+.formularz-admin .pole-z-bledem textarea {
+  border-color: var(--glina-600);
+  background: var(--glina-100);
+}
+.formularz-admin .pole-blad { font-weight: 500; }
