@@ -292,3 +292,92 @@ export async function zapiszList(formData) {
   revalidatePath("/admin/listy/" + id);
   redirect("/admin/listy/" + id + "?sukces=" + (publikuj ? "opublikowany" : "zapisany"));
 }
+
+export async function aktualizujPrezent(formData) {
+  const redaktor = await wymagajRedakcji();
+  const id = tekst(formData, "id", 80);
+  const operacja = tekst(formData, "operacja", 20);
+  if (!id || !["przyjmij", "sprawdz", "zapakuj", "wydaj"].includes(operacja)) {
+    wrocZBledem("/admin", "Nieprawidlowa operacja na prezencie.");
+  }
+
+  const list = await db.list.findUnique({
+    where: { id },
+    select: {
+      status: true,
+      rezerwacje: {
+        where: { status: { in: ["POTWIERDZONA", "DOSTARCZONA"] } },
+        orderBy: { utworzona: "desc" },
+        take: 1,
+        select: { id: true, status: true, prezent: { select: { id: true, stan: true } } },
+      },
+    },
+  });
+  const rezerwacja = list?.rezerwacje?.[0];
+  if (!list || !rezerwacja) {
+    wrocZBledem("/admin/listy/" + id, "Brak potwierdzonej rezerwacji dla tego listu.");
+  }
+
+  try {
+    if (operacja === "przyjmij") {
+      await db.$transaction(async (tx) => {
+        const r = await tx.rezerwacja.updateMany({
+          where: { id: rezerwacja.id, status: "POTWIERDZONA" },
+          data: { status: "DOSTARCZONA" },
+        });
+        const l = await tx.list.updateMany({
+          where: { id, status: "ZAREZERWOWANY" },
+          data: { status: "OPLACONY" },
+        });
+        if (r.count !== 1 || l.count !== 1) throw new Error("ZMIENIONY_STAN");
+        await tx.prezent.upsert({
+          where: { rezerwacjaId: rezerwacja.id },
+          update: { stan: "PRZYJETY", dataPrzyjecia: new Date(), przyjetyPrzez: redaktor.id },
+          create: {
+            rezerwacjaId: rezerwacja.id,
+            stan: "PRZYJETY",
+            dataPrzyjecia: new Date(),
+            przyjetyPrzez: redaktor.id,
+          },
+        });
+      });
+    } else if (operacja === "sprawdz") {
+      const wynik = await db.prezent.updateMany({
+        where: { rezerwacjaId: rezerwacja.id, stan: "PRZYJETY" },
+        data: { stan: "SPRAWDZONY" },
+      });
+      if (wynik.count !== 1) throw new Error("ZMIENIONY_STAN");
+    } else if (operacja === "zapakuj") {
+      const wynik = await db.prezent.updateMany({
+        where: { rezerwacjaId: rezerwacja.id, stan: "SPRAWDZONY" },
+        data: { stan: "ZAPAKOWANY" },
+      });
+      if (wynik.count !== 1) throw new Error("ZMIENIONY_STAN");
+    } else {
+      await db.$transaction(async (tx) => {
+        const p = await tx.prezent.updateMany({
+          where: { rezerwacjaId: rezerwacja.id, stan: "ZAPAKOWANY" },
+          data: { stan: "WYDANY" },
+        });
+        const l = await tx.list.updateMany({
+          where: { id, status: "OPLACONY" },
+          data: { status: "PRZEKAZANY" },
+        });
+        if (p.count !== 1 || l.count !== 1) throw new Error("ZMIENIONY_STAN");
+      });
+    }
+  } catch (e) {
+    if (e?.message === "ZMIENIONY_STAN") {
+      wrocZBledem("/admin/listy/" + id, "Stan zostal zmieniony przez inna osobe. Odswiez strone.");
+    }
+    throw e;
+  }
+
+  revalidatePath("/");
+  revalidatePath("/listy");
+  revalidatePath("/listy/" + id);
+  revalidatePath("/moje-rezerwacje");
+  revalidatePath("/admin");
+  revalidatePath("/admin/listy/" + id);
+  redirect("/admin/listy/" + id + "?sukces=prezent");
+}

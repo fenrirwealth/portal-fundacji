@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { db } from "../../../../lib/db";
 import { wymagajRedakcji } from "../../../../lib/admin";
 import { WOJEWODZTWA } from "../../../../lib/slowniki";
-import { zapiszList } from "../../actions";
+import { aktualizujPrezent, zapiszList } from "../../actions";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Edycja listu", robots: { index: false, follow: false } };
@@ -30,11 +30,24 @@ export default async function EdycjaListu({ params, searchParams }) {
       placowka: { select: { nazwa: true } },
       edycja: { select: { nazwa: true } },
       weryfikacja: true,
+      rezerwacje: {
+        where: { status: { in: ["OCZEKUJE", "POTWIERDZONA", "DOSTARCZONA"] } },
+        orderBy: { utworzona: "desc" },
+        take: 1,
+        select: {
+          id: true,
+          status: true,
+          wygasa: true,
+          user: { select: { email: true } },
+          prezent: { select: { stan: true, dataPrzyjecia: true } },
+        },
+      },
     },
   });
   if (!list) notFound();
 
   const zablokowany = ["ZAREZERWOWANY", "OPLACONY", "PRZEKAZANY"].includes(list.status);
+  const rezerwacja = list.rezerwacje[0];
 
   return (
     <div className="wrap sekcja">
@@ -44,6 +57,31 @@ export default async function EdycjaListu({ params, searchParams }) {
       {p.blad && <p className="blad" role="alert">{p.blad}</p>}
       {p.sukces && <p className="info" role="status">Zmiany zapisano poprawnie.</p>}
       {zablokowany && <p className="blad">List jest w realizacji. Dane sa zablokowane przed przypadkowa zmiana.</p>}
+
+      {rezerwacja && (
+        <section className="realizacja">
+          <h2>Realizacja prezentu</h2>
+          <p>
+            Darczynca: <b>{rezerwacja.user.email}</b> · rezerwacja: {rezerwacja.status}
+            {rezerwacja.prezent ? ` · prezent: ${rezerwacja.prezent.stan}` : ""}
+          </p>
+          <form action={aktualizujPrezent} className="naglowek-rzad">
+            <input type="hidden" name="id" value={list.id} />
+            {rezerwacja.status === "POTWIERDZONA" && list.status === "ZAREZERWOWANY" && (
+              <button className="btn" name="operacja" value="przyjmij">Oznacz prezent jako przyjety</button>
+            )}
+            {rezerwacja.prezent?.stan === "PRZYJETY" && (
+              <button className="btn" name="operacja" value="sprawdz">Oznacz jako sprawdzony</button>
+            )}
+            {rezerwacja.prezent?.stan === "SPRAWDZONY" && (
+              <button className="btn" name="operacja" value="zapakuj">Oznacz jako zapakowany</button>
+            )}
+            {rezerwacja.prezent?.stan === "ZAPAKOWANY" && (
+              <button className="btn" name="operacja" value="wydaj">Oznacz jako przekazany placowce</button>
+            )}
+          </form>
+        </section>
+      )}
 
       <form action={zapiszList} className="formularz-admin">
         <input type="hidden" name="id" value={list.id} />

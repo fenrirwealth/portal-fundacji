@@ -23,6 +23,9 @@
 .btn.drugorzedny{background:transparent;color:var(--atrament);border:1px solid var(--linia2);margin-left:8px}
 .btn.niebezpieczny{background:#8b1e2d;margin-left:8px}
 .blad{padding:12px 14px;border-left:3px solid var(--czerwien);background:#fff3f3;margin-top:18px}
+.realizacja{margin:24px 0;padding:20px;background:var(--biel);border:1px solid var(--linia);border-radius:4px}
+.realizacja h2{font-size:20px;margin-bottom:8px}
+.realizacja .btn{width:auto}
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
 body{margin:0;background:var(--papier);color:var(--atrament);
