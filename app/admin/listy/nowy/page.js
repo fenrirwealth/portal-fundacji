@@ -3,7 +3,7 @@ import { db } from "../../../../lib/db";
 import { wymagajRedakcji } from "../../../../lib/admin";
 import { WOJEWODZTWA, KATEGORIE } from "../../../../lib/slowniki";
 import { utworzList } from "../../actions";
-import Podglad from "../../ui/Podglad";
+import FormularzNowy from "../../ui/FormularzNowy";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Nowy list", robots: { index: false, follow: false } };
@@ -44,56 +44,12 @@ export default async function NowyList({ searchParams }) {
           </Link>
         </div>
       ) : (
-        <form action={utworzList} className="formularz-admin">
-          <fieldset>
-            <legend>Placówka i edycja</legend>
-            <label>Placówka
-              <select name="udzialId" required defaultValue="">
-                <option value="" disabled>wybierz z listy zatwierdzonych</option>
-                {udzialy.map((u) => (
-                  <option key={u.id} value={u.id}>{u.placowka.nazwa} — {u.placowka.wojewodztwo}</option>
-                ))}
-              </select>
-            </label>
-            <p className="drobny cichy" style={{ margin: 0 }}>
-              Widoczne są wyłącznie placówki zatwierdzone w aktywnej edycji.
-            </p>
-          </fieldset>
-
-          <fieldset>
-            <legend>Dane publiczne</legend>
-            <p className="drobny cichy" style={{ margin: 0 }}>
-              Wszystko w tej sekcji zobaczy darczyńca. Nie wpisuj nazwiska dziecka,
-              nazwy placówki ani miejscowości.
-            </p>
-            <label>Imię dziecka<input name="imie" required maxLength={80} /></label>
-            <label>Wiek<input name="wiek" type="number" min="1" max="25" required /></label>
-            <label>Województwo
-              <select name="wojewodztwo" required defaultValue="">
-                <option value="" disabled>wybierz</option>
-                {WOJEWODZTWA.map((w) => <option key={w}>{w}</option>)}
-              </select>
-            </label>
-            <label>Kategoria
-              <select name="kategoria" required defaultValue="">
-                <option value="" disabled>wybierz</option>
-                {KATEGORIE.map((k) => <option key={k}>{k}</option>)}
-              </select>
-            </label>
-            <label>Marzenie<textarea name="marzenie" required maxLength={300} rows={3} /></label>
-            <label>Rozmiar (opcjonalnie)<input name="rozmiar" maxLength={80} /></label>
-            <label>Opis publiczny<textarea name="opis" maxLength={1200} rows={5} /></label>
-            <label>Adres przygotowanego zdjęcia listu (HTTPS)
-              <input name="zdjecieUrl" type="url" pattern="https://.*" />
-            </label>
-          </fieldset>
-
-          <div className="pasek-akcji-admin">
-            <Podglad pola={{}} />
-            <span style={{ flex: 1 }} />
-            <button className="btn" type="submit">Utwórz szkic</button>
-          </div>
-        </form>
+        <FormularzNowy
+          akcja={utworzList}
+          udzialy={udzialy.map((u) => ({ id: u.id, nazwa: u.placowka.nazwa, wojewodztwo: u.placowka.wojewodztwo }))}
+          wojewodztwa={WOJEWODZTWA}
+          kategorie={KATEGORIE}
+        />
       )}
     </div>
   );

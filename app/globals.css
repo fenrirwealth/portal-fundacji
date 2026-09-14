@@ -732,3 +732,13 @@ select.pole-kontrolka {
    kilkanaście pikseli i nie spełnia minimum celu dotykowego. */
 summary.btn { list-style: none; cursor: pointer; }
 summary.btn::-webkit-details-marker { display: none; }
+
+/* Pole panelu z błędem — obramowanie kontrolki i komunikat pod spodem,
+   zamiast jednego zbiorczego komunikatu na górze formularza. */
+.formularz-admin .pole-z-bledem input,
+.formularz-admin .pole-z-bledem select,
+.formularz-admin .pole-z-bledem textarea {
+  border-color: var(--glina-600);
+  background: var(--glina-100);
+}
+.formularz-admin .pole-blad { font-weight: 500; }

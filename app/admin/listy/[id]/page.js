@@ -5,8 +5,7 @@ import { wymagajRedakcji } from "../../../../lib/admin";
 import { WOJEWODZTWA, KATEGORIE } from "../../../../lib/slowniki";
 import { aktualizujPrezent, zapiszList } from "../../actions";
 import Status from "../../ui/Status";
-import ListaKontrolna from "../../ui/ListaKontrolna";
-import Podglad from "../../ui/Podglad";
+import FormularzListu from "../../ui/FormularzListu";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Edycja listu", robots: { index: false, follow: false } };
@@ -26,6 +25,7 @@ const KONTROLA = [
 
 const KOMUNIKATY = {
   utworzony: "Szkic listu został utworzony.",
+  przywrocony: "List przywrócony do szkiców. Nie jest opublikowany — wymaga ponownego sprawdzenia.",
   zapisany: "Zmiany zapisane jako szkic.",
   opublikowany: "List opublikowany — jest już widoczny dla darczyńców.",
   wycofany: "List wycofany. Zniknął ze strony publicznej.",
@@ -110,52 +110,30 @@ export default async function EdycjaListu({ params, searchParams }) {
         </section>
       )}
 
-      <form action={zapiszList} className="formularz-admin">
-        <input type="hidden" name="id" value={list.id} />
-        <input type="hidden" name="wersja" value={list.zaktualizowany.toISOString()} />
+      <FormularzListu
+        akcja={zapiszList}
+        list={{
+          id: list.id,
+          numer: list.numer,
+          wersja: list.zaktualizowany.toISOString(),
+          imie: list.imie,
+          wiek: list.wiek,
+          wojewodztwo: list.wojewodztwo,
+          kategoria: list.kategoria,
+          marzenie: list.marzenie,
+          rozmiar: list.rozmiar,
+          opis: list.opis,
+          zdjecieUrl: list.zdjecieUrl,
+          zgodaPrzyjeta: Boolean(list.zgodaData && !list.zgodaCofnieta),
+        }}
+        weryfikacja={list.weryfikacja}
+        kontrola={KONTROLA}
+        wojewodztwa={WOJEWODZTWA}
+        kategorie={KATEGORIE}
+        zablokowany={zablokowany}
+        wycofany={list.status === "WYCOFANY"}
+      />
 
-        <fieldset disabled={zablokowany}>
-          <legend>Dane publiczne</legend>
-          <p className="drobny cichy" style={{ margin: 0 }}>
-            Wszystko w tej sekcji zobaczy darczyńca. Nic poza nią nie opuszcza panelu.
-          </p>
-          <label>Imię dziecka<input name="imie" required maxLength={80} defaultValue={list.imie} /></label>
-          <label>Wiek<input name="wiek" type="number" min="1" max="25" required defaultValue={list.wiek} /></label>
-          <label>Województwo
-            <select name="wojewodztwo" required defaultValue={list.wojewodztwo}>
-              {WOJEWODZTWA.map((w) => <option key={w}>{w}</option>)}
-            </select>
-          </label>
-          <label>Kategoria
-            <select name="kategoria" required defaultValue={list.kategoria}>
-              {KATEGORIE.map((k) => <option key={k}>{k}</option>)}
-            </select>
-          </label>
-          <label>Marzenie<textarea name="marzenie" rows={3} required maxLength={300} defaultValue={list.marzenie} /></label>
-          <label>Rozmiar<input name="rozmiar" maxLength={80} defaultValue={list.rozmiar || ""} /></label>
-          <label>Opis publiczny<textarea name="opis" rows={5} maxLength={1200} defaultValue={list.opis || ""} /></label>
-          <label>Adres przygotowanego zdjęcia listu (HTTPS)
-            <input name="zdjecieUrl" type="url" pattern="https://.*" defaultValue={list.zdjecieUrl || ""} />
-          </label>
-        </fieldset>
-
-        <ListaKontrolna
-          pozycje={KONTROLA}
-          wartosci={list.weryfikacja}
-          zgodaPoczatkowa={Boolean(list.zgodaData && !list.zgodaCofnieta)}
-          zablokowany={zablokowany}
-        />
-
-        {!zablokowany && (
-          <div className="pasek-akcji-admin">
-            <Podglad pola={{ numer: list.numer }} />
-            <span style={{ flex: 1 }} />
-            <button className="btn drugorzedny" name="operacja" value="zapisz">Zapisz jako szkic</button>
-            <button className="btn" name="operacja" value="publikuj">Sprawdź i opublikuj</button>
-            <button className="btn niebezpieczny" name="operacja" value="wycofaj">Wycofaj list</button>
-          </div>
-        )}
-      </form>
     </div>
   );
 }

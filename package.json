@@ -13,7 +13,8 @@
     "lint": "eslint app lib auth.js",
     "typecheck": "tsc -p jsconfig.json --noEmit",
     "test:ui": "node testy/dostepnosc.mjs",
-    "zrzuty": "node testy/zrzuty.mjs"
+    "zrzuty": "node testy/zrzuty.mjs",
+    "test:admin": "node testy/scenariusze-admin.mjs"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.3",

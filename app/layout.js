@@ -1,5 +1,6 @@
 import "./globals.css";
-import { auth, signOut } from "../auth";
+import { auth } from "../auth";
+import { wyloguj } from "./akcje-sesji";
 import { ToastProvider } from "./ui/Toast";
 import Link from "next/link";
 
@@ -53,8 +54,10 @@ export default async function Layout({ children }) {
                     <Link href="/moje-rezerwacje">Moje rezerwacje</Link>
                     <span className="konto" title={sesja.user.email}>{sesja.user.email}</span>
                     {/* Wylogowanie jako formularz, nie odnośnik: zmienia stan,
-                        więc nie może wykonać się przez samo wejście na adres. */}
-                    <form action={async () => { "use server"; await signOut({ redirectTo: "/" }); }}>
+                        więc nie może wykonać się przez samo wejście na adres.
+                        Akcja jest nazwana i leży w osobnym module — łatwiej
+                        ją wtedy wskazać w testach i nie powiela się w układzie. */}
+                    <form action={wyloguj}>
                       <button type="submit" className="btn btn-tekstowy">Wyloguj</button>
                     </form>
                   </>

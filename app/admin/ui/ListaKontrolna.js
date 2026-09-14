@@ -10,7 +10,7 @@ import { useState } from "react";
 //
 // Licznik jest wylacznie podpowiedzia. Warunkiem publikacji pozostaje
 // sprawdzenie po stronie serwera w actions.js, ktorego nie dotykamy.
-export default function ListaKontrolna({ pozycje, wartosci, zgodaPoczatkowa, zablokowany }) {
+export default function ListaKontrolna({ pozycje, wartosci, zgodaPoczatkowa, zablokowany, bladZgody, bladListy }) {
   const [zaznaczone, setZaznaczone] = useState(
     () => Object.fromEntries(pozycje.map(([pole]) => [pole, Boolean(wartosci?.[pole])]))
   );
@@ -22,6 +22,16 @@ export default function ListaKontrolna({ pozycje, wartosci, zgodaPoczatkowa, zab
   return (
     <fieldset disabled={zablokowany} className="kontrolna">
       <legend>Zgoda i lista kontrolna</legend>
+
+      {/* Brak zgody i braki na liscie to dwie rozne przeszkody. Pokazujemy
+          obie naraz — inaczej redaktor poprawia jedna i dopiero wtedy
+          dowiaduje sie o drugiej. */}
+      {[bladZgody, bladListy].filter(Boolean).map((tresc) => (
+        <p className="pole-blad" role="alert" key={tresc} style={{ marginBottom: "var(--o-2)" }}>
+          <span aria-hidden="true">✕</span>
+          <span>{tresc}</span>
+        </p>
+      ))}
 
       <p className={"kontrolna-postep" + (komplet ? " kontrolna-gotowa" : "")} aria-live="polite">
         {komplet
