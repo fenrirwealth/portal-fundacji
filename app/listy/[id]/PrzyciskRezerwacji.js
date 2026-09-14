@@ -9,11 +9,14 @@ export default function PrzyciskRezerwacji({ listId, wolny, status }) {
   const router = useRouter();
 
   if (!wolny) {
+    const etykieta = {
+      ZAREZERWOWANY: "Ten list jest juz zarezerwowany",
+      OPLACONY: "Prezent zostal dostarczony",
+      PRZEKAZANY: "Prezent zostal przekazany",
+    }[status] || "Ten list jest niedostepny";
     return (
       <button className="btn stop" disabled>
-        {status === "ZAREZERWOWANY"
-          ? "Ten list jest juz zarezerwowany"
-          : "Prezent zostal przekazany"}
+        {etykieta}
       </button>
     );
   }
@@ -29,6 +32,10 @@ export default function PrzyciskRezerwacji({ listId, wolny, status }) {
       });
       const dane = await odp.json();
 
+      if (odp.status === 403 && dane.wymagaZgody) {
+        window.location.href = "/regulamin?wroc=/listy/" + listId;
+        return;
+      }
       if (odp.status === 401) {
         // Niezalogowany — po powrocie wracamy dokladnie na ten list,
         // zeby nie trzeba bylo szukac go od nowa.

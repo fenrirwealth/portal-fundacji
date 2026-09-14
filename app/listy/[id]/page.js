@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { listPubliczny } from "../../../lib/db";
+import { listPubliczny, aktywnaEdycja, formatujTermin } from "../../../lib/db";
 import { zwolnijWygasle } from "../../api/rezerwacja/route";
 import PrzyciskRezerwacji from "./PrzyciskRezerwacji";
 
@@ -12,6 +12,10 @@ export async function generateMetadata({ params }) {
   return {
     title: "List od " + list.imie + ", " + list.wiek + " lat",
     description: "Marzenie: " + list.marzenie + ". Sprawdz, jak przekazac prezent.",
+    // Pojedynczy list NIE trafia do wyszukiwarek. Strona zbiorcza wystarczy
+    // do promocji akcji, a indeksowanie kart dzieci zostawialoby je w cache
+    // Google jeszcze dlugo po zakonczeniu edycji i po ewentualnym wycofaniu.
+    robots: { index: false, follow: true },
   };
 }
 
@@ -19,8 +23,9 @@ export default async function Szczegol({ params }) {
   const p = await params;
   await zwolnijWygasle();
 
-  const list = await listPubliczny(p.id);
+  const [list, edycja] = await Promise.all([listPubliczny(p.id), aktywnaEdycja()]);
   if (!list) notFound();
+  const termin = formatujTermin(edycja?.terminDostarczenia);
 
   const wolny = list.status === "OPUBLIKOWANY";
 
@@ -31,15 +36,15 @@ export default async function Szczegol({ params }) {
       <div className="szczegol">
         <div className="skan">
           <div className="linie" />
-          {list.skanUrl ? (
+          {list.zdjecieUrl ? (
             <img
-              src={list.skanUrl}
+              src={list.zdjecieUrl}
               alt={"Odreczny list od " + list.imie + ", " + list.wiek + " lat"}
               style={{ position: "relative", borderRadius: 3 }}
             />
           ) : (
             <>
-              <div className="pismo">{list.trescOdczytana || list.marzenie}</div>
+              <div className="pismo">{list.opis || list.marzenie}</div>
               <div className="podpis">{list.imie}</div>
             </>
           )}
@@ -65,8 +70,9 @@ export default async function Szczegol({ params }) {
           <PrzyciskRezerwacji listId={list.id} wolny={wolny} status={list.status} />
 
           <div className="zasady">
-            Po rezerwacji masz 3 dni na potwierdzenie — przypomnimy mailem dzien
-            wczesniej. Prezent dostarczasz do siedziby fundacji do 7 grudnia,
+            Po rezerwacji masz 3 dni na potwierdzenie. Po tym czasie list
+            wraca do puli. Prezent dostarczasz do siedziby fundacji
+            {termin ? " do " + termin : " w terminie podanym w regulaminie akcji"},
             nieowiniety: sprawdzamy zawartosc i pakujemy sami.
           </div>
         </div>

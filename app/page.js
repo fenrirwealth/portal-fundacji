@@ -1,4 +1,4 @@
-import { licznik } from "../lib/db";
+import { licznik, aktywnaEdycja, formatujTermin } from "../lib/db";
 
 export const dynamic = "force-dynamic";
 
@@ -6,8 +6,11 @@ export default async function Start() {
   // Strona glowna portalu celowo pobiera z bazy tylko licznik.
   // Gdyby baza padla, nadal wyswietli sie tresc i przycisk.
   let stan = null;
+  let termin = null;
   try {
     stan = await licznik();
+    const edycja = await aktywnaEdycja();
+    termin = formatujTermin(edycja?.terminDostarczenia);
   } catch {}
 
   return (
@@ -35,7 +38,7 @@ export default async function Start() {
           <div className="list" style={{ padding: 22 }}>
             <h3>1. Zakladasz konto</h3>
             <p className="meta" style={{ marginTop: 8 }}>
-              Potrzebujemy kontaktu, zeby przypomniec o terminie.
+              Potrzebujemy adresu e-mail do logowania i kontaktu w sprawie akcji.
             </p>
           </div>
           <div className="list" style={{ padding: 22 }}>
@@ -47,7 +50,7 @@ export default async function Start() {
           <div className="list" style={{ padding: 22 }}>
             <h3>3. Kupujesz prezent</h3>
             <p className="meta" style={{ marginTop: 8 }}>
-              Dostarczasz go do siedziby fundacji do 7 grudnia, nieowiniety.
+              Dostarczasz go do siedziby fundacji{termin ? " do " + termin : ""}, nieowiniety.
             </p>
           </div>
           <div className="list" style={{ padding: 22 }}>

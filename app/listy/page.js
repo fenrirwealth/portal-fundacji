@@ -1,4 +1,4 @@
-import { listyPubliczne, licznik } from "../../lib/db";
+import { listyPubliczne, licznik, aktywnaEdycja, formatujTermin } from "../../lib/db";
 import { zwolnijWygasle } from "../api/rezerwacja/route";
 import LicznikNaZywo from "./LicznikNaZywo";
 
@@ -17,6 +17,7 @@ const KATEGORIE = [
   ["KSIAZKI", "Ksiazki"],
   ["NAUKA", "Nauka"],
   ["UBRANIA", "Ubrania"],
+  ["INNE", "Inne"],
 ];
 
 const WIEKI = [
@@ -31,6 +32,8 @@ function etykieta(status) {
     return <span className="st-wolny">Czeka na darczynce</span>;
   if (status === "ZAREZERWOWANY")
     return <span className="st-zajety">Zarezerwowany</span>;
+  if (status === "OPLACONY")
+    return <span className="st-gotowy">Prezent dostarczony</span>;
   return <span className="st-gotowy">Prezent przekazany</span>;
 }
 
@@ -55,7 +58,7 @@ export default async function Listy({ searchParams }) {
 
   const zakres = wiek ? wiek.split("-").map(Number) : [null, null];
 
-  const [listy, stan] = await Promise.all([
+  const [listy, stan, edycja] = await Promise.all([
     listyPubliczne({
       kategoria: kategoria || undefined,
       wiekOd: zakres[0] || undefined,
@@ -63,6 +66,7 @@ export default async function Listy({ searchParams }) {
       tylkoWolne: wolne,
     }),
     licznik(),
+    aktywnaEdycja(),
   ]);
 
   return (
@@ -70,11 +74,10 @@ export default async function Listy({ searchParams }) {
       <h1 className="tytul">Listy dzieci</h1>
       <p className="wstep">
         Kazdy list przeszedl weryfikacje placowki i fundacji. Publikujemy
-        wylacznie imie, wiek i wojewodztwo — bez nazwisk, nazw placowek
-        i miejscowosci.
+        imie, wiek, wojewodztwo, opis marzenia i kategorie prezentu, w razie potrzeby rozmiar ubrania lub buta, oraz zdjecie listu przygotowane przez Fundacje. Nie publikujemy nazwisk, nazwy placowki, miejscowosci, adresu ani wizerunku dziecka.
       </p>
 
-      <LicznikNaZywo poczatkowy={stan} />
+      <LicznikNaZywo poczatkowy={stan} termin={formatujTermin(edycja?.terminDostarczenia)} />
 
       <div className="filtry">
         {KATEGORIE.map(([wartosc, nazwa]) => (
@@ -116,7 +119,7 @@ export default async function Listy({ searchParams }) {
             <div className="kartka">
               <div className="linie" />
               <div className="pismo">
-                {(l.trescOdczytana || l.marzenie).slice(0, 96)}…
+                {(l.opis || l.marzenie).slice(0, 96)}…
               </div>
             </div>
             <div className="tresc">

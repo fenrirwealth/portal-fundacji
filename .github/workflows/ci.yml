@@ -1,0 +1,44 @@
+name: Kontrola jakosci
+
+on:
+  push:
+    branches: [main, feature/edycja-auth-v1]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  portal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U test -d test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://test:test@127.0.0.1:5432/test
+      AUTH_SECRET: testowy-sekret-wylacznie-dla-ci-minimum-32-znaki
+      AUTH_URL: http://localhost:3000
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+      - run: npx prisma migrate deploy
+      - run: npm run build
+      - run: npm audit --omit=dev --audit-level=high
+      - run: docker build --tag portal-fundacji:ci .

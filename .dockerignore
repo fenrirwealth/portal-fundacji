@@ -1,0 +1,13 @@
+.git
+.gitignore
+.github
+.next
+node_modules
+.env
+.env.*
+*.log
+*.zip
+INSTRUKCJA.md
+WDROZENIE.md
+SHA256SUMS*.txt
+tests

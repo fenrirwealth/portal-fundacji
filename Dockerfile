@@ -11,9 +11,12 @@ RUN apk add --no-cache openssl libc6-compat
 
 FROM base AS deps
 WORKDIR /app
-COPY package.json package-lock.json* ./
+# npm ci, nie npm install: instaluje dokladnie wersje z package-lock.json.
+# Bez tego kazdy build moglby wciagnac inna wersje zaleznosci, a przy
+# next-auth w becie to realne ryzyko, nie teoria.
+COPY package.json package-lock.json ./
 COPY prisma ./prisma
-RUN npm install
+RUN npm ci
 
 FROM base AS builder
 WORKDIR /app
@@ -31,21 +34,16 @@ ENV PORT=3000
 RUN addgroup --system --gid 1001 nodejs \
  && adduser --system --uid 1001 nextjs
 
-# Wynik trybu standalone: serwer z wbudowanymi zaleznosciami aplikacji.
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
-# Pelne node_modules sa tu potrzebne SWIADOMIE.
-#
-# Wczesniej kopiowalem tylko katalogi "prisma" i "@prisma", zeby obraz byl
-# mniejszy. Efekt: narzedzie wiersza polecen Prismy nie mialo swoich
-# zaleznosci, wywalalo sie przy starcie, a skrypt raportowal to jako
-# "baza nieosiagalna" — komunikat mylacy, bo baza dzialala.
-#
-# Obraz rosnie o kilkaset megabajtow. Przy 100 GB dysku to nie problem,
-# a start kontenera staje sie przewidywalny.
+# Pelne node_modules swiadomie: wczesniej kopiowalem tylko katalogi
+# "prisma" i "@prisma", przez co narzedzie Prismy nie mialo zaleznosci,
+# wywalalo sie przy starcie, a skrypt raportowal to jako "baza
+# nieosiagalna" — komunikat mylacy, bo baza dzialala.
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
+COPY --from=builder --chown=nextjs:nodejs /app/scripts ./scripts
 COPY --from=builder --chown=nextjs:nodejs /app/package.json ./package.json
 
 COPY docker-entrypoint.sh ./
@@ -53,6 +51,12 @@ RUN chmod +x docker-entrypoint.sh
 
 USER nextjs
 EXPOSE 3000
+
+# Coolify moze korzystac z tego samego punktu kontrolnego. Start-period
+# obejmuje oczekiwanie na PostgreSQL i wykonanie migracji przy pierwszym
+# uruchomieniu kontenera.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=90s --retries=3 \
+  CMD wget -q -O - http://127.0.0.1:3000/api/zdrowie >/dev/null || exit 1
 
 ENTRYPOINT ["./docker-entrypoint.sh"]
 CMD ["node", "server.js"]

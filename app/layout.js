@@ -1,4 +1,5 @@
 import "./globals.css";
+import { auth, signOut } from "../auth";
 
 export const metadata = {
   title: {
@@ -9,7 +10,8 @@ export const metadata = {
     "Pomagamy osobom w trudnej sytuacji mieszkaniowej i wspieramy dzieci z placowek opiekunczo-wychowawczych.",
 };
 
-export default function Layout({ children }) {
+export default async function Layout({ children }) {
+  const sesja = await auth();
   return (
     <html lang="pl">
       <head>
@@ -30,6 +32,35 @@ export default function Layout({ children }) {
             </a>
             <nav>
               <a href="/listy">Listy dzieci</a>
+              {sesja?.user ? (
+                <>
+                  <a href="/moje-rezerwacje">Moje rezerwacje</a>
+                  {["REDAKCJA", "ZARZAD"].includes(sesja.user.rola) && (
+                    <a href="/admin">Panel redakcji</a>
+                  )}
+                  {/* Wylogowanie musi byc widoczne, skoro prosimy o nie
+                      przy komputerach wspoldzielonych. Jako formularz,
+                      nie odnosnik — wylogowanie zmienia stan i nie moze
+                      sie wykonac przez samo wejscie na adres. */}
+                  <form
+                    action={async () => {
+                      "use server";
+                      await signOut({ redirectTo: "/" });
+                    }}
+                    style={{ display: "inline" }}
+                  >
+                    <button
+                      type="submit"
+                      style={{ background: "none", border: 0, padding: 0,
+                               font: "inherit", color: "var(--atrament2)", cursor: "pointer" }}
+                    >
+                      Wyloguj ({sesja.user.email})
+                    </button>
+                  </form>
+                </>
+              ) : (
+                <a href="/zaloguj">Zaloguj sie</a>
+              )}
               <a href="https://fundacjalepszydomlepszejutro.pl">Strona fundacji</a>
             </nav>
           </div>
@@ -44,8 +75,8 @@ export default function Layout({ children }) {
               KRS 0000971976 · NIP 5273002294 · REGON 522030190
             </p>
             <p className="nota">
-              Publikujemy wylacznie imie, wiek i wojewodztwo dziecka. Nie
-              udostepniamy nazwisk, nazw placowek ani wizerunku.
+              Przy kazdym liscie publikujemy imie, wiek, wojewodztwo, opis marzenia i kategorie prezentu, w razie potrzeby rozmiar ubrania lub buta, oraz zdjecie listu przygotowane przez Fundacje. Nie
+              publikujemy nazwisk, nazwy placowki, miejscowosci, adresu ani wizerunku dziecka.
             </p>
           </div>
         </footer>

@@ -94,8 +94,9 @@ export default function ZglosPlacowke() {
                   placeholder="Rzeczy zakazane regulaminem placowki, ograniczenia wiekowe, inne istotne informacje" />
 
         <p style={{ fontSize: 13, color: "var(--atrament2)" }}>
-          Danych dzieci nie podawaj w tym formularzu. Publikujemy wylacznie imie,
-          wiek i wojewodztwo, a kazdy list wymaga pisemnej zgody dyrektora.
+          Danych dzieci nie podawaj w tym formularzu. Przy liscie publikujemy
+          imie, wiek, wojewodztwo, opis marzenia i kategorie prezentu, w razie potrzeby rozmiar ubrania lub buta, oraz zdjecie listu przygotowane przez Fundacje. Nie publikujemy nazwisk, nazwy placowki, miejscowosci, adresu ani wizerunku dziecka. Kazdy list
+          wymaga pisemnej zgody dyrektora.
         </p>
 
         <button className="btn" type="submit" disabled={stan === "wysylam"} style={{ marginTop: 14 }}>
