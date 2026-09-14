@@ -1,26 +1,35 @@
+import Link from "next/link";
 import { db } from "../../lib/db";
 import { wymagajRedakcji } from "../../lib/admin";
 import { rozpatrzZgloszenie, utworzEdycje } from "./actions";
-import Link from "next/link";
+import Status, { ETYKIETY } from "./ui/Status";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Panel redakcji", robots: { index: false, follow: false } };
 
-const etykiety = {
-  SZKIC: "Szkic",
-  DO_POPRAWY: "Do poprawy",
-  OPUBLIKOWANY: "Opublikowany",
-  ZAREZERWOWANY: "Zarezerwowany",
-  OPLACONY: "Prezent przyjety",
-  PRZEKAZANY: "Przekazany",
-  WYCOFANY: "Wycofany",
-};
+// Filtry jako odnosniki z parametrami, nie stan w przegladarce: kazdy
+// widok ma wlasny adres, wiec da sie go wyslac wspolpracownikowi
+// i dziala przycisk wstecz.
+const STATUSY = ["SZKIC", "DO_POPRAWY", "OPUBLIKOWANY", "ZAREZERWOWANY", "OPLACONY", "PRZEKAZANY"];
+
+function link(params, zmiana) {
+  const p = new URLSearchParams(params);
+  for (const [k, v] of Object.entries(zmiana)) {
+    if (v) p.set(k, v); else p.delete(k);
+  }
+  const s = p.toString();
+  return s ? "/admin?" + s : "/admin";
+}
 
 export default async function Admin({ searchParams }) {
   const konto = await wymagajRedakcji();
   const p = (await searchParams) || {};
 
-  const [edycja, zgloszenia, listy] = await Promise.all([
+  const filtrStatus = STATUSY.includes(p.status) || p.status === "WYCOFANY" ? p.status : "";
+  const szukaj = String(p.szukaj || "").trim().slice(0, 60);
+  const archiwum = p.archiwum === "1";
+
+  const [edycja, zgloszenia, listy, liczby] = await Promise.all([
     db.edycjaAkcji.findFirst({ where: { aktywna: true } }),
     db.udzialPlacowki.findMany({
       where: { status: "ZGLOSZONA" },
@@ -29,60 +38,87 @@ export default async function Admin({ searchParams }) {
       take: 30,
     }),
     db.list.findMany({
-      include: { placowka: { select: { nazwa: true } } },
+      where: {
+        // Archiwum ukryte domyslnie. Wycofane listy zostaja w bazie —
+        // to zapis decyzji, nie smiec — ale nie zasmiecaja biezacej pracy.
+        ...(filtrStatus ? { status: filtrStatus } : archiwum ? {} : { status: { not: "WYCOFANY" } }),
+        ...(szukaj
+          ? {
+              OR: [
+                { imie: { contains: szukaj, mode: "insensitive" } },
+                { marzenie: { contains: szukaj, mode: "insensitive" } },
+                { placowka: { nazwa: { contains: szukaj, mode: "insensitive" } } },
+              ],
+            }
+          : {}),
+      },
+      include: { placowka: { select: { nazwa: true } }, weryfikacja: { select: { zakonczona: true } } },
       orderBy: { zaktualizowany: "desc" },
       take: 100,
     }),
+    db.list.groupBy({ by: ["status"], _count: true }),
   ]);
+
+  const licznik = Object.fromEntries(liczby.map((l) => [l.status, l._count]));
+  const wszystkich = liczby.reduce((s, l) => s + l._count, 0);
 
   return (
     <div className="wrap sekcja">
-      <h1 className="tytul">Panel redakcji</h1>
-      <p className="wstep">Zalogowano jako {konto.email} ({konto.rola}).</p>
+      <div className="naglowek-rzad">
+        <div>
+          <h1 className="tytul">Panel redakcji</h1>
+          <p className="wstep">Zalogowano jako {konto.email} ({konto.rola}).</p>
+        </div>
+        <Link className="btn" href="/admin/listy/nowy">Dodaj list</Link>
+      </div>
 
       {p.blad && <p className="blad" role="alert">{p.blad}</p>}
-      {p.sukces && <p className="info" role="status">Operacja zakonczona poprawnie.</p>}
+      {p.sukces && <p className="info" role="status">Operacja zakończona poprawnie.</p>}
 
-      <section style={{ marginTop: 32 }}>
-        <h2>Aktywna edycja</h2>
+      <section style={{ marginTop: "var(--o-7)" }}>
+        <h2 style={{ fontSize: "var(--t-xl)" }}>Aktywna edycja</h2>
         {edycja ? (
-          <p className="wstep">
+          <p className="wstep" style={{ marginTop: "var(--o-2)" }}>
             <b>{edycja.nazwa}</b> ({edycja.rok}), termin dostarczenia:{" "}
             {edycja.terminDostarczenia.toLocaleDateString("pl-PL")}.
           </p>
         ) : (
-          <p className="blad">Brak aktywnej edycji. Publiczne listy i formularz placowek sa wstrzymane.</p>
+          <p className="blad">Brak aktywnej edycji. Publiczne listy i formularz placówek są wstrzymane.</p>
         )}
 
-        <details style={{ marginTop: 16 }}>
-          <summary>Utworz nowa edycje</summary>
+        <details style={{ marginTop: "var(--o-4)" }}>
+          <summary className="btn drugorzedny" style={{ display: "inline-flex" }}>Utwórz nową edycję</summary>
           <form action={utworzEdycje} className="formularz-admin">
             <label>Rok<input name="rok" type="number" min="2022" max="2100" required /></label>
-            <label>Nazwa<input name="nazwa" required placeholder="Listy do Swietego Mikolaja 2026" /></label>
+            <label>Nazwa<input name="nazwa" required placeholder="Listy do Świętego Mikołaja 2026" /></label>
             <label>Start<input name="dataStart" type="date" required /></label>
             <label>Koniec<input name="dataKoniec" type="date" required /></label>
             <label>Termin dostarczenia<input name="terminDostarczenia" type="date" required /></label>
-            <label className="checkbox"><input name="aktywna" type="checkbox" /> Ustaw od razu jako aktywna</label>
-            <button className="btn" type="submit">Utworz edycje</button>
+            <label className="checkbox"><input name="aktywna" type="checkbox" /> <span>Ustaw od razu jako aktywną</span></label>
+            <button className="btn" type="submit">Utwórz edycję</button>
           </form>
         </details>
       </section>
 
-      <section style={{ marginTop: 40 }}>
-        <h2>Zgloszenia placowek ({zgloszenia.length})</h2>
-        {zgloszenia.length === 0 ? <p className="wstep">Brak nowych zgloszen.</p> : (
+      <section style={{ marginTop: "var(--o-8)" }}>
+        <h2 style={{ fontSize: "var(--t-xl)" }}>
+          Zgłoszenia placówek {zgloszenia.length > 0 && <span className="plakietka plakietka-gotowy">{zgloszenia.length} czeka</span>}
+        </h2>
+        {zgloszenia.length === 0 ? (
+          <p className="wstep" style={{ marginTop: "var(--o-3)" }}>Brak nowych zgłoszeń.</p>
+        ) : (
           <div className="tabela-przewijana"><table className="tabela">
-            <thead><tr><th>Placowka</th><th>Kontakt z wniosku</th><th>Dzieci</th><th>Decyzja</th></tr></thead>
+            <thead><tr><th>Placówka</th><th>Kontakt z wniosku</th><th>Dzieci</th><th>Decyzja</th></tr></thead>
             <tbody>{zgloszenia.map((z) => (
               <tr key={z.id}>
-                <td><b>{z.placowka.nazwa}</b><br />{z.placowka.wojewodztwo}, edycja {z.edycja.rok}</td>
-                <td>{z.zgloszonaOsoba || "—"}<br />{z.zgloszonyEmail || "—"}<br />{z.zgloszonyTelefon || "—"}</td>
+                <td><b>{z.placowka.nazwa}</b><br /><span className="drobny cichy">{z.placowka.wojewodztwo}, edycja {z.edycja.rok}</span></td>
+                <td className="maly">{z.zgloszonaOsoba || "—"}<br />{z.zgloszonyEmail || "—"}<br />{z.zgloszonyTelefon || "—"}</td>
                 <td>{z.deklarowaneDzieci ?? "—"}</td>
                 <td>
-                  <form action={rozpatrzZgloszenie}>
+                  <form action={rozpatrzZgloszenie} style={{ display: "flex", gap: "var(--o-2)" }}>
                     <input type="hidden" name="id" value={z.id} />
-                    <button className="btn" name="decyzja" value="zatwierdz">Zatwierdz</button>
-                    <button className="btn drugorzedny" name="decyzja" value="odrzuc">Odrzuc</button>
+                    <button className="btn" name="decyzja" value="zatwierdz">Zatwierdź</button>
+                    <button className="btn drugorzedny" name="decyzja" value="odrzuc">Odrzuć</button>
                   </form>
                 </td>
               </tr>
@@ -91,19 +127,60 @@ export default async function Admin({ searchParams }) {
         )}
       </section>
 
-      <section style={{ marginTop: 40 }}>
+      <section style={{ marginTop: "var(--o-8)" }}>
         <div className="naglowek-rzad">
-          <h2>Listy ({listy.length})</h2>
-          <Link className="btn" href="/admin/listy/nowy">Dodaj list</Link>
+          <h2 style={{ fontSize: "var(--t-xl)" }}>Listy</h2>
+          <span className="drobny cichy">
+            {wszystkich} w bazie · pokazujemy {listy.length}
+          </span>
         </div>
-        {listy.length === 0 ? <p className="wstep">Nie dodano jeszcze zadnych listow.</p> : (
+
+        <form className="szukajka-admin" role="search">
+          {filtrStatus && <input type="hidden" name="status" value={filtrStatus} />}
+          {archiwum && <input type="hidden" name="archiwum" value="1" />}
+          <label htmlFor="szukaj" className="tylko-dla-czytnika">Szukaj listów</label>
+          <input id="szukaj" name="szukaj" type="search" className="pole-kontrolka" defaultValue={szukaj}
+                 placeholder="Imię dziecka, marzenie albo nazwa placówki" maxLength={60} />
+          <button className="btn drugorzedny" type="submit">Szukaj</button>
+          {(szukaj || filtrStatus || archiwum) && (
+            <Link className="btn btn-tekstowy" href="/admin">Wyczyść</Link>
+          )}
+        </form>
+
+        <div className="filtry" style={{ marginTop: "var(--o-4)" }}>
+          <div className="filtry-grupa">
+            <Link className="filtr" aria-pressed={!filtrStatus && !archiwum} href={link(p, { status: "", archiwum: "" })}>
+              Bieżące
+            </Link>
+            {STATUSY.map((s) => (
+              <Link key={s} className="filtr" aria-pressed={filtrStatus === s} href={link(p, { status: s, archiwum: "" })}>
+                {ETYKIETY[s]}{licznik[s] ? ` (${licznik[s]})` : ""}
+              </Link>
+            ))}
+          </div>
+          <div className="filtry-grupa">
+            <Link className="filtr" aria-pressed={filtrStatus === "WYCOFANY"} href={link(p, { status: "WYCOFANY", archiwum: "" })}>
+              Archiwum{licznik.WYCOFANY ? ` (${licznik.WYCOFANY})` : ""}
+            </Link>
+          </div>
+        </div>
+
+        {listy.length === 0 ? (
+          <div className="pusto" style={{ marginTop: "var(--o-5)" }}>
+            <h3>{szukaj ? "Nic nie pasuje do wyszukiwania" : "Brak listów w tym widoku"}</h3>
+            <p>{szukaj ? "Spróbuj innego słowa albo wyczyść filtry." : "Dodaj pierwszy list albo zmień filtr statusu."}</p>
+          </div>
+        ) : (
           <div className="tabela-przewijana"><table className="tabela">
-            <thead><tr><th>Nr</th><th>Dziecko</th><th>Placowka</th><th>Status</th><th /></tr></thead>
+            <thead><tr><th>Nr</th><th>Dziecko</th><th>Placówka</th><th>Status</th><th>Weryfikacja</th><th><span className="tylko-dla-czytnika">Akcje</span></th></tr></thead>
             <tbody>{listy.map((l) => (
               <tr key={l.id}>
-                <td>{l.numer}</td><td>{l.imie}, {l.wiek} lat</td><td>{l.placowka.nazwa}</td>
-                <td>{etykiety[l.status] || l.status}</td>
-                <td><a href={"/admin/listy/" + l.id}>Otworz</a></td>
+                <td className="cichy">{l.numer}</td>
+                <td><b>{l.imie}</b>, {l.wiek} lat<br /><span className="drobny cichy">{l.marzenie.slice(0, 48)}{l.marzenie.length > 48 ? "…" : ""}</span></td>
+                <td className="maly">{l.placowka.nazwa}</td>
+                <td><Status status={l.status} /></td>
+                <td className="drobny">{l.weryfikacja?.zakonczona ? "zakończona" : <span className="cichy">w toku</span>}</td>
+                <td><Link className="btn drugorzedny" href={"/admin/listy/" + l.id}>Otwórz</Link></td>
               </tr>
             ))}</tbody>
           </table></div>

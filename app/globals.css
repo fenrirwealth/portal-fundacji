@@ -670,3 +670,65 @@ select.pole-kontrolka {
   border: 1px solid color-mix(in srgb, var(--szalwia-600) 25%, transparent);
   border-radius: var(--r-md); font-size: var(--t-sm);
 }
+
+/* ============================================================
+   PANEL — WYSZUKIWANIE, AKCJE, LISTA KONTROLNA, PODGLĄD
+   ============================================================ */
+
+.szukajka-admin {
+  display: flex; gap: var(--o-2); align-items: center; flex-wrap: wrap;
+  margin-top: var(--o-5); max-width: 640px;
+}
+.szukajka-admin .pole-kontrolka { flex: 1; min-width: 240px; }
+
+/* Pasek akcji przy dole formularza. Na telefonie przykleja się do dołu —
+   formularz listu jest długi, a przyciski publikacji muszą być
+   w zasięgu bez przewijania na sam koniec. */
+.pasek-akcji-admin {
+  display: flex; gap: var(--o-2); align-items: center; flex-wrap: wrap;
+  padding-top: var(--o-5); border-top: 1px solid var(--linia);
+}
+.pasek-akcji-admin .btn { margin-left: 0; }
+
+@media (max-width: 720px) {
+  .pasek-akcji-admin {
+    position: sticky; bottom: 0;
+    background: color-mix(in srgb, var(--tlo) 94%, transparent);
+    backdrop-filter: blur(10px);
+    margin-inline: calc(var(--o-5) * -1);
+    padding: var(--o-3) var(--o-5) calc(var(--o-3) + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--linia);
+  }
+  .pasek-akcji-admin span { display: none; }
+  .pasek-akcji-admin .btn { flex: 1 1 auto; }
+}
+
+.kontrolna-postep {
+  margin: 0 0 var(--o-2);
+  padding: var(--o-3) var(--o-4);
+  border-radius: var(--r-md);
+  background: var(--papier-200); color: var(--tekst-cichy);
+  font-size: var(--t-sm); font-weight: 500;
+}
+.kontrolna-gotowa {
+  background: var(--szalwia-100); color: var(--szalwia-600);
+}
+
+.podglad-tlo {
+  position: fixed; inset: 0; z-index: 70;
+  display: grid; place-items: start center;
+  padding: var(--o-5);
+  background: color-mix(in srgb, var(--atrament-900) 55%, transparent);
+  overflow-y: auto;
+}
+.podglad-okno {
+  background: var(--tlo); border-radius: var(--r-lg);
+  padding: var(--o-6); max-width: 720px; width: 100%;
+  margin-block: var(--o-5);
+  box-shadow: 0 24px 64px color-mix(in srgb, var(--atrament-900) 35%, transparent);
+}
+
+/* Podsumowanie <details> jako przycisk — domyślny trójkącik ma
+   kilkanaście pikseli i nie spełnia minimum celu dotykowego. */
+summary.btn { list-style: none; cursor: pointer; }
+summary.btn::-webkit-details-marker { display: none; }
