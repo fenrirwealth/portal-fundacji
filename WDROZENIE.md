@@ -31,6 +31,28 @@ openssl rand -base64 48
 5. Kopia zapasowa PostgreSQL jest skonfigurowana i przetestowana przez
    odtworzenie do osobnej bazy.
 
+Po ustawieniu DNS i certyfikatow pierwsze cztery kontrole oraz zamkniecie
+publicznego portu PostgreSQL mozna sprawdzic automatycznie:
+
+```sh
+npm run smoke:production
+```
+
+Polecenie domyslnie sprawdza domeny produkcyjne. Dla srodowiska testowego
+ustaw `PORTAL_URL` i `STRONA_URL` na jego publiczne adresy HTTPS.
+
+## Kopie zapasowe PostgreSQL
+
+1. Wlacz codzienny backup bazy do magazynu poza VPS-em (S3 lub zgodny).
+2. Ustaw retencje co najmniej: 7 kopii dziennych i 4 tygodniowe.
+3. Zaszyfruj magazyn, ogranicz dane dostepowe tylko do katalogu backupow.
+4. Raz w miesiacu odtworz najnowsza kopie do osobnej, prywatnej bazy.
+5. Po odtworzeniu uruchom migracje i sprawdz liczbe uzytkownikow, listow,
+   rezerwacji oraz prezentow; testowa baze nastepnie usun.
+
+Kopia znajdujaca sie tylko na tym samym VPS-ie nie chroni przed awaria lub
+utrata calego serwera. Hasel i kluczy do magazynu nie zapisuj w repozytorium.
+
 ## Pierwsze konto zarzadu
 
 Najpierw zaloguj sie do portalu docelowym adresem e-mail. Nastepnie w
