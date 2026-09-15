@@ -33,12 +33,39 @@ export const viewport = {
   initialScale: 1,
 };
 
+const daneFundacji = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "Fundacja Lepszy Dom Lepsze Jutro",
+  url: "https://fundacjalepszydomlepszejutro.pl",
+  email: "kontakt@fundacjalepszydomlepszejutro.pl",
+  telephone: "+48 570 747 779",
+  identifier: [
+    { "@type": "PropertyValue", propertyID: "KRS", value: "0000971976" },
+    { "@type": "PropertyValue", propertyID: "NIP", value: "5273002294" },
+  ],
+  address: {
+    "@type": "PostalAddress",
+    streetAddress: "Złota 75A/7",
+    postalCode: "00-819",
+    addressLocality: "Warszawa",
+    addressCountry: "PL",
+  },
+  sameAs: ["https://www.facebook.com/LEPSZYDOMLEPSZEJUTRO"],
+};
+
 export default async function Layout({ children }) {
   const sesja = await auth();
 
   return (
     <html lang="pl">
       <body>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(daneFundacji).replace(/</g, "\\u003c"),
+          }}
+        />
         <PlynnyScroll />
         <ToastProvider>
           <a className="skip" href="#tresc">Przejdź do treści</a>
@@ -54,6 +81,7 @@ export default async function Layout({ children }) {
                 <Link href="/listy">Listy dzieci</Link>
                 <Link href="/#jak-to-dziala">Jak to działa</Link>
                 <Link href="/o-akcji">O akcji</Link>
+                <Link href="/fundusz-ostatniej-gwiazdki">Fundusz</Link>
                 {sesja?.user ? (
                   <>
                     <Link href="/moje-rezerwacje">Moje listy</Link>
@@ -86,6 +114,7 @@ export default async function Layout({ children }) {
                     Złota 75A/7, 00-819 Warszawa<br />
                     KRS 0000971976 · NIP 5273002294 · REGON 522030190
                   </p>
+                  <p className="drobny" style={{ marginTop: "var(--o-3)" }}><Link href="/fundusz-ostatniej-gwiazdki">Fundusz Ostatniej Gwiazdki</Link> · <Link href="/regulamin">Regulamin</Link></p>
                 </div>
                   <p className="drobny cichy czytanie">
                   Przy każdym liście publikujemy imię, wiek, województwo, opis marzenia

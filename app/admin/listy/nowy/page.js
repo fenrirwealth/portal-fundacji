@@ -12,11 +12,19 @@ export default async function NowyList({ searchParams }) {
   await wymagajRedakcji("/admin/listy/nowy");
   const p = (await searchParams) || {};
 
-  const udzialy = await db.udzialPlacowki.findMany({
-    where: { status: "POTWIERDZILA", edycja: { aktywna: true } },
-    include: { placowka: { select: { nazwa: true, wojewodztwo: true } } },
-    orderBy: { placowka: { nazwa: "asc" } },
-  });
+  const [udzialy, skany] = await Promise.all([
+    db.udzialPlacowki.findMany({
+      where: { status: "POTWIERDZILA", edycja: { aktywna: true } },
+      include: { placowka: { select: { nazwa: true, wojewodztwo: true } } },
+      orderBy: { placowka: { nazwa: "asc" } },
+    }),
+    db.skanListu.findMany({
+      where: { status: { in: ["NOWY", "W_MODERACJI"] }, list: null, udzial: { edycja: { aktywna: true } } },
+      include: { udzial: { include: { placowka: { select: { nazwa: true } } } } },
+      orderBy: { utworzony: "asc" },
+    }),
+  ]);
+  const wybranySkan = skany.find((s) => s.id === p.skan);
 
   return (
     <div className="wrap sekcja">
@@ -47,6 +55,9 @@ export default async function NowyList({ searchParams }) {
         <FormularzNowy
           akcja={utworzList}
           udzialy={udzialy.map((u) => ({ id: u.id, nazwa: u.placowka.nazwa, wojewodztwo: u.placowka.wojewodztwo }))}
+          skany={skany.map((s) => ({ id: s.id, udzialId: s.udzialId, nazwa: s.udzial.placowka.nazwa, data: s.utworzony.toLocaleDateString("pl-PL") }))}
+          domyslnySkanId={wybranySkan?.id || ""}
+          domyslnyUdzialId={wybranySkan?.udzialId || ""}
           wojewodztwa={WOJEWODZTWA}
           kategorie={KATEGORIE}
         />

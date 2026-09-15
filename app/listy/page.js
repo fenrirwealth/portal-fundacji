@@ -13,6 +13,7 @@ export const metadata = {
   title: "Listy dzieci",
   description:
     "Dzieci z placówek opiekuńczo-wychowawczych napisały, o czym marzą. Wybierz list i sprawdź, jak przekazać prezent.",
+  alternates: { canonical: "/listy" },
 };
 
 const KATEGORIE = [

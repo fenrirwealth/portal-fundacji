@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="tlo" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#071126"/>
+      <stop offset="1" stop-color="#14264A"/>
+    </linearGradient>
+    <linearGradient id="zloto" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#F2D18B"/>
+      <stop offset="1" stop-color="#BF954B"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="15" fill="url(#tlo)"/>
+  <path d="M13 21.5h38v25H13z" fill="#F3E5CB" stroke="url(#zloto)" stroke-width="2"/>
+  <path d="m14 23 18 14 18-14" fill="#DFCDAE" stroke="#A87D35" stroke-width="2" stroke-linejoin="round"/>
+  <circle cx="32" cy="37" r="6" fill="#7B1830" stroke="#D5AE62" stroke-width="1.5"/>
+  <path d="m32 33 1.15 2.35 2.6.38-1.88 1.83.44 2.59L32 38.93l-2.32 1.22.44-2.59-1.88-1.83 2.6-.38z" fill="#FFF9F0"/>
+</svg>

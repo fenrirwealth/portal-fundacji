@@ -1,6 +1,7 @@
 import { db } from "../../../../lib/db";
 import { poprawnyTokenCron } from "../../../../lib/cron.mjs";
-import { nadawca, utworzTransportSmtp } from "../../../../lib/poczta";
+import { kolejkujEmail } from "../../../../lib/kolejka-email";
+import { usunPrywatnySkan } from "../../../../lib/skany";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -14,7 +15,8 @@ export async function POST(request) {
 
   const teraz = new Date();
   const zaDobe = new Date(teraz.getTime() + 24 * 60 * 60 * 1000);
-  const kandydaci = await db.rezerwacja.findMany({
+  const zaDwieDoby = new Date(teraz.getTime() + 2 * 24 * 60 * 60 * 1000);
+  const [kandydaci, dostarczenia] = await Promise.all([db.rezerwacja.findMany({
     where: {
       status: "OCZEKUJE",
       przypomnienieWyslane: null,
@@ -28,17 +30,15 @@ export async function POST(request) {
     },
     orderBy: { wygasa: "asc" },
     take: 100,
-  });
+  }), db.rezerwacja.findMany({
+    where: {
+      status: "POTWIERDZONA", przypomnienieDostarczeniaWyslane: null,
+      list: { edycja: { aktywna: true, terminDostarczenia: { gt: teraz, lte: zaDwieDoby } } },
+    },
+    select: { id: true }, orderBy: { utworzona: "asc" }, take: 300,
+  })]);
 
-  let transport;
-  try {
-    transport = utworzTransportSmtp();
-  } catch {
-    return Response.json({ blad: "Brak konfiguracji SMTP." }, { status: 503 });
-  }
-
-  const adresPortalu = String(process.env.AUTH_URL || "").replace(/\/$/, "");
-  let wyslane = 0;
+  let zakolejkowane = 0;
   let bledy = 0;
 
   for (const rezerwacja of kandydaci) {
@@ -58,17 +58,8 @@ export async function POST(request) {
     if (zajeta.count !== 1) continue;
 
     try {
-      await transport.sendMail({
-        from: nadawca(),
-        to: rezerwacja.user.email,
-        subject: `Potwierdz rezerwacje listu nr ${rezerwacja.list.numer}`,
-        text: [
-          `Rezerwacja listu od ${rezerwacja.list.imie} wygasa ${rezerwacja.wygasa.toLocaleString("pl-PL", { timeZone: "Europe/Warsaw" })}.`,
-          "Potwierdz ja przed uplywem terminu, inaczej list wroci do puli.",
-          adresPortalu ? `${adresPortalu}/moje-rezerwacje` : "Zaloguj sie do portalu i otworz Moje rezerwacje.",
-        ].join("\n\n"),
-      });
-      wyslane += 1;
+      if (!(await kolejkujEmail("PRZYPOMNIENIE", { rezerwacjaId: rezerwacja.id }, `przypomnienie-${rezerwacja.id}`))) throw new Error("KOLEJKA_NIEDOSTEPNA");
+      zakolejkowane += 1;
     } catch {
       bledy += 1;
       await db.rezerwacja.updateMany({
@@ -78,8 +69,44 @@ export async function POST(request) {
     }
   }
 
+  for (const rezerwacja of dostarczenia) {
+    const znacznik = new Date();
+    const zajeta = await db.rezerwacja.updateMany({
+      where: { id: rezerwacja.id, status: "POTWIERDZONA", przypomnienieDostarczeniaWyslane: null },
+      data: { przypomnienieDostarczeniaWyslane: znacznik },
+    });
+    if (zajeta.count !== 1) continue;
+    try {
+      if (!(await kolejkujEmail("PRZYPOMNIENIE_DOSTARCZENIA", { rezerwacjaId: rezerwacja.id }, `dostarczenie-${rezerwacja.id}`))) throw new Error("KOLEJKA_NIEDOSTEPNA");
+      zakolejkowane += 1;
+    } catch {
+      bledy += 1;
+      await db.rezerwacja.updateMany({
+        where: { id: rezerwacja.id, przypomnienieDostarczeniaWyslane: znacznik },
+        data: { przypomnienieDostarczeniaWyslane: null },
+      });
+    }
+  }
+
+  // Minimalizacja danych: odrzucone, niepowiązane skany usuwamy po 90 dniach.
+  // Każdy rekord wskazuje wyłącznie losową nazwę w prywatnym katalogu.
+  const granicaRetencji = new Date(teraz.getTime() - 90 * 24 * 60 * 60 * 1000);
+  const stareSkany = await db.skanListu.findMany({
+    where: { status: "ODRZUCONY", list: null, zaktualizowany: { lt: granicaRetencji } },
+    select: { id: true, plik: true }, take: 100,
+  });
+  for (const skan of stareSkany) {
+    const usuniety = await db.skanListu.deleteMany({ where: { id: skan.id, status: "ODRZUCONY", list: null } });
+    if (usuniety.count === 1) await usunPrywatnySkan(skan.plik);
+  }
+
+  await db.udzialPlacowki.updateMany({
+    where: { tokenPrzesylaniaWygasa: { lt: teraz }, tokenPrzesylaniaHash: { not: null } },
+    data: { tokenPrzesylaniaHash: null, tokenPrzesylaniaWygasa: null },
+  });
+
   return Response.json(
-    { sprawdzone: kandydaci.length, wyslane, bledy },
+    { sprawdzone: kandydaci.length + dostarczenia.length, zakolejkowane, bledy, usunieteSkany: stareSkany.length },
     { status: bledy > 0 ? 502 : 200 }
   );
 }

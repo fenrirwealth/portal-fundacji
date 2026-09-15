@@ -104,6 +104,13 @@ export default async function Start() {
       </section>
 
       <section className="wrap sekcja">
+        <Wejscie className="fundusz-zaproszenie">
+          <div><p className="nadtytul nadtytul-ciemny"><span /> Fundusz Ostatniej Gwiazdki</p><h2>Pomóż nam domknąć ostatnie marzenia.</h2><p>Wpłaty wykorzystujemy, gdy list nie znajdzie Mikołaja albo dostarczony prezent wymaga uzupełnienia.</p></div>
+          <Link className="btn btn-cichy btn-duzy" href="/fundusz-ostatniej-gwiazdki">Poznaj fundusz</Link>
+        </Wejscie>
+      </section>
+
+      <section className="wrap sekcja">
         <Wejscie className="pasek-finalowy">
           <div>
             <p className="nadtytul"><span /> Jeden gest uruchamia kolejny</p>
@@ -112,7 +119,9 @@ export default async function Start() {
           </div>
           <div className="pasek-finalowy-akcje">
             <Link className="btn btn-magiczny btn-duzy" href="/listy">Zobacz listy</Link>
-            <Link className="btn btn-szklany btn-duzy" href="/zglos-placowke">Zgłoś placówkę</Link>
+            {edycja && (
+              <Link className="btn btn-szklany btn-duzy" href="/zglos-placowke">Zgłoś placówkę</Link>
+            )}
           </div>
         </Wejscie>
       </section>

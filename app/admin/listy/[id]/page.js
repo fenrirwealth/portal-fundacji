@@ -1,9 +1,10 @@
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { db } from "../../../../lib/db";
 import { wymagajRedakcji } from "../../../../lib/admin";
 import { WOJEWODZTWA, KATEGORIE } from "../../../../lib/slowniki";
-import { aktualizujPrezent, zapiszList } from "../../actions";
+import { aktualizujPrezent, zapiszList, zwolnijRezerwacjeListu } from "../../actions";
 import Status from "../../ui/Status";
 import FormularzListu from "../../ui/FormularzListu";
 
@@ -30,6 +31,7 @@ const KOMUNIKATY = {
   opublikowany: "List opublikowany — jest już widoczny dla darczyńców.",
   wycofany: "List wycofany. Zniknął ze strony publicznej.",
   prezent: "Stan prezentu zaktualizowany.",
+  zwolniony: "Rezerwacja została ręcznie zwolniona, a list wrócił do puli.",
 };
 
 export default async function EdycjaListu({ params, searchParams }) {
@@ -43,6 +45,7 @@ export default async function EdycjaListu({ params, searchParams }) {
       placowka: { select: { nazwa: true } },
       edycja: { select: { nazwa: true } },
       weryfikacja: true,
+      skan: { select: { id: true, status: true, utworzony: true } },
       rezerwacje: {
         where: { status: { in: ["OCZEKUJE", "POTWIERDZONA", "DOSTARCZONA"] } },
         orderBy: { utworzona: "desc" },
@@ -107,6 +110,26 @@ export default async function EdycjaListu({ params, searchParams }) {
               <button className="btn" name="operacja" value="wydaj">Oznacz jako przekazany placówce</button>
             )}
           </form>
+          {list.status === "ZAREZERWOWANY" && (
+            <details style={{ marginTop: "var(--o-4)" }}>
+              <summary className="btn drugorzedny">Opcje awaryjne</summary>
+              <form action={zwolnijRezerwacjeListu} style={{ marginTop: "var(--o-3)" }}>
+                <input type="hidden" name="id" value={list.id} />
+                <p className="drobny cichy">Użyj tylko po kontakcie z darczyńcą. List natychmiast wróci do publicznej puli.</p>
+                <button className="btn niebezpieczny" type="submit" style={{ marginTop: "var(--o-2)" }}>Potwierdzam — zwolnij rezerwację</button>
+              </form>
+            </details>
+          )}
+        </section>
+      )}
+
+      {list.skan && (
+        <section className="realizacja">
+          <div className="naglowek-rzad">
+            <div><h2>Prywatny skan źródłowy</h2><p className="drobny cichy">Status: {list.skan.status} · dostęp tylko dla redakcji</p></div>
+            <a className="btn drugorzedny" href={`/api/admin/skany/${list.skan.id}`} target="_blank" rel="noreferrer">Otwórz w pełnym rozmiarze</a>
+          </div>
+          <Image className="podglad-skanu" src={`/api/admin/skany/${list.skan.id}`} alt="Prywatny skan listu do weryfikacji" width={1200} height={1600} unoptimized />
         </section>
       )}
 

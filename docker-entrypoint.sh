@@ -1,6 +1,13 @@
 #!/bin/sh
 set -e
 
+KATALOG_SKANOW="${SKANY_PRIVATE_DIR:-/data/skany}"
+mkdir -p "$KATALOG_SKANOW"
+if [ ! -w "$KATALOG_SKANOW" ]; then
+  echo "[start] Brak prawa zapisu do prywatnego katalogu skanów: $KATALOG_SKANOW"
+  exit 1
+fi
+
 echo "[start] Wykonuje migracje bazy danych..."
 
 # Bledow NIE ukrywamy i NIE obchodzimy.

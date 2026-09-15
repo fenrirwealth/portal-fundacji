@@ -49,10 +49,10 @@ export async function POST(request) {
   const dzieci = surowa ? Math.min(parseInt(surowa, 10), 10000) : null;
 
   if (nazwa.length < 3) {
-    return Response.json({ blad: "Podaj nazwe placowki (min. 3 znaki)." }, { status: 400 });
+    return Response.json({ blad: "Podaj nazwę placówki (min. 3 znaki)." }, { status: 400 });
   }
   if (!WOJEWODZTWA.includes(wojewodztwo)) {
-    return Response.json({ blad: "Wybierz wojewodztwo z listy." }, { status: 400 });
+    return Response.json({ blad: "Wybierz województwo z listy." }, { status: 400 });
   }
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
     return Response.json({ blad: "Podaj poprawny adres e-mail." }, { status: 400 });
@@ -64,7 +64,7 @@ export async function POST(request) {
   });
   if (!edycja) {
     return Response.json(
-      { blad: "Nie prowadzimy teraz naboru. Zajrzyj pozniej albo zadzwon do nas." },
+      { blad: "Nie prowadzimy teraz naboru. Zajrzyj później albo zadzwoń do nas." },
       { status: 409 }
     );
   }

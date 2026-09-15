@@ -11,7 +11,7 @@ import { KLUCZ_LICZNIKA, usunCache } from "../../../../lib/cache";
 export async function PATCH(request, { params }) {
   const sesja = await auth();
   if (!sesja?.user?.id) {
-    return Response.json({ blad: "Zaloguj sie." }, { status: 401 });
+    return Response.json({ blad: "Zaloguj się." }, { status: 401 });
   }
 
   const { id } = await params;
@@ -49,7 +49,7 @@ export async function PATCH(request, { params }) {
 
     if (wynik.count === 0) {
       return Response.json(
-        { blad: "Tej rezerwacji nie mozna juz potwierdzic — termin minal albo zostala zmieniona." },
+        { blad: "Tej rezerwacji nie można już potwierdzić — termin minął albo została zmieniona." },
         { status: 409 }
       );
     }
@@ -70,7 +70,7 @@ export async function PATCH(request, { params }) {
 
     if (wynik.count === 0) {
       return Response.json(
-        { blad: "Tej rezerwacji nie mozna juz anulowac." },
+        { blad: "Tej rezerwacji nie można już anulować." },
         { status: 409 }
       );
     }

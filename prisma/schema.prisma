@@ -212,6 +212,13 @@ model UdzialPlacowki {
   zgloszonyTelefon String?
   zgloszonyEmail   String?
 
+  // Jednorazowy, długi token trafia wyłącznie do placówki. W bazie
+  // przechowujemy jego SHA-256, więc wyciek bazy nie ujawnia linków uploadu.
+  tokenPrzesylaniaHash   String?   @unique
+  tokenPrzesylaniaWygasa DateTime?
+
+  skany SkanListu[]
+
   utworzony      DateTime @default(now())
   zaktualizowany DateTime @updatedAt
 
@@ -273,6 +280,11 @@ model List {
   // bez zadnej korzysci. Czego nie ma, tego nie da sie wyciec.
   zdjecieUrl String?
 
+  // Prywatny, oczyszczony skan może zostać przypięty do jednego szkicu.
+  // Nigdy nie jest serwowany przez katalog publiczny Next.js.
+  skanId String?    @unique
+  skan   SkanListu? @relation(fields: [skanId], references: [id])
+
   // --- dane wewnetrzne ---
   placowkaId String
   placowka   Placowka @relation(fields: [placowkaId], references: [id])
@@ -296,6 +308,37 @@ model List {
   @@index([status])
   @@index([edycjaId, status])
   @@index([kategoria, wiek])
+}
+
+enum StatusSkanu {
+  NOWY
+  W_MODERACJI
+  ZATWIERDZONY
+  ODRZUCONY
+}
+
+model SkanListu {
+  id       String         @id @default(cuid())
+  udzialId String
+  udzial   UdzialPlacowki @relation(fields: [udzialId], references: [id], onDelete: Cascade)
+
+  // Tylko losowa nazwa pliku, bez ścieżki podanej przez użytkownika.
+  plik            String      @unique
+  oryginalnaNazwa String
+  mimeType        String
+  rozmiar         Int
+  sumaKontrolna   String
+  status          StatusSkanu @default(NOWY)
+  notatkaPlacowki String?
+  uwagiModeracji  String?
+
+  list List?
+
+  utworzony      DateTime @default(now())
+  zaktualizowany DateTime @updatedAt
+
+  @@index([status, utworzony])
+  @@index([udzialId])
 }
 
 model Weryfikacja {
@@ -345,11 +388,12 @@ model Rezerwacja {
   userId String
   user   User   @relation(fields: [userId], references: [id])
 
-  status               StatusRezerwacji @default(OCZEKUJE)
-  wygasa               DateTime
-  potwierdzona         DateTime?
-  anulowana            DateTime?
-  przypomnienieWyslane DateTime?
+  status                           StatusRezerwacji @default(OCZEKUJE)
+  wygasa                           DateTime
+  potwierdzona                     DateTime?
+  anulowana                        DateTime?
+  przypomnienieWyslane             DateTime?
+  przypomnienieDostarczeniaWyslane DateTime?
 
   prezent   Prezent?
   utworzona DateTime @default(now())
