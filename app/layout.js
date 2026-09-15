@@ -1,4 +1,5 @@
 import "./globals.css";
+import "lenis/dist/lenis.css";
 import "@fontsource-variable/fraunces";
 import "@fontsource-variable/dm-sans";
 import "@fontsource/caveat/500.css";

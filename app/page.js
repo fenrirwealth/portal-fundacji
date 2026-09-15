@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { aktywnaEdycja, formatujTermin, licznik } from "../lib/db";
-import Koperta3D from "./ui/Koperta3D";
+import HeroMagia from "./ui/HeroMagia";
 import LancuchDobra from "./ui/LancuchDobra";
 import Wejscie from "./ui/Wejscie";
 
@@ -42,35 +42,7 @@ export default async function Start() {
 
   return (
     <>
-      <section className="hero-swieta">
-        <div className="hero-swiatlo hero-swiatlo-lewe" aria-hidden="true" />
-        <div className="hero-swiatlo hero-swiatlo-prawe" aria-hidden="true" />
-        <div className="wrap hero-siatka">
-          <div className="hero-copy">
-            <p className="nadtytul"><span /> {etykieta}</p>
-            <h1>Każdy list czeka na swojego <em>Mikołaja.</em></h1>
-            <p className="hero-lead">Być może właśnie na Ciebie.</p>
-            <p className="hero-opis">
-              Dzieci napisały, o czym marzą. Fundacja weryfikuje każdy list,
-              chroni ich prywatność i bezpiecznie przekazuje prezenty.
-            </p>
-            <div className="hero-akcje">
-              <Link className="btn btn-magiczny btn-duzy" href="/listy">
-                {saListy ? "Zostań Mikołajem listu" : "Zobacz, jak działa akcja"}
-                <span aria-hidden="true">↗</span>
-              </Link>
-              {saListy && (
-                <Link className="btn btn-szklany btn-duzy" href="/listy/losowy">
-                  Niech list wybierze mnie
-                </Link>
-              )}
-            </div>
-            {termin && <p className="hero-termin">Prezenty przyjmujemy do {termin}.</p>}
-          </div>
-          <Koperta3D />
-        </div>
-        <div className="hero-przewin" aria-hidden="true"><span /> Poznaj akcję</div>
-      </section>
+      <HeroMagia etykieta={etykieta} saListy={saListy} termin={termin} />
 
       <section className="sekcja-lancucha">
         <div className="wrap">
