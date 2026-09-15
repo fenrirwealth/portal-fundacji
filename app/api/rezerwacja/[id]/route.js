@@ -1,6 +1,7 @@
 import { auth } from "../../../../auth";
 import { db } from "../../../../lib/db";
 import { jsonZLimitem, odpowiedzBleduHttp } from "../../../../lib/http.mjs";
+import { KLUCZ_LICZNIKA, usunCache } from "../../../../lib/cache";
 
 // Potwierdzenie i rezygnacja. Obie operacje sprawdzaja wlasciciela —
 // bez tego znajomosc identyfikatora pozwalalaby ruszyc cudza rezerwacje.
@@ -80,6 +81,7 @@ export async function PATCH(request, { params }) {
       where: { id: rezerwacja.listId, status: "ZAREZERWOWANY" },
       data: { status: "OPUBLIKOWANY" },
     });
+    await usunCache(KLUCZ_LICZNIKA);
 
     return Response.json({ ok: true });
   }

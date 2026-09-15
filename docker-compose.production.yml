@@ -1,0 +1,84 @@
+services:
+  portal:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-portal}:${POSTGRES_PASSWORD:?Ustaw POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-portal}?schema=public
+      REDIS_URL: redis://redis:6379/0
+      AUTH_SECRET: ${AUTH_SECRET:?Ustaw AUTH_SECRET}
+      AUTH_URL: ${AUTH_URL:-https://portal.fundacjalepszydomlepszejutro.pl}
+      NEXT_PUBLIC_PORTAL_URL: ${NEXT_PUBLIC_PORTAL_URL:-https://portal.fundacjalepszydomlepszejutro.pl}
+      SMTP_HOST: ${SMTP_HOST:?Ustaw SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:?Ustaw SMTP_USER}
+      SMTP_PASS: ${SMTP_PASS:?Ustaw SMTP_PASS}
+      SMTP_FROM: ${SMTP_FROM:?Ustaw SMTP_FROM}
+      CRON_SECRET: ${CRON_SECRET:?Ustaw CRON_SECRET}
+      WEB_CONCURRENCY: ${WEB_CONCURRENCY:-3}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:3000:3000"
+    mem_limit: 4g
+    cpus: 3.5
+    security_opt:
+      - no-new-privileges:true
+    networks: [portal-wewnetrzna]
+
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-portal}
+      POSTGRES_USER: ${POSTGRES_USER:-portal}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Ustaw POSTGRES_PASSWORD}
+    command:
+      - postgres
+      - -c
+      - shared_buffers=1GB
+      - -c
+      - effective_cache_size=3GB
+      - -c
+      - maintenance_work_mem=256MB
+      - -c
+      - work_mem=16MB
+      - -c
+      - max_connections=100
+      - -c
+      - random_page_cost=1.1
+    volumes:
+      - portal-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-portal} -d ${POSTGRES_DB:-portal}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    mem_limit: 4g
+    cpus: 2
+    shm_size: 1g
+    networks: [portal-wewnetrzna]
+
+  redis:
+    image: redis:8-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "no", "--maxmemory", "384mb", "--maxmemory-policy", "allkeys-lru"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+    mem_limit: 512m
+    cpus: 0.25
+    networks: [portal-wewnetrzna]
+
+volumes:
+  portal-postgres:
+
+networks:
+  portal-wewnetrzna:
+    driver: bridge

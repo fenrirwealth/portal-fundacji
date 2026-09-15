@@ -100,8 +100,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return true;
     },
     async session({ session, user }) {
-      session.user.id = user.id;
-      session.user.rola = user.rola;
+      const daneSesji = /** @type {any} */ (session.user);
+      const daneUzytkownika = /** @type {any} */ (user);
+      daneSesji.id = daneUzytkownika.id;
+      daneSesji.rola = daneUzytkownika.rola;
       return session;
     },
   },

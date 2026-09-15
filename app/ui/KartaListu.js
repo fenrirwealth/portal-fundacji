@@ -10,8 +10,8 @@ import Link from "next/link";
 // wygladalaby falszywie.
 
 const OPISY_STATUSU = {
-  OPUBLIKOWANY: ["Czeka na darczyńcę", "plakietka-wolny"],
-  ZAREZERWOWANY: ["Zarezerwowany", "plakietka-zajety"],
+  OPUBLIKOWANY: ["Czeka na Mikołaja", "plakietka-wolny"],
+  ZAREZERWOWANY: ["Ma już Mikołaja", "plakietka-zajety"],
   OPLACONY: ["Prezent dostarczony", "plakietka-gotowy"],
   PRZEKAZANY: ["Prezent przekazany", "plakietka-gotowy"],
 };
@@ -54,7 +54,7 @@ export default function KartaListu({ list }) {
           {list.rozmiar ? ` · rozmiar ${list.rozmiar}` : ""}
         </p>
         <p className="maly" style={{ margin: 0 }}>{list.marzenie}</p>
-        {wolny && <span className="karta-listu-akcja" aria-hidden="true">Zobacz list →</span>}
+        {wolny && <span className="karta-listu-akcja" aria-hidden="true">Zostań Mikołajem tego listu →</span>}
       </div>
     </Link>
   );

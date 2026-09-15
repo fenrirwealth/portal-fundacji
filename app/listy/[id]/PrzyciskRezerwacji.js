@@ -19,7 +19,7 @@ export default function PrzyciskRezerwacji({ listId, wolny, status, zwiezly = fa
   if (!wolny) {
     return (
       <button className={"btn" + (zwiezly ? "" : " btn-pelny")} disabled aria-disabled="true">
-        {status === "ZAREZERWOWANY" ? "Już zarezerwowany" : "Prezent przekazany"}
+        {status === "ZAREZERWOWANY" ? "Ten list ma już Mikołaja" : "Prezent przekazany"}
       </button>
     );
   }
@@ -67,7 +67,7 @@ export default function PrzyciskRezerwacji({ listId, wolny, status, zwiezly = fa
       disabled={stan === "czekam"}
       aria-busy={stan === "czekam"}
     >
-      {stan === "czekam" ? "Rezerwuję…" : zwiezly ? "Rezerwuję" : "Rezerwuję ten list"}
+      {stan === "czekam" ? "Rezerwuję…" : zwiezly ? "Wybieram" : "Zostań Mikołajem tego listu"}
     </button>
   );
 }

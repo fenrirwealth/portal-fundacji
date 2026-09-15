@@ -3,6 +3,7 @@ import { listPubliczny, aktywnaEdycja, formatujTermin } from "../../../lib/db";
 import { zwolnijWygasle } from "../../api/rezerwacja/route";
 import PrzyciskRezerwacji from "./PrzyciskRezerwacji";
 import Link from "next/link";
+import UdostepnijMarzenie from "./UdostepnijMarzenie";
 
 export const dynamic = "force-dynamic";
 
@@ -13,6 +14,11 @@ export async function generateMetadata({ params }) {
   return {
     title: `List od ${list.imie}, ${list.wiek} lat`,
     description: `Marzenie: ${list.marzenie}. Sprawdź, jak przekazać prezent.`,
+    openGraph: {
+      title: list.status === "OPUBLIKOWANY" ? `Ten list nadal czeka na Mikołaja` : `Ten list ma już swojego Mikołaja`,
+      description: `${list.imie}, ${list.wiek} lat — ${list.marzenie}`,
+      images: [{ url: `/api/listy/${list.id}/story?format=og`, width: 1200, height: 630 }],
+    },
     // Pojedynczy list NIE trafia do wyszukiwarek. Strona zbiorcza
     // wystarcza do promocji akcji, a indeksowanie kart dzieci
     // zostawiałoby je w pamięci podręcznej Google długo po zakończeniu
@@ -82,9 +88,12 @@ export default async function Szczegol({ params }) {
             </p>
 
             <PrzyciskRezerwacji listId={list.id} wolny={wolny} status={list.status} />
+            <div style={{ marginTop: "var(--o-3)" }}>
+              <UdostepnijMarzenie listId={list.id} imie={list.imie} wolny={wolny} />
+            </div>
 
             <p className="drobny cichy" style={{ marginTop: "var(--o-5)", paddingTop: "var(--o-4)", borderTop: "1px solid var(--linia)" }}>
-              Po rezerwacji masz 3 dni na potwierdzenie — po tym czasie list wraca
+              Po wybraniu listu masz 3 dni na potwierdzenie — po tym czasie list wraca
               do puli. Prezent dostarczasz do siedziby Fundacji
               {termin ? ` do ${termin}` : " w terminie podanym w regulaminie"},
               nieowinięty: sprawdzamy zawartość i pakujemy sami.

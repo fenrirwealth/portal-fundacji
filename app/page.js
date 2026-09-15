@@ -1,101 +1,120 @@
-import { licznik, aktywnaEdycja, formatujTermin } from "../lib/db";
 import Link from "next/link";
+import { aktywnaEdycja, formatujTermin, licznik } from "../lib/db";
+import Koperta3D from "./ui/Koperta3D";
+import LancuchDobra from "./ui/LancuchDobra";
+import Wejscie from "./ui/Wejscie";
 
 export const dynamic = "force-dynamic";
 
+export const metadata = {
+  title: "Listy do Świętego Mikołaja",
+  description:
+    "Wybierz zweryfikowany list dziecka i zostań jego Mikołajem. Fundacja bezpiecznie koordynuje prezenty dla placówek opiekuńczo-wychowawczych.",
+  alternates: { canonical: "/" },
+};
+
 const KROKI = [
-  ["Zakładasz konto", "Bez hasła. Wysyłamy link na e-mail, którego użyjemy też do kontaktu w sprawie akcji."],
-  ["Rezerwujesz list", "Jeden list naraz. Masz 3 dni na potwierdzenie, potem wraca do puli i wybierze go ktoś inny."],
-  ["Kupujesz prezent", "Nie musisz spełniać całego marzenia. Paczkę przywozisz nieowiniętą — sprawdzamy zawartość."],
-  ["My przekazujemy", "Pakujemy i wieziemy do placówki. Dziecko nie dowiaduje się, że ktoś się rozmyślił."],
+  ["01", "Wybierz list", "Poznaj marzenie bez nazwiska, adresu, nazwy placówki ani wizerunku dziecka."],
+  ["02", "Zostań Mikołajem", "Zaloguj się bez hasła i zarezerwuj list. Masz 3 dni na potwierdzenie."],
+  ["03", "Przygotuj prezent", "Nie musisz kupować wszystkiego. Liczy się gest, uważność i bezpieczny podarunek."],
+  ["04", "My go przekażemy", "Sprawdzamy, pakujemy i dostarczamy prezenty do zweryfikowanych placówek."],
 ];
 
+function trybAkcji(edycja) {
+  if (!edycja) return "OCZEKIWANIE";
+  const teraz = Date.now();
+  if (teraz < new Date(edycja.dataStart).getTime()) return "ODLICZANIE";
+  if (teraz > new Date(edycja.dataKoniec).getTime()) return "ZAKONCZENIE";
+  return "TRWA";
+}
+
 export default async function Start() {
-  // Strona główna celowo pobiera z bazy tylko licznik i to w bloku
-  // obsługi błędów. Gdyby baza padła, treść i wezwanie do działania
-  // nadal się wyświetlą — zniknie wyłącznie jedno zdanie z liczbami.
   let stan = null;
-  let termin = null;
+  let edycja = null;
   try {
-    stan = await licznik();
-    const edycja = await aktywnaEdycja();
-    termin = formatujTermin(edycja?.terminDostarczenia);
+    [stan, edycja] = await Promise.all([licznik(), aktywnaEdycja()]);
   } catch {}
 
-  const saNaListy = stan && stan.wszystkie > 0;
+  const tryb = trybAkcji(edycja);
+  const saListy = Boolean(stan?.wszystkie);
+  const termin = formatujTermin(edycja?.terminDostarczenia);
+  const etykieta = tryb === "TRWA" ? "Akcja trwa" : tryb === "ODLICZANIE" ? "Już wkrótce" : tryb === "ZAKONCZENIE" ? "Edycja zakończona" : "Przygotowujemy kolejną edycję";
 
   return (
     <>
-      <section style={{ background: "var(--tlo-odwrocone)", color: "var(--tekst-odwrocony)" }}>
-        <div className="wrap" style={{ paddingBlock: "var(--o-9)" }}>
-          <div style={{ maxWidth: "20ch" }}>
-            <h1 style={{ fontSize: "var(--t-4xl)", color: "var(--papier-50)" }}>
-              Listy do Świętego Mikołaja
-            </h1>
-          </div>
-
-          <p className="czytanie" style={{ fontSize: "var(--t-lg)", color: "color-mix(in srgb, var(--papier-100) 78%, transparent)", marginTop: "var(--o-5)" }}>
-            Dzieci z placówek opiekuńczo-wychowawczych napisały, o czym marzą.
-            Wybierz list, kup prezent i przywieź go do nas — resztą zajmiemy się my.
-          </p>
-
-          <div style={{ display: "flex", gap: "var(--o-3)", flexWrap: "wrap", marginTop: "var(--o-6)" }}>
-            <Link className="btn btn-duzy" href="/listy">
-              {saNaListy ? "Zobacz listy dzieci" : "Zobacz akcję"}
-            </Link>
-            <Link className="btn btn-duzy btn-cichy" href="/zglos-placowke"
-               style={/** @type {any} */ ({ "--btn-tekst": "var(--papier-100)", "--btn-krawedz": "color-mix(in srgb, var(--papier-100) 35%, transparent)" })}>
-              Zgłoś placówkę
-            </Link>
-          </div>
-
-          {/* Liczby pokazujemy TYLKO gdy są prawdziwe. Pusty licznik
-              w dniu startu kampanii jest uczciwszy niż wymyślona statystyka. */}
-          {saNaListy && (
-            <p style={{ marginTop: "var(--o-6)", color: "color-mix(in srgb, var(--papier-100) 65%, transparent)", fontSize: "var(--t-sm)" }}>
-              W akcji jest {stan.wszystkie}{" "}
-              {stan.wszystkie === 1 ? "list" : "listów"}, z czego {stan.wolne}{" "}
-              {stan.wolne === 1 ? "czeka" : "czeka"} na darczyńcę
-              {termin ? ` · prezenty przyjmujemy do ${termin}` : ""}.
+      <section className="hero-swieta">
+        <div className="hero-swiatlo hero-swiatlo-lewe" aria-hidden="true" />
+        <div className="hero-swiatlo hero-swiatlo-prawe" aria-hidden="true" />
+        <div className="wrap hero-siatka">
+          <div className="hero-copy">
+            <p className="nadtytul"><span /> {etykieta}</p>
+            <h1>Każdy list czeka na swojego <em>Mikołaja.</em></h1>
+            <p className="hero-lead">Być może właśnie na Ciebie.</p>
+            <p className="hero-opis">
+              Dzieci napisały, o czym marzą. Fundacja weryfikuje każdy list,
+              chroni ich prywatność i bezpiecznie przekazuje prezenty.
             </p>
-          )}
+            <div className="hero-akcje">
+              <Link className="btn btn-magiczny btn-duzy" href="/listy">
+                {saListy ? "Zostań Mikołajem listu" : "Zobacz, jak działa akcja"}
+                <span aria-hidden="true">↗</span>
+              </Link>
+              {saListy && (
+                <Link className="btn btn-szklany btn-duzy" href="/listy/losowy">
+                  Niech list wybierze mnie
+                </Link>
+              )}
+            </div>
+            {termin && <p className="hero-termin">Prezenty przyjmujemy do {termin}.</p>}
+          </div>
+          <Koperta3D />
+        </div>
+        <div className="hero-przewin" aria-hidden="true"><span /> Poznaj akcję</div>
+      </section>
+
+      <section className="sekcja-lancucha">
+        <div className="wrap">
+          <Wejscie>
+            <p className="nadtytul nadtytul-ciemny"><span /> Żywy Łańcuch Dobra</p>
+            <div className="naglowek-sekcji">
+              <h2>Magia rośnie z każdym wybranym listem.</h2>
+              <p>Każda rezerwacja wydłuża złotą linię. Nie pokazujemy liczb marketingowych — tylko aktualny stan zweryfikowanych listów.</p>
+            </div>
+          </Wejscie>
+          <Wejscie opoznienie={0.1}><LancuchDobra poczatkowy={stan} /></Wejscie>
         </div>
       </section>
 
-      <section className="wrap sekcja">
-        <h2 style={{ fontSize: "var(--t-2xl)" }}>Jak to działa</h2>
-        <p className="czytanie cichy" style={{ marginTop: "var(--o-3)" }}>
-          Prezenty przechodzą przez Fundację. Dzięki temu żadne dziecko nie zostaje
-          z pustymi rękami, jeśli darczyńca się rozmyśli albo nie zdąży.
-        </p>
-
-        <ol className="siatka siatka-4" style={{ marginTop: "var(--o-6)", listStyle: "none", padding: 0, counterReset: "krok" }}>
-          {KROKI.map(([tytul, opis], i) => (
-            <li key={tytul} className="karta karta-tresc" style={{ background: "transparent", borderColor: "var(--linia)" }}>
-              <span aria-hidden="true" style={{
-                fontFamily: "var(--krój-tytuł)", fontSize: "var(--t-2xl)",
-                color: "var(--bursztyn-400)", lineHeight: 1, display: "block", marginBottom: "var(--o-3)",
-              }}>
-                {i + 1}
-              </span>
-              <h3 style={{ fontSize: "var(--t-lg)", marginBottom: "var(--o-2)" }}>{tytul}</h3>
-              <p className="maly cichy">{opis}</p>
-            </li>
+      <section className="wrap sekcja jak-dziala" id="jak-to-dziala">
+        <Wejscie>
+          <p className="nadtytul nadtytul-ciemny"><span /> Prosto i bezpiecznie</p>
+          <div className="naglowek-sekcji">
+            <h2>Ty wybierasz marzenie. My czuwamy nad całą drogą prezentu.</h2>
+            <p>Jedna przejrzysta ścieżka od listu do dziecka, z kontrolą Fundacji na każdym etapie.</p>
+          </div>
+        </Wejscie>
+        <ol className="kroki-magiczne">
+          {KROKI.map(([nr, tytul, opis], i) => (
+            <Wejscie as="li" key={nr} opoznienie={i * 0.07}>
+              <span className="krok-numer">{nr}</span>
+              <div><h3>{tytul}</h3><p>{opis}</p></div>
+            </Wejscie>
           ))}
         </ol>
       </section>
 
-      <section className="wrap" style={{ paddingBottom: "var(--o-9)" }}>
-        <div className="karta karta-tresc pasek-zachety">
+      <section className="wrap sekcja">
+        <Wejscie className="pasek-finalowy">
           <div>
-            <h2 style={{ fontSize: "var(--t-xl)", marginBottom: "var(--o-2)" }}>Prowadzisz placówkę?</h2>
-            <p className="maly cichy czytanie" style={{ margin: 0 }}>
-              Zgłoś udział, a prześlemy blankiety listów, wzór zgody dyrektora
-              i regulamin akcji. Danych dzieci nie podaje się w formularzu.
-            </p>
+            <p className="nadtytul"><span /> Jeden gest uruchamia kolejny</p>
+            <h2>Znajdź list, który poruszy właśnie Ciebie.</h2>
+            <p>Możesz go wybrać świadomie albo pozwolić, by to marzenie znalazło swojego Mikołaja.</p>
           </div>
-          <Link className="btn btn-cichy" href="/zglos-placowke">Formularz zgłoszenia</Link>
-        </div>
+          <div className="pasek-finalowy-akcje">
+            <Link className="btn btn-magiczny btn-duzy" href="/listy">Zobacz listy</Link>
+            <Link className="btn btn-szklany btn-duzy" href="/zglos-placowke">Zgłoś placówkę</Link>
+          </div>
+        </Wejscie>
       </section>
     </>
   );
