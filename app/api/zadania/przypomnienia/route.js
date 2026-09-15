@@ -61,11 +61,11 @@ export async function POST(request) {
       await transport.sendMail({
         from: nadawca(),
         to: rezerwacja.user.email,
-        subject: `Potwierdz rezerwacje listu nr ${rezerwacja.list.numer}`,
+        subject: `Potwierdź rezerwację listu nr ${rezerwacja.list.numer}`,
         text: [
           `Rezerwacja listu od ${rezerwacja.list.imie} wygasa ${rezerwacja.wygasa.toLocaleString("pl-PL", { timeZone: "Europe/Warsaw" })}.`,
-          "Potwierdz ja przed uplywem terminu, inaczej list wroci do puli.",
-          adresPortalu ? `${adresPortalu}/moje-rezerwacje` : "Zaloguj sie do portalu i otworz Moje rezerwacje.",
+          "Potwierdź ją przed upływem terminu, inaczej list wróci do puli.",
+          adresPortalu ? `${adresPortalu}/moje-rezerwacje` : "Zaloguj się do portalu i otwórz Moje rezerwacje.",
         ].join("\n\n"),
       });
       wyslane += 1;

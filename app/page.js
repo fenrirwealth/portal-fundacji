@@ -112,7 +112,9 @@ export default async function Start() {
           </div>
           <div className="pasek-finalowy-akcje">
             <Link className="btn btn-magiczny btn-duzy" href="/listy">Zobacz listy</Link>
-            <Link className="btn btn-szklany btn-duzy" href="/zglos-placowke">Zgłoś placówkę</Link>
+            {edycja && (
+              <Link className="btn btn-szklany btn-duzy" href="/zglos-placowke">Zgłoś placówkę</Link>
+            )}
           </div>
         </Wejscie>
       </section>

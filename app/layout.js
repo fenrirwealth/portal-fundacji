@@ -33,12 +33,39 @@ export const viewport = {
   initialScale: 1,
 };
 
+const daneFundacji = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "Fundacja Lepszy Dom Lepsze Jutro",
+  url: "https://fundacjalepszydomlepszejutro.pl",
+  email: "kontakt@fundacjalepszydomlepszejutro.pl",
+  telephone: "+48 570 747 779",
+  identifier: [
+    { "@type": "PropertyValue", propertyID: "KRS", value: "0000971976" },
+    { "@type": "PropertyValue", propertyID: "NIP", value: "5273002294" },
+  ],
+  address: {
+    "@type": "PostalAddress",
+    streetAddress: "Złota 75A/7",
+    postalCode: "00-819",
+    addressLocality: "Warszawa",
+    addressCountry: "PL",
+  },
+  sameAs: ["https://www.facebook.com/LEPSZYDOMLEPSZEJUTRO"],
+};
+
 export default async function Layout({ children }) {
   const sesja = await auth();
 
   return (
     <html lang="pl">
       <body>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(daneFundacji).replace(/</g, "\\u003c"),
+          }}
+        />
         <PlynnyScroll />
         <ToastProvider>
           <a className="skip" href="#tresc">Przejdź do treści</a>

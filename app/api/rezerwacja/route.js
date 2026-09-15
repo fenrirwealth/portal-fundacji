@@ -49,7 +49,7 @@ export async function POST(request) {
   // listy jako ktos inny.
   const sesja = await auth();
   if (!sesja?.user?.id) {
-    return Response.json({ blad: "Zaloguj sie, zeby zarezerwowac list." }, { status: 401 });
+    return Response.json({ blad: "Zaloguj się, żeby zarezerwować list." }, { status: 401 });
   }
 
   // Rezerwowac moze wylacznie osoba, ktora swiadomie zaakceptowala
@@ -66,7 +66,7 @@ export async function POST(request) {
     return Response.json(
       {
         blad: konto?.zgodaRegulamin
-          ? "Regulamin akcji sie zmienil. Zapoznaj sie z nowa wersja i zaakceptuj ja."
+          ? "Regulamin akcji się zmienił. Zapoznaj się z nową wersją i zaakceptuj ją."
           : "Zaakceptuj regulamin akcji, zanim zarezerwujesz list.",
         wymagaZgody: true,
       },
@@ -143,13 +143,13 @@ export async function POST(request) {
   } catch (e) {
     if (e.message === "NIEDOSTEPNY") {
       return Response.json(
-        { blad: "Ten list jest juz niedostepny." },
+        { blad: "Ten list jest już niedostępny." },
         { status: 409 }
       );
     }
     if (e.code === "P2002") {
       return Response.json(
-        { blad: "Masz juz zarezerwowany jeden list. Dokoncz go albo zrezygnuj, zanim wybierzesz kolejny." },
+        { blad: "Masz już zarezerwowany jeden list. Dokończ go albo zrezygnuj, zanim wybierzesz kolejny." },
         { status: 429 }
       );
     }
