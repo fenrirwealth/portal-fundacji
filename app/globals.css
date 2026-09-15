@@ -882,6 +882,30 @@ select.pole-kontrolka {
   box-shadow: 0 24px 64px color-mix(in srgb, var(--atrament-900) 35%, transparent);
 }
 
+.podglad-skanu { display: block; width: min(100%, 760px); height: auto; margin-top: var(--o-5); border-radius: var(--r-md); border: 1px solid var(--linia); background: var(--papier-100); }
+.panel-przesylania { max-width: 780px; margin-inline: auto; }
+.panel-przesylania h1 { max-width: 13ch; margin-top: var(--o-3); font-size: var(--t-3xl); }
+.ochrona-skany { margin: var(--o-6) 0; padding: var(--o-5); border: 1px solid color-mix(in srgb, var(--szalwia-600) 25%, transparent); border-radius: var(--r-lg); background: var(--szalwia-100); color: var(--atrament-900); }
+.ochrona-skany p { margin-top: var(--o-2); color: var(--tekst-cichy); }
+.formularz-skanow { display: grid; gap: var(--o-4); padding: clamp(24px, 5vw, 42px); border: 1px solid var(--linia); border-radius: var(--r-lg); background: var(--tlo); box-shadow: var(--cien-maly); }
+.formularz-skanow label { display: grid; gap: var(--o-2); }
+.formularz-skanow input[type="file"], .formularz-skanow textarea { width: 100%; padding: 14px; border: 1px solid var(--linia); border-radius: var(--r-md); background: var(--papier-50); color: var(--tekst); font: inherit; }
+.pole-upload { padding: var(--o-5); border: 1px dashed color-mix(in srgb, var(--bursztyn-600) 55%, var(--linia)); border-radius: var(--r-md); background: color-mix(in srgb, var(--bursztyn-100) 55%, var(--tlo)); }
+.pole-upload label span { color: var(--tekst-cichy); font-size: var(--t-sm); }
+.pulapka { position: absolute !important; left: -9999px !important; width: 1px; height: 1px; overflow: hidden; }
+.fundusz-hero { padding: clamp(40px, 8vw, 90px); border-radius: 32px; color: var(--papier-50); background: radial-gradient(circle at 80% 15%, rgba(213,174,98,.24), transparent 28%), linear-gradient(135deg, var(--atrament-900), var(--atrament-800)); }
+.fundusz-hero h1 { max-width: 11ch; margin-top: var(--o-3); color: var(--papier-50); font-size: var(--t-4xl); }
+.fundusz-hero .czytanie { margin-top: var(--o-4); color: rgba(255,249,240,.78); }
+.fundusz-tresc { margin-top: var(--o-6); }
+.konto-funduszu { background: linear-gradient(145deg, var(--papier-100), var(--bursztyn-100)); }
+.numer-konta { margin: var(--o-4) 0 var(--o-2); color: var(--atrament-900); font: 650 clamp(1.15rem, 3vw, 1.65rem)/1.4 var(--krój-tekst); letter-spacing: .04em; overflow-wrap: anywhere; }
+.konto-funduszu .btn { margin-top: var(--o-5); }
+.fundusz-zaproszenie { display: grid; grid-template-columns: 1fr auto; gap: var(--o-6); align-items: end; padding: clamp(28px, 5vw, 52px); border: 1px solid var(--linia); border-radius: 26px; background: linear-gradient(120deg, var(--papier-100), var(--tlo)); }
+.fundusz-zaproszenie h2 { max-width: 18ch; margin-top: var(--o-2); font-size: var(--t-2xl); }
+.fundusz-zaproszenie p:not(.nadtytul) { max-width: 56ch; margin-top: var(--o-3); color: var(--tekst-cichy); }
+
+@media (max-width: 720px) { .fundusz-zaproszenie { grid-template-columns: 1fr; align-items: start; } }
+
 /* Podsumowanie <details> jako przycisk — domyślny trójkącik ma
    kilkanaście pikseli i nie spełnia minimum celu dotykowego. */
 summary.btn { list-style: none; cursor: pointer; }

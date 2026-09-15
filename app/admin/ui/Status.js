@@ -10,6 +10,10 @@ export const ETYKIETY = {
   OPLACONY: "Prezent przyjęty",
   PRZEKAZANY: "Przekazany",
   WYCOFANY: "Wycofany",
+  NOWY: "Nowy skan",
+  W_MODERACJI: "W moderacji",
+  ZATWIERDZONY: "Zatwierdzony",
+  ODRZUCONY: "Odrzucony",
 };
 
 const KLASY = {
@@ -20,6 +24,10 @@ const KLASY = {
   OPLACONY: "plakietka-gotowy",
   PRZEKAZANY: "plakietka-wolny",
   WYCOFANY: "plakietka-zajety",
+  NOWY: "plakietka-gotowy",
+  W_MODERACJI: "plakietka-gotowy",
+  ZATWIERDZONY: "plakietka-wolny",
+  ODRZUCONY: "plakietka-zajety",
 };
 
 /** @param {{status: string}} p */

@@ -48,3 +48,19 @@ test("kazda akcja panelu ponownie sprawdza role redakcji", () => {
     assert.match(tresc, /await wymagajRedakcji\(/, `brak kontroli roli w ${nazwa}`);
   }
 });
+
+test("SEO portalu indeksuje tylko bezpieczne strony publiczne", () => {
+  const robots = fs.readFileSync(new URL("../app/robots.js", import.meta.url), "utf8");
+  const sitemap = fs.readFileSync(new URL("../app/sitemap.js", import.meta.url), "utf8");
+  const szczegolListu = fs.readFileSync(
+    new URL("../app/listy/[id]/page.js", import.meta.url),
+    "utf8"
+  );
+
+  assert.match(robots, /"\/admin\/"/);
+  assert.match(robots, /"\/api\/"/);
+  assert.match(robots, /"\/listy\/\*"/);
+  assert.match(sitemap, /"\/listy"/);
+  assert.doesNotMatch(sitemap, /\/listy\/\[id\]/);
+  assert.match(szczegolListu, /robots:\s*\{\s*index:\s*false/);
+});

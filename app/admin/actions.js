@@ -5,6 +5,9 @@ import { redirect } from "next/navigation";
 import { db } from "../../lib/db";
 import { wymagajRedakcji } from "../../lib/admin";
 import { KATEGORIE, WOJEWODZTWA } from "../../lib/slowniki";
+import { KLUCZ_LICZNIKA, usunCache } from "../../lib/cache";
+import { kolejkujEmail } from "../../lib/kolejka-email";
+import { nowyTokenPrzesylania } from "../../lib/skany";
 
 const POLA_WERYFIKACJI = [
   "zgodaDolaczona",
@@ -58,6 +61,7 @@ function wartosciListu(formData) {
     rozmiar: tekst(formData, "rozmiar", 80),
     opis: tekst(formData, "opis", 1200),
     zdjecieUrl: tekst(formData, "zdjecieUrl", 1000),
+    skanId: tekst(formData, "skanId", 80),
     udzialId: tekst(formData, "udzialId", 80),
   };
 }
@@ -66,18 +70,18 @@ function wartosciListu(formData) {
 // i edycji — wczesniej byly powielone i mogly sie rozjechac.
 function sprawdzPolaListu(w) {
   const mapa = {};
-  if (!w.imie) mapa.imie = "Podaj imie dziecka.";
-  else if (w.imie.length > 80) mapa.imie = "Imie jest za dlugie.";
+  if (!w.imie) mapa.imie = "Podaj imię dziecka.";
+  else if (w.imie.length > 80) mapa.imie = "Imię jest za długie.";
 
   const wiek = Number(w.wiek);
   if (!Number.isInteger(wiek) || wiek < 1 || wiek > 25) {
-    mapa.wiek = "Wiek musi byc liczba od 1 do 25.";
+    mapa.wiek = "Wiek musi być liczbą od 1 do 25.";
   }
-  if (!WOJEWODZTWA.includes(w.wojewodztwo)) mapa.wojewodztwo = "Wybierz wojewodztwo z listy.";
-  if (!KATEGORIE.includes(w.kategoria)) mapa.kategoria = "Wybierz kategorie z listy.";
+  if (!WOJEWODZTWA.includes(w.wojewodztwo)) mapa.wojewodztwo = "Wybierz województwo z listy.";
+  if (!KATEGORIE.includes(w.kategoria)) mapa.kategoria = "Wybierz kategorię z listy.";
   if (w.marzenie.length < 3) mapa.marzenie = "Opisz marzenie — co najmniej 3 znaki.";
   if (w.zdjecieUrl && !/^https:\/\//i.test(w.zdjecieUrl)) {
-    mapa.zdjecieUrl = "Adres zdjecia musi zaczynac sie od https://";
+    mapa.zdjecieUrl = "Adres zdjęcia musi zaczynać się od https://";
   }
   return mapa;
 }
@@ -93,7 +97,7 @@ export async function utworzEdycje(formData) {
   const aktywna = formData.get("aktywna") === "on";
 
   if (!Number.isInteger(rok) || rok < 2022 || rok > 2100 || nazwa.length < 3) {
-    wrocZBledem("/admin", "Podaj poprawny rok i nazwe edycji.");
+    wrocZBledem("/admin", "Podaj poprawny rok i nazwę edycji.");
   }
   if (
     !dataStart ||
@@ -102,7 +106,7 @@ export async function utworzEdycje(formData) {
     dataStart > terminDostarczenia ||
     terminDostarczenia > dataKoniec
   ) {
-    wrocZBledem("/admin", "Daty musza miec kolejnosc: start, termin dostarczenia, koniec.");
+    wrocZBledem("/admin", "Daty muszą mieć kolejność: start, termin dostarczenia, koniec.");
   }
 
   try {
@@ -113,7 +117,7 @@ export async function utworzEdycje(formData) {
       });
     });
   } catch (e) {
-    if (e?.code === "P2002") wrocZBledem("/admin", "Edycja dla tego roku juz istnieje.");
+    if (e?.code === "P2002") wrocZBledem("/admin", "Edycja dla tego roku już istnieje.");
     throw e;
   }
 
@@ -128,22 +132,26 @@ export async function rozpatrzZgloszenie(formData) {
   const id = tekst(formData, "id", 80);
   const decyzja = tekst(formData, "decyzja", 20);
   if (!id || !["zatwierdz", "odrzuc"].includes(decyzja)) {
-    wrocZBledem("/admin", "Nieprawidlowe zgloszenie.");
+    wrocZBledem("/admin", "Nieprawidłowe zgłoszenie.");
   }
 
   const udzial = await db.udzialPlacowki.findUnique({
     where: { id },
-    include: { placowka: { select: { id: true } } },
+    include: { placowka: { select: { id: true, nazwa: true } }, edycja: { select: { dataKoniec: true } } },
   });
   if (!udzial || udzial.status !== "ZGLOSZONA") {
-    wrocZBledem("/admin", "Zgloszenie zostalo juz rozpatrzone albo nie istnieje.");
+    wrocZBledem("/admin", "Zgłoszenie zostało już rozpatrzone albo nie istnieje.");
   }
 
+  const dostep = decyzja === "zatwierdz" ? nowyTokenPrzesylania() : null;
   try {
     await db.$transaction(async (tx) => {
       const wynik = await tx.udzialPlacowki.updateMany({
         where: { id, status: "ZGLOSZONA" },
-        data: { status: decyzja === "odrzuc" ? "ODMOWILA" : "POTWIERDZILA" },
+        data: {
+          status: decyzja === "odrzuc" ? "ODMOWILA" : "POTWIERDZILA",
+          ...(dostep ? { tokenPrzesylaniaHash: dostep.hash, tokenPrzesylaniaWygasa: udzial.edycja.dataKoniec } : {}),
+        },
       });
       if (wynik.count !== 1) throw new Error("ROZPATRZONE");
 
@@ -160,13 +168,62 @@ export async function rozpatrzZgloszenie(formData) {
     });
   } catch (e) {
     if (e?.message === "ROZPATRZONE") {
-      wrocZBledem("/admin", "Zgloszenie zostalo wlasnie rozpatrzone przez inna osobe.");
+      wrocZBledem("/admin", "Zgłoszenie zostało właśnie rozpatrzone przez inną osobę.");
     }
     throw e;
   }
 
+  if (dostep && udzial.zgloszonyEmail) {
+    const baza = process.env.NEXT_PUBLIC_PORTAL_URL || process.env.AUTH_URL || "https://portal.fundacjalepszydomlepszejutro.pl";
+    await kolejkujEmail("LINK_PLACOWKI", {
+      email: udzial.zgloszonyEmail,
+      nazwa: udzial.placowka.nazwa,
+      link: `${baza}/placowka/przeslij/${dostep.token}`,
+    }, `link-placowki-${udzial.id}`).catch((blad) => console.error("[placowka] E-mail:", blad.message));
+  }
+
   revalidatePath("/admin");
   redirect("/admin?sukces=zgloszenie");
+}
+
+export async function odnowLinkPlacowki(formData) {
+  await wymagajRedakcji();
+  const id = tekst(formData, "id", 80);
+  const udzial = await db.udzialPlacowki.findFirst({
+    where: { id, status: "POTWIERDZILA", edycja: { aktywna: true } },
+    include: { placowka: { select: { nazwa: true } }, edycja: { select: { dataKoniec: true } } },
+  });
+  if (!udzial?.zgloszonyEmail) wrocZBledem("/admin", "Brak aktywnej placówki lub adresu e-mail.");
+  const dostep = nowyTokenPrzesylania();
+  await db.udzialPlacowki.update({
+    where: { id },
+    data: { tokenPrzesylaniaHash: dostep.hash, tokenPrzesylaniaWygasa: udzial.edycja.dataKoniec },
+  });
+  const baza = process.env.NEXT_PUBLIC_PORTAL_URL || process.env.AUTH_URL || "https://portal.fundacjalepszydomlepszejutro.pl";
+  try {
+    const zakolejkowany = await kolejkujEmail("LINK_PLACOWKI", {
+      email: udzial.zgloszonyEmail, nazwa: udzial.placowka.nazwa,
+      link: `${baza}/placowka/przeslij/${dostep.token}`,
+    }, `link-placowki-${udzial.id}-${Date.now()}`);
+    if (!zakolejkowany) throw new Error("KOLEJKA_NIEDOSTEPNA");
+  } catch {
+    wrocZBledem("/admin", "Nie udało się zakolejkować wiadomości. Spróbuj ponownie.");
+  }
+  redirect("/admin?sukces=link-placowki");
+}
+
+export async function moderujSkan(formData) {
+  await wymagajRedakcji();
+  const id = tekst(formData, "id", 80);
+  const decyzja = tekst(formData, "decyzja", 20);
+  if (!id || !["odrzuc", "przywroc"].includes(decyzja)) wrocZBledem("/admin", "Nieprawidłowa decyzja dla skanu.");
+  const wynik = await db.skanListu.updateMany({
+    where: { id, list: null, status: decyzja === "odrzuc" ? { in: ["NOWY", "W_MODERACJI"] } : "ODRZUCONY" },
+    data: { status: decyzja === "odrzuc" ? "ODRZUCONY" : "NOWY" },
+  });
+  if (wynik.count !== 1) wrocZBledem("/admin", "Skan został już przypięty do listu albo zmienił status.");
+  revalidatePath("/admin");
+  redirect("/admin?sukces=skan");
 }
 
 // Sygnatura (poprzedniStan, formData) — wymagana przez useActionState.
@@ -175,7 +232,7 @@ export async function utworzList(_poprzedni, formData) {
   const w = wartosciListu(formData);
 
   const mapa = sprawdzPolaListu(w);
-  if (!w.udzialId) mapa.udzialId = "Wybierz placowke.";
+  if (!w.udzialId) mapa.udzialId = "Wybierz placówkę.";
   if (Object.keys(mapa).length) return bledy(mapa, w);
 
   const udzial = await db.udzialPlacowki.findFirst({
@@ -183,7 +240,15 @@ export async function utworzList(_poprzedni, formData) {
     select: { placowkaId: true, edycjaId: true },
   });
   if (!udzial) {
-    return bledy({ udzialId: "Ta placowka nie jest zatwierdzona w aktywnej edycji." }, w);
+    return bledy({ udzialId: "Ta placówka nie jest zatwierdzona w aktywnej edycji." }, w);
+  }
+
+  if (w.skanId) {
+    const skan = await db.skanListu.findFirst({
+      where: { id: w.skanId, udzialId: w.udzialId, status: { in: ["NOWY", "W_MODERACJI"] }, list: null },
+      select: { id: true },
+    });
+    if (!skan) return bledy({ skanId: "Wybierz dostępny skan tej placówki." }, w);
   }
 
   const list = await db.list.create({
@@ -198,11 +263,14 @@ export async function utworzList(_poprzedni, formData) {
       rozmiar: w.rozmiar || null,
       opis: w.opis || null,
       zdjecieUrl: w.zdjecieUrl || null,
+      skanId: w.skanId || null,
       status: "SZKIC",
       weryfikacja: { create: { osobaId: redaktor.id } },
     },
     select: { id: true },
   });
+
+  if (w.skanId) await db.skanListu.update({ where: { id: w.skanId }, data: { status: "W_MODERACJI" } });
 
   revalidatePath("/admin");
   redirect("/admin/listy/" + list.id + "?sukces=utworzony");
@@ -218,28 +286,28 @@ export async function zapiszList(_poprzedni, formData) {
     where: { id },
     select: {
       id: true, status: true, zgodaData: true, zgodaPrzyjalId: true,
-      zgodaCofnieta: true, zaktualizowany: true,
+      zgodaCofnieta: true, zaktualizowany: true, skanId: true,
     },
   });
   // Braki rekordu i konflikty wersji nadal przekierowuja: nie ma tu
   // czego odtwarzac, a uzytkownik musi zobaczyc aktualny stan.
   if (!obecny) wrocZBledem("/admin", "List nie istnieje.");
   if (wersja !== obecny.zaktualizowany.toISOString()) {
-    wrocZBledem("/admin/listy/" + id, "List zostal zmieniony przez inna osobe. Odswiez strone.");
+    wrocZBledem("/admin/listy/" + id, "List został zmieniony przez inną osobę. Odśwież stronę.");
   }
 
   const wRealizacji = ["ZAREZERWOWANY", "OPLACONY", "PRZEKAZANY"].includes(obecny.status);
 
   if (operacja === "wycofaj") {
     if (wRealizacji) {
-      wrocZBledem("/admin/listy/" + id, "Nie mozna wycofac listu z aktywna realizacja.");
+      wrocZBledem("/admin/listy/" + id, "Nie można wycofać listu z aktywną realizacją.");
     }
     const wynik = await db.list.updateMany({
       where: { id, zaktualizowany: obecny.zaktualizowany },
       data: { status: "WYCOFANY" },
     });
     if (wynik.count !== 1) {
-      wrocZBledem("/admin/listy/" + id, "List zostal zmieniony przez inna osobe. Odswiez strone.");
+      wrocZBledem("/admin/listy/" + id, "List został zmieniony przez inną osobę. Odśwież stronę.");
     }
     revalidatePath("/listy");
     revalidatePath("/admin");
@@ -254,14 +322,14 @@ export async function zapiszList(_poprzedni, formData) {
   // wiec dwie rownoczesne proby nie moga sie nalozyc.
   if (operacja === "przywroc") {
     if (obecny.status !== "WYCOFANY") {
-      wrocZBledem("/admin/listy/" + id, "Przywrocic mozna wylacznie list wycofany.");
+      wrocZBledem("/admin/listy/" + id, "Przywrócić można wyłącznie list wycofany.");
     }
     const wynik = await db.list.updateMany({
       where: { id, status: "WYCOFANY", zaktualizowany: obecny.zaktualizowany },
       data: { status: "SZKIC" },
     });
     if (wynik.count !== 1) {
-      wrocZBledem("/admin/listy/" + id, "List zostal zmieniony przez inna osobe. Odswiez strone.");
+      wrocZBledem("/admin/listy/" + id, "List został zmieniony przez inną osobę. Odśwież stronę.");
     }
     revalidatePath("/admin");
     redirect("/admin/listy/" + id + "?sukces=przywrocony");
@@ -281,7 +349,7 @@ export async function zapiszList(_poprzedni, formData) {
 
   const mapa = sprawdzPolaListu(w);
   if (publikuj && !zgoda) {
-    mapa.zgoda = "Publikacja wymaga przyjetej zgody dyrektora.";
+    mapa.zgoda = "Publikacja wymaga przyjętej zgody dyrektora.";
   }
   if (publikuj && !kompletna) {
     const brakuje = POLA_WERYFIKACJI.filter((pole) => !weryfikacja[pole]).length;
@@ -320,10 +388,13 @@ export async function zapiszList(_poprzedni, formData) {
         update: { ...weryfikacja, osobaId: redaktor.id, zakonczona: kompletna ? teraz : null },
         create: { listId: id, osobaId: redaktor.id, ...weryfikacja, zakonczona: kompletna ? teraz : null },
       });
+      if (publikuj && obecny.skanId) {
+        await tx.skanListu.update({ where: { id: obecny.skanId }, data: { status: "ZATWIERDZONY" } });
+      }
     });
   } catch (e) {
     if (e?.message === "STARA_WERSJA") {
-      wrocZBledem("/admin/listy/" + id, "List zostal zmieniony przez inna osobe. Odswiez strone.");
+      wrocZBledem("/admin/listy/" + id, "List został zmieniony przez inną osobę. Odśwież stronę.");
     }
     throw e;
   }
@@ -336,12 +407,38 @@ export async function zapiszList(_poprzedni, formData) {
   redirect("/admin/listy/" + id + "?sukces=" + (publikuj ? "opublikowany" : "zapisany"));
 }
 
+export async function zwolnijRezerwacjeListu(formData) {
+  await wymagajRedakcji();
+  const id = tekst(formData, "id", 80);
+  const list = await db.list.findUnique({
+    where: { id }, select: { status: true, edycja: { select: { aktywna: true } } },
+  });
+  if (!list || list.status !== "ZAREZERWOWANY") {
+    wrocZBledem("/admin/listy/" + id, "List nie ma aktywnej rezerwacji do zwolnienia.");
+  }
+  await db.$transaction(async (tx) => {
+    await tx.rezerwacja.updateMany({
+      where: { listId: id, status: { in: ["OCZEKUJE", "POTWIERDZONA"] } },
+      data: { status: "ANULOWANA", anulowana: new Date() },
+    });
+    await tx.list.updateMany({
+      where: { id, status: "ZAREZERWOWANY" },
+      data: { status: list.edycja.aktywna ? "OPUBLIKOWANY" : "WYCOFANY" },
+    });
+  });
+  await usunCache(KLUCZ_LICZNIKA);
+  revalidatePath("/");
+  revalidatePath("/listy");
+  revalidatePath("/admin");
+  redirect("/admin/listy/" + id + "?sukces=zwolniony");
+}
+
 export async function aktualizujPrezent(formData) {
   const redaktor = await wymagajRedakcji();
   const id = tekst(formData, "id", 80);
   const operacja = tekst(formData, "operacja", 20);
   if (!id || !["przyjmij", "sprawdz", "zapakuj", "wydaj"].includes(operacja)) {
-    wrocZBledem("/admin", "Nieprawidlowa operacja na prezencie.");
+    wrocZBledem("/admin", "Nieprawidłowa operacja na prezencie.");
   }
 
   const list = await db.list.findUnique({
@@ -411,7 +508,7 @@ export async function aktualizujPrezent(formData) {
     }
   } catch (e) {
     if (e?.message === "ZMIENIONY_STAN") {
-      wrocZBledem("/admin/listy/" + id, "Stan zostal zmieniony przez inna osobe. Odswiez strone.");
+      wrocZBledem("/admin/listy/" + id, "Stan został zmieniony przez inną osobę. Odśwież stronę.");
     }
     throw e;
   }
@@ -422,5 +519,9 @@ export async function aktualizujPrezent(formData) {
   revalidatePath("/moje-rezerwacje");
   revalidatePath("/admin");
   revalidatePath("/admin/listy/" + id);
+  if (operacja === "wydaj") {
+    await kolejkujEmail("PODZIEKOWANIE", { rezerwacjaId: rezerwacja.id }, `podziekowanie-${rezerwacja.id}`)
+      .catch((blad) => console.error("[prezent] E-mail:", blad.message));
+  }
   redirect("/admin/listy/" + id + "?sukces=prezent");
 }

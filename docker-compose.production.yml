@@ -17,6 +17,10 @@ services:
       SMTP_FROM: ${SMTP_FROM:?Ustaw SMTP_FROM}
       CRON_SECRET: ${CRON_SECRET:?Ustaw CRON_SECRET}
       WEB_CONCURRENCY: ${WEB_CONCURRENCY:-3}
+      EMAIL_WORKER_CONCURRENCY: ${EMAIL_WORKER_CONCURRENCY:-4}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-kontakt@fundacjalepszydomlepszejutro.pl}
+      SKANY_PRIVATE_DIR: /data/skany
+      NEXT_PUBLIC_DONATION_ACCOUNT: ${NEXT_PUBLIC_DONATION_ACCOUNT:-}
     depends_on:
       postgres:
         condition: service_healthy
@@ -24,6 +28,8 @@ services:
         condition: service_healthy
     ports:
       - "127.0.0.1:3000:3000"
+    volumes:
+      - portal-skany:/data/skany
     mem_limit: 4g
     cpus: 3.5
     security_opt:
@@ -78,6 +84,7 @@ services:
 
 volumes:
   portal-postgres:
+  portal-skany:
 
 networks:
   portal-wewnetrzna:
