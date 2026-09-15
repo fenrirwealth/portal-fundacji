@@ -4,7 +4,7 @@ export default function robots() {
   return {
     rules: {
       userAgent: "*",
-      allow: ["/", "/listy", "/o-akcji", "/regulamin", "/zglos-placowke"],
+      allow: ["/", "/listy", "/o-akcji", "/regulamin", "/zglos-placowke", "/fundusz-ostatniej-gwiazdki"],
       disallow: [
         "/admin/",
         "/api/",
@@ -12,6 +12,7 @@ export default function robots() {
         "/zaloguj",
         "/listy/losowy",
         "/listy/*",
+        "/placowka/",
       ],
     },
     sitemap: `${ADRES}/sitemap.xml`,

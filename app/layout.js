@@ -81,6 +81,7 @@ export default async function Layout({ children }) {
                 <Link href="/listy">Listy dzieci</Link>
                 <Link href="/#jak-to-dziala">Jak to działa</Link>
                 <Link href="/o-akcji">O akcji</Link>
+                <Link href="/fundusz-ostatniej-gwiazdki">Fundusz</Link>
                 {sesja?.user ? (
                   <>
                     <Link href="/moje-rezerwacje">Moje listy</Link>
@@ -113,6 +114,7 @@ export default async function Layout({ children }) {
                     Złota 75A/7, 00-819 Warszawa<br />
                     KRS 0000971976 · NIP 5273002294 · REGON 522030190
                   </p>
+                  <p className="drobny" style={{ marginTop: "var(--o-3)" }}><Link href="/fundusz-ostatniej-gwiazdki">Fundusz Ostatniej Gwiazdki</Link> · <Link href="/regulamin">Regulamin</Link></p>
                 </div>
                   <p className="drobny cichy czytanie">
                   Przy każdym liście publikujemy imię, wiek, województwo, opis marzenia

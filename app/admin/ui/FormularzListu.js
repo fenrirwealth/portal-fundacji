@@ -79,7 +79,7 @@ export default function FormularzListu({
               </select>
             </PoleAdmin>
 
-            <PoleAdmin nazwa="marzenie" etykieta="Marzenie" blad={b.marzenie}>
+            <PoleAdmin nazwa="marzenie" etykieta="Zatwierdzony cytat / marzenie" blad={b.marzenie}>
               <textarea name="marzenie" rows={3} maxLength={300} defaultValue={v("marzenie", list.marzenie)} />
             </PoleAdmin>
 

@@ -2,6 +2,7 @@ import { auth } from "../../../auth";
 import { db, WARUNKI_PUBLIKACJI, WERSJA_REGULAMINU } from "../../../lib/db";
 import { jsonZLimitem, odpowiedzBleduHttp } from "../../../lib/http.mjs";
 import { KLUCZ_LICZNIKA, usunCache } from "../../../lib/cache";
+import { kolejkujEmail } from "../../../lib/kolejka-email";
 
 const DNI_NA_POTWIERDZENIE = 3;
 
@@ -134,6 +135,8 @@ export async function POST(request) {
     });
 
     await usunCache(KLUCZ_LICZNIKA);
+    await kolejkujEmail("REZERWACJA", { rezerwacjaId: rezerwacja.id }, `rezerwacja-${rezerwacja.id}`)
+      .catch((blad) => console.error("[rezerwacja] E-mail:", blad.message));
     return Response.json({
       ok: true,
       rezerwacjaId: rezerwacja.id,

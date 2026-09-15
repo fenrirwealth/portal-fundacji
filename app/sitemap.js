@@ -6,6 +6,7 @@ const STRONY = [
   ["/o-akcji", "monthly", 0.8],
   ["/regulamin", "yearly", 0.4],
   ["/zglos-placowke", "monthly", 0.6],
+  ["/fundusz-ostatniej-gwiazdki", "monthly", 0.8],
 ];
 
 export default function sitemap() {

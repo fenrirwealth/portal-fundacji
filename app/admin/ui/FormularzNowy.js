@@ -11,7 +11,7 @@ const STAN_POCZATKOWY = { ok: true, bledy: {}, wartosci: {} };
  * i trafiaja do konkretnych pol, a wpisane wartosci sa odtwarzane —
  * wczesniej kazdy blad przeladowywal strone i kasowal cala prace.
  */
-export default function FormularzNowy({ akcja, udzialy, wojewodztwa, kategorie }) {
+export default function FormularzNowy({ akcja, udzialy, skany, domyslnySkanId, domyslnyUdzialId, wojewodztwa, kategorie }) {
   const [stan, wyslij, wTrakcie] = useActionState(akcja, STAN_POCZATKOWY);
   const b = stan?.bledy || {};
   const w = stan?.wartosci || {};
@@ -28,9 +28,16 @@ export default function FormularzNowy({ akcja, udzialy, wojewodztwa, kategorie }
         <legend>Placówka i edycja</legend>
         <PoleAdmin nazwa="udzialId" etykieta="Placówka" blad={b.udzialId}
                    podpowiedz="Widoczne są wyłącznie placówki zatwierdzone w aktywnej edycji.">
-          <select name="udzialId" defaultValue={w.udzialId || ""}>
+          <select name="udzialId" defaultValue={w.udzialId || domyslnyUdzialId || ""}>
             <option value="" disabled>wybierz z listy zatwierdzonych</option>
             {udzialy.map((u) => <option key={u.id} value={u.id}>{u.nazwa} — {u.wojewodztwo}</option>)}
+          </select>
+        </PoleAdmin>
+        <PoleAdmin nazwa="skanId" etykieta="Prywatny skan źródłowy (opcjonalnie)" blad={b.skanId}
+                   podpowiedz="Skan jest widoczny tylko dla redakcji i zostanie przypięty do tego szkicu.">
+          <select name="skanId" defaultValue={w.skanId || domyslnySkanId || ""}>
+            <option value="">bez skanu z panelu placówki</option>
+            {skany.map((s) => <option key={s.id} value={s.id}>{s.nazwa} · {s.data}</option>)}
           </select>
         </PoleAdmin>
       </fieldset>
@@ -64,7 +71,7 @@ export default function FormularzNowy({ akcja, udzialy, wojewodztwa, kategorie }
           </select>
         </PoleAdmin>
 
-        <PoleAdmin nazwa="marzenie" etykieta="Marzenie" blad={b.marzenie}>
+        <PoleAdmin nazwa="marzenie" etykieta="Zatwierdzony cytat / marzenie" blad={b.marzenie}>
           <textarea name="marzenie" maxLength={300} rows={3} defaultValue={w.marzenie || ""} />
         </PoleAdmin>
 

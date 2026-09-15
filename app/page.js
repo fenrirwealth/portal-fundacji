@@ -104,6 +104,13 @@ export default async function Start() {
       </section>
 
       <section className="wrap sekcja">
+        <Wejscie className="fundusz-zaproszenie">
+          <div><p className="nadtytul nadtytul-ciemny"><span /> Fundusz Ostatniej Gwiazdki</p><h2>Pomóż nam domknąć ostatnie marzenia.</h2><p>Wpłaty wykorzystujemy, gdy list nie znajdzie Mikołaja albo dostarczony prezent wymaga uzupełnienia.</p></div>
+          <Link className="btn btn-cichy btn-duzy" href="/fundusz-ostatniej-gwiazdki">Poznaj fundusz</Link>
+        </Wejscie>
+      </section>
+
+      <section className="wrap sekcja">
         <Wejscie className="pasek-finalowy">
           <div>
             <p className="nadtytul"><span /> Jeden gest uruchamia kolejny</p>

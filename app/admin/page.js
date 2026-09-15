@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { db } from "../../lib/db";
 import { wymagajRedakcji } from "../../lib/admin";
-import { rozpatrzZgloszenie, utworzEdycje } from "./actions";
+import { moderujSkan, odnowLinkPlacowki, rozpatrzZgloszenie, utworzEdycje } from "./actions";
 import Status, { ETYKIETY } from "./ui/Status";
 
 export const dynamic = "force-dynamic";
@@ -29,13 +29,25 @@ export default async function Admin({ searchParams }) {
   const szukaj = String(p.szukaj || "").trim().slice(0, 60);
   const archiwum = p.archiwum === "1";
 
-  const [edycja, zgloszenia, listy, liczby] = await Promise.all([
+  const [edycja, zgloszenia, placowkiAkcji, skany, listy, liczby] = await Promise.all([
     db.edycjaAkcji.findFirst({ where: { aktywna: true } }),
     db.udzialPlacowki.findMany({
       where: { status: "ZGLOSZONA" },
       include: { placowka: { select: { nazwa: true, wojewodztwo: true } }, edycja: { select: { rok: true } } },
       orderBy: { utworzony: "asc" },
       take: 30,
+    }),
+    db.udzialPlacowki.findMany({
+      where: { status: "POTWIERDZILA", edycja: { aktywna: true } },
+      include: { placowka: { select: { nazwa: true } }, _count: { select: { skany: true } } },
+      orderBy: { placowka: { nazwa: "asc" } },
+      take: 100,
+    }),
+    db.skanListu.findMany({
+      where: { status: { in: ["NOWY", "W_MODERACJI"] }, list: null },
+      include: { udzial: { include: { placowka: { select: { nazwa: true } } } } },
+      orderBy: { utworzony: "asc" },
+      take: 50,
     }),
     db.list.findMany({
       where: {
@@ -98,6 +110,44 @@ export default async function Admin({ searchParams }) {
             <button className="btn" type="submit">Utwórz edycję</button>
           </form>
         </details>
+      </section>
+
+      {placowkiAkcji.length > 0 && (
+        <section style={{ marginTop: "var(--o-8)" }}>
+          <h2 style={{ fontSize: "var(--t-xl)" }}>Placówki w aktywnej edycji</h2>
+          <div className="tabela-przewijana"><table className="tabela">
+            <thead><tr><th>Placówka</th><th>Skany</th><th>Link przesyłania</th></tr></thead>
+            <tbody>{placowkiAkcji.map((u) => (
+              <tr key={u.id}><td><b>{u.placowka.nazwa}</b><br /><span className="drobny cichy">{u.zgloszonyEmail}</span></td>
+                <td>{u._count.skany}</td><td><form action={odnowLinkPlacowki}><input type="hidden" name="id" value={u.id} /><button className="btn drugorzedny">Wyślij nowy bezpieczny link</button></form></td></tr>
+            ))}</tbody>
+          </table></div>
+        </section>
+      )}
+
+      <section style={{ marginTop: "var(--o-8)" }}>
+        <h2 style={{ fontSize: "var(--t-xl)" }}>
+          Skany do moderacji {skany.length > 0 && <span className="plakietka plakietka-gotowy">{skany.length} czeka</span>}
+        </h2>
+        {skany.length === 0 ? (
+          <p className="wstep" style={{ marginTop: "var(--o-3)" }}>Brak nowych skanów.</p>
+        ) : (
+          <div className="tabela-przewijana"><table className="tabela">
+            <thead><tr><th>Placówka</th><th>Przesłano</th><th>Status</th><th>Akcje</th></tr></thead>
+            <tbody>{skany.map((s) => (
+              <tr key={s.id}>
+                <td><b>{s.udzial.placowka.nazwa}</b></td>
+                <td className="maly">{s.utworzony.toLocaleString("pl-PL")}</td>
+                <td><Status status={s.status} /></td>
+                <td><div className="naglowek-rzad">
+                  <a className="btn drugorzedny" href={`/api/admin/skany/${s.id}`} target="_blank" rel="noreferrer">Podgląd</a>
+                  <Link className="btn" href={`/admin/listy/nowy?skan=${s.id}`}>Utwórz szkic</Link>
+                  <form action={moderujSkan}><input type="hidden" name="id" value={s.id} /><button className="btn niebezpieczny" name="decyzja" value="odrzuc">Odrzuć</button></form>
+                </div></td>
+              </tr>
+            ))}</tbody>
+          </table></div>
+        )}
       </section>
 
       <section style={{ marginTop: "var(--o-8)" }}>

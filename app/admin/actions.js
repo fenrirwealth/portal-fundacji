@@ -5,6 +5,9 @@ import { redirect } from "next/navigation";
 import { db } from "../../lib/db";
 import { wymagajRedakcji } from "../../lib/admin";
 import { KATEGORIE, WOJEWODZTWA } from "../../lib/slowniki";
+import { KLUCZ_LICZNIKA, usunCache } from "../../lib/cache";
+import { kolejkujEmail } from "../../lib/kolejka-email";
+import { nowyTokenPrzesylania } from "../../lib/skany";
 
 const POLA_WERYFIKACJI = [
   "zgodaDolaczona",
@@ -58,6 +61,7 @@ function wartosciListu(formData) {
     rozmiar: tekst(formData, "rozmiar", 80),
     opis: tekst(formData, "opis", 1200),
     zdjecieUrl: tekst(formData, "zdjecieUrl", 1000),
+    skanId: tekst(formData, "skanId", 80),
     udzialId: tekst(formData, "udzialId", 80),
   };
 }
@@ -133,17 +137,21 @@ export async function rozpatrzZgloszenie(formData) {
 
   const udzial = await db.udzialPlacowki.findUnique({
     where: { id },
-    include: { placowka: { select: { id: true } } },
+    include: { placowka: { select: { id: true, nazwa: true } }, edycja: { select: { dataKoniec: true } } },
   });
   if (!udzial || udzial.status !== "ZGLOSZONA") {
     wrocZBledem("/admin", "Zgłoszenie zostało już rozpatrzone albo nie istnieje.");
   }
 
+  const dostep = decyzja === "zatwierdz" ? nowyTokenPrzesylania() : null;
   try {
     await db.$transaction(async (tx) => {
       const wynik = await tx.udzialPlacowki.updateMany({
         where: { id, status: "ZGLOSZONA" },
-        data: { status: decyzja === "odrzuc" ? "ODMOWILA" : "POTWIERDZILA" },
+        data: {
+          status: decyzja === "odrzuc" ? "ODMOWILA" : "POTWIERDZILA",
+          ...(dostep ? { tokenPrzesylaniaHash: dostep.hash, tokenPrzesylaniaWygasa: udzial.edycja.dataKoniec } : {}),
+        },
       });
       if (wynik.count !== 1) throw new Error("ROZPATRZONE");
 
@@ -165,8 +173,57 @@ export async function rozpatrzZgloszenie(formData) {
     throw e;
   }
 
+  if (dostep && udzial.zgloszonyEmail) {
+    const baza = process.env.NEXT_PUBLIC_PORTAL_URL || process.env.AUTH_URL || "https://portal.fundacjalepszydomlepszejutro.pl";
+    await kolejkujEmail("LINK_PLACOWKI", {
+      email: udzial.zgloszonyEmail,
+      nazwa: udzial.placowka.nazwa,
+      link: `${baza}/placowka/przeslij/${dostep.token}`,
+    }, `link-placowki-${udzial.id}`).catch((blad) => console.error("[placowka] E-mail:", blad.message));
+  }
+
   revalidatePath("/admin");
   redirect("/admin?sukces=zgloszenie");
+}
+
+export async function odnowLinkPlacowki(formData) {
+  await wymagajRedakcji();
+  const id = tekst(formData, "id", 80);
+  const udzial = await db.udzialPlacowki.findFirst({
+    where: { id, status: "POTWIERDZILA", edycja: { aktywna: true } },
+    include: { placowka: { select: { nazwa: true } }, edycja: { select: { dataKoniec: true } } },
+  });
+  if (!udzial?.zgloszonyEmail) wrocZBledem("/admin", "Brak aktywnej placówki lub adresu e-mail.");
+  const dostep = nowyTokenPrzesylania();
+  await db.udzialPlacowki.update({
+    where: { id },
+    data: { tokenPrzesylaniaHash: dostep.hash, tokenPrzesylaniaWygasa: udzial.edycja.dataKoniec },
+  });
+  const baza = process.env.NEXT_PUBLIC_PORTAL_URL || process.env.AUTH_URL || "https://portal.fundacjalepszydomlepszejutro.pl";
+  try {
+    const zakolejkowany = await kolejkujEmail("LINK_PLACOWKI", {
+      email: udzial.zgloszonyEmail, nazwa: udzial.placowka.nazwa,
+      link: `${baza}/placowka/przeslij/${dostep.token}`,
+    }, `link-placowki-${udzial.id}-${Date.now()}`);
+    if (!zakolejkowany) throw new Error("KOLEJKA_NIEDOSTEPNA");
+  } catch {
+    wrocZBledem("/admin", "Nie udało się zakolejkować wiadomości. Spróbuj ponownie.");
+  }
+  redirect("/admin?sukces=link-placowki");
+}
+
+export async function moderujSkan(formData) {
+  await wymagajRedakcji();
+  const id = tekst(formData, "id", 80);
+  const decyzja = tekst(formData, "decyzja", 20);
+  if (!id || !["odrzuc", "przywroc"].includes(decyzja)) wrocZBledem("/admin", "Nieprawidłowa decyzja dla skanu.");
+  const wynik = await db.skanListu.updateMany({
+    where: { id, list: null, status: decyzja === "odrzuc" ? { in: ["NOWY", "W_MODERACJI"] } : "ODRZUCONY" },
+    data: { status: decyzja === "odrzuc" ? "ODRZUCONY" : "NOWY" },
+  });
+  if (wynik.count !== 1) wrocZBledem("/admin", "Skan został już przypięty do listu albo zmienił status.");
+  revalidatePath("/admin");
+  redirect("/admin?sukces=skan");
 }
 
 // Sygnatura (poprzedniStan, formData) — wymagana przez useActionState.
@@ -186,6 +243,14 @@ export async function utworzList(_poprzedni, formData) {
     return bledy({ udzialId: "Ta placówka nie jest zatwierdzona w aktywnej edycji." }, w);
   }
 
+  if (w.skanId) {
+    const skan = await db.skanListu.findFirst({
+      where: { id: w.skanId, udzialId: w.udzialId, status: { in: ["NOWY", "W_MODERACJI"] }, list: null },
+      select: { id: true },
+    });
+    if (!skan) return bledy({ skanId: "Wybierz dostępny skan tej placówki." }, w);
+  }
+
   const list = await db.list.create({
     data: {
       edycjaId: udzial.edycjaId,
@@ -198,11 +263,14 @@ export async function utworzList(_poprzedni, formData) {
       rozmiar: w.rozmiar || null,
       opis: w.opis || null,
       zdjecieUrl: w.zdjecieUrl || null,
+      skanId: w.skanId || null,
       status: "SZKIC",
       weryfikacja: { create: { osobaId: redaktor.id } },
     },
     select: { id: true },
   });
+
+  if (w.skanId) await db.skanListu.update({ where: { id: w.skanId }, data: { status: "W_MODERACJI" } });
 
   revalidatePath("/admin");
   redirect("/admin/listy/" + list.id + "?sukces=utworzony");
@@ -218,7 +286,7 @@ export async function zapiszList(_poprzedni, formData) {
     where: { id },
     select: {
       id: true, status: true, zgodaData: true, zgodaPrzyjalId: true,
-      zgodaCofnieta: true, zaktualizowany: true,
+      zgodaCofnieta: true, zaktualizowany: true, skanId: true,
     },
   });
   // Braki rekordu i konflikty wersji nadal przekierowuja: nie ma tu
@@ -320,6 +388,9 @@ export async function zapiszList(_poprzedni, formData) {
         update: { ...weryfikacja, osobaId: redaktor.id, zakonczona: kompletna ? teraz : null },
         create: { listId: id, osobaId: redaktor.id, ...weryfikacja, zakonczona: kompletna ? teraz : null },
       });
+      if (publikuj && obecny.skanId) {
+        await tx.skanListu.update({ where: { id: obecny.skanId }, data: { status: "ZATWIERDZONY" } });
+      }
     });
   } catch (e) {
     if (e?.message === "STARA_WERSJA") {
@@ -334,6 +405,32 @@ export async function zapiszList(_poprzedni, formData) {
   revalidatePath("/admin");
   revalidatePath("/admin/listy/" + id);
   redirect("/admin/listy/" + id + "?sukces=" + (publikuj ? "opublikowany" : "zapisany"));
+}
+
+export async function zwolnijRezerwacjeListu(formData) {
+  await wymagajRedakcji();
+  const id = tekst(formData, "id", 80);
+  const list = await db.list.findUnique({
+    where: { id }, select: { status: true, edycja: { select: { aktywna: true } } },
+  });
+  if (!list || list.status !== "ZAREZERWOWANY") {
+    wrocZBledem("/admin/listy/" + id, "List nie ma aktywnej rezerwacji do zwolnienia.");
+  }
+  await db.$transaction(async (tx) => {
+    await tx.rezerwacja.updateMany({
+      where: { listId: id, status: { in: ["OCZEKUJE", "POTWIERDZONA"] } },
+      data: { status: "ANULOWANA", anulowana: new Date() },
+    });
+    await tx.list.updateMany({
+      where: { id, status: "ZAREZERWOWANY" },
+      data: { status: list.edycja.aktywna ? "OPUBLIKOWANY" : "WYCOFANY" },
+    });
+  });
+  await usunCache(KLUCZ_LICZNIKA);
+  revalidatePath("/");
+  revalidatePath("/listy");
+  revalidatePath("/admin");
+  redirect("/admin/listy/" + id + "?sukces=zwolniony");
 }
 
 export async function aktualizujPrezent(formData) {
@@ -422,5 +519,9 @@ export async function aktualizujPrezent(formData) {
   revalidatePath("/moje-rezerwacje");
   revalidatePath("/admin");
   revalidatePath("/admin/listy/" + id);
+  if (operacja === "wydaj") {
+    await kolejkujEmail("PODZIEKOWANIE", { rezerwacjaId: rezerwacja.id }, `podziekowanie-${rezerwacja.id}`)
+      .catch((blad) => console.error("[prezent] E-mail:", blad.message));
+  }
   redirect("/admin/listy/" + id + "?sukces=prezent");
 }
