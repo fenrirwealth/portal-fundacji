@@ -4,11 +4,12 @@ import { db, aktywnaEdycja, formatujTermin } from "../../lib/db";
 import { zwolnijWygasle } from "../api/rezerwacja/route";
 import Akcje from "./Akcje";
 import Link from "next/link";
+import UdostepnijMarzenie from "../listy/[id]/UdostepnijMarzenie";
 
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Moje rezerwacje",
+  title: "Moje listy",
   robots: { index: false, follow: false },
 };
 
@@ -48,24 +49,32 @@ export default async function MojeRezerwacje({ searchParams }) {
 
   return (
     <div className="wrap sekcja">
-      <h1 style={{ fontSize: "var(--t-3xl)" }}>Moje rezerwacje</h1>
+      <h1 style={{ fontSize: "var(--t-3xl)" }}>Moje listy</h1>
 
       {p.nowa === "1" && (
-        <div className="komunikat komunikat-sukces" role="status" style={{ margin: "var(--o-5) 0" }}>
-          <span aria-hidden="true">✓</span>
-          <span><b>Rezerwacja przyjęta.</b> Potwierdź ją w ciągu 3 dni — po tym czasie list wraca do puli.</span>
+        <div className="karta-mikolaja" role="status" style={{ margin: "var(--o-5) 0" }}>
+          <span className="karta-mikolaja-gwiazda" aria-hidden="true">✦</span>
+          <div>
+            <h2>Ten list ma już Mikołaja. Ciebie.</h2>
+            <p>Potwierdź wybór w ciągu 3 dni, a potem zaproś innych do Łańcucha Dobra.</p>
+            {aktywne[0] && (
+              <div style={{ maxWidth: 340, marginTop: "var(--o-4)" }}>
+                <UdostepnijMarzenie listId={aktywne[0].list.id} imie={aktywne[0].list.imie} wolny={false} />
+              </div>
+            )}
+          </div>
         </div>
       )}
 
       <p className="czytanie cichy" style={{ marginTop: "var(--o-3)" }}>
-        Mozesz trzymac jeden list naraz. Po potwierdzeniu masz czas
+        Możesz wybrać jeden list naraz. Po potwierdzeniu masz czas
         {termin ? " do " + termin : ""} na dostarczenie prezentu do siedziby
         fundacji.
       </p>
 
       {rezerwacje.length === 0 && (
         <div className="pusto" style={{ marginTop: "var(--o-6)" }}>
-          <h3>Nie masz jeszcze rezerwacji</h3>
+          <h3>Nie masz jeszcze wybranego listu</h3>
           <p>Wybierz list z listy dzieci — przy każdym widać, czy jest jeszcze wolny.</p>
           <Link className="btn" href="/listy" style={{ marginTop: "var(--o-4)" }}>Zobacz listy dzieci</Link>
         </div>

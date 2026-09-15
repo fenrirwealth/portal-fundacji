@@ -324,10 +324,10 @@ model Weryfikacja {
 // ------------------------------------------------------------
 //  REZERWACJE
 //
-//  Limit "jedno konto — jeden aktywny list" wymusza CZESCIOWY INDEKS
-//  UNIKALNY dopisany w migracji recznie. Sprawdzanie tego w kodzie
-//  przed transakcja przepuszcza dwa rownolegle zadania; baza nie
-//  przepusci nigdy.
+//  Dwa CZESCIOWE INDEKSY UNIKALNE dopisane ręcznie w migracjach pilnują:
+//  - jednego aktywnego listu na konto,
+//  - jednej aktywnej rezerwacji na list.
+//  Sprawdzanie tego wyłącznie w kodzie przepuszczałoby równoległe żądania.
 // ------------------------------------------------------------
 
 enum StatusRezerwacji {

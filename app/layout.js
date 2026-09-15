@@ -1,20 +1,34 @@
 import "./globals.css";
+import "@fontsource-variable/fraunces";
+import "@fontsource-variable/dm-sans";
+import "@fontsource/caveat/500.css";
+import "@fontsource/caveat/600.css";
 import { auth } from "../auth";
 import { wyloguj } from "./akcje-sesji";
 import { ToastProvider } from "./ui/Toast";
 import Link from "next/link";
+import PlynnyScroll from "./ui/PlynnyScroll";
 
 export const metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_PORTAL_URL || "https://portal.fundacjalepszydomlepszejutro.pl"),
   title: {
-    default: "Fundacja Lepszy Dom Lepsze Jutro",
+    default: "Listy do Świętego Mikołaja",
     template: "%s — Fundacja Lepszy Dom Lepsze Jutro",
   },
   description:
-    "Pomagamy osobom w trudnej sytuacji mieszkaniowej i wspieramy dzieci z placowek opiekunczo-wychowawczych.",
+    "Listy do Świętego Mikołaja — bezpieczna akcja Fundacji Lepszy Dom Lepsze Jutro. Wybierz list i podaruj dziecku magiczne święta.",
+  openGraph: {
+    type: "website",
+    locale: "pl_PL",
+    siteName: "Listy do Świętego Mikołaja",
+    title: "Każdy list czeka na swojego Mikołaja",
+    description: "Wybierz zweryfikowany list dziecka i zostań jego Mikołajem.",
+  },
+  twitter: { card: "summary_large_image" },
 };
 
 export const viewport = {
-  themeColor: "#F5F3EE",
+  themeColor: "#09152F",
   width: "device-width",
   initialScale: 1,
 };
@@ -24,34 +38,25 @@ export default async function Layout({ children }) {
 
   return (
     <html lang="pl">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-        {/* Fraunces: krój o zmiennej optycznej wielkości — nagłówki mają
-            inną proporcję niż tekst, tak jak w składzie książkowym.
-            Inter do interfejsu, bo ma komplet polskich znaków i świetnie
-            czyta się w małych rozmiarach. */}
-        <link
-          href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap"
-          rel="stylesheet"
-        />
-      </head>
       <body>
+        <PlynnyScroll />
         <ToastProvider>
           <a className="skip" href="#tresc">Przejdź do treści</a>
 
           <header className="naglowek">
             <div className="wrap naglowek-tresc">
               <Link className="znak" href="/">
-                <b>Lepszy Dom</b>
-                <span>Lepsze Jutro</span>
+                <b>Listy do Mikołaja</b>
+                <span>Lepszy Dom Lepsze Jutro</span>
               </Link>
 
               <nav className="menu" aria-label="Główna">
                 <Link href="/listy">Listy dzieci</Link>
+                <Link href="/#jak-to-dziala">Jak to działa</Link>
+                <Link href="/o-akcji">O akcji</Link>
                 {sesja?.user ? (
                   <>
-                    <Link href="/moje-rezerwacje">Moje rezerwacje</Link>
+                    <Link href="/moje-rezerwacje">Moje listy</Link>
                     <span className="konto" title={sesja.user.email}>{sesja.user.email}</span>
                     {/* Wylogowanie jako formularz, nie odnośnik: zmienia stan,
                         więc nie może wykonać się przez samo wejście na adres.
@@ -62,7 +67,7 @@ export default async function Layout({ children }) {
                     </form>
                   </>
                 ) : (
-                  <Link href="/zaloguj">Zaloguj się</Link>
+                  <Link href="/zaloguj">Moje listy / Zaloguj się</Link>
                 )}
               </nav>
             </div>
@@ -82,12 +87,12 @@ export default async function Layout({ children }) {
                     KRS 0000971976 · NIP 5273002294 · REGON 522030190
                   </p>
                 </div>
-                <p className="drobny cichy czytanie">
+                  <p className="drobny cichy czytanie">
                   Przy każdym liście publikujemy imię, wiek, województwo, opis marzenia
                   i kategorię prezentu, w razie potrzeby rozmiar ubrania lub buta, oraz
                   zdjęcie listu przygotowane przez Fundację. Nie publikujemy nazwisk,
                   nazwy placówki, miejscowości, adresu ani wizerunku dziecka.
-                </p>
+                  </p>
               </div>
             </div>
           </footer>

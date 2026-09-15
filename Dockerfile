@@ -46,6 +46,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
 COPY --from=builder --chown=nextjs:nodejs /app/scripts ./scripts
 COPY --from=builder --chown=nextjs:nodejs /app/package.json ./package.json
+COPY --from=builder --chown=nextjs:nodejs /app/cluster-server.cjs ./cluster-server.cjs
 
 COPY docker-entrypoint.sh ./
 RUN chmod +x docker-entrypoint.sh
@@ -60,4 +61,6 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=5 \
   CMD wget -q -O - http://127.0.0.1:3000/api/zdrowie >/dev/null || exit 1
 
 ENTRYPOINT ["./docker-entrypoint.sh"]
-CMD ["node", "server.js"]
+# Natywny node:cluster nie dodaje procesu zarządzającego z zewnętrznej
+# paczki. Trzy workery zostawiają zapas CPU dla bazy, Redisa i proxy.
+CMD ["node", "cluster-server.cjs"]

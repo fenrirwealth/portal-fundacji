@@ -1,6 +1,7 @@
 import { auth } from "../../../auth";
 import { db, WARUNKI_PUBLIKACJI, WERSJA_REGULAMINU } from "../../../lib/db";
 import { jsonZLimitem, odpowiedzBleduHttp } from "../../../lib/http.mjs";
+import { KLUCZ_LICZNIKA, usunCache } from "../../../lib/cache";
 
 const DNI_NA_POTWIERDZENIE = 3;
 
@@ -37,6 +38,7 @@ export async function zwolnijWygasle() {
       where: { id: { in: doZwolnienia }, status: "ZAREZERWOWANY" },
       data: { status: "OPUBLIKOWANY" },
     });
+    await usunCache(KLUCZ_LICZNIKA);
   }
   return doZwolnienia.length;
 }
@@ -131,6 +133,7 @@ export async function POST(request) {
       });
     });
 
+    await usunCache(KLUCZ_LICZNIKA);
     return Response.json({
       ok: true,
       rezerwacjaId: rezerwacja.id,
