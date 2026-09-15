@@ -8,7 +8,20 @@ function czyLekkiTryb() {
   const malyEkran = window.matchMedia("(max-width: 760px)").matches;
   const polaczenie = /** @type {any} */ (navigator).connection;
   const slabePolaczenie = polaczenie?.saveData || /(^|-)2g$/.test(polaczenie?.effectiveType || "");
-  return mniejRuchu || malyEkran || slabePolaczenie;
+  let webglDziala = false;
+
+  try {
+    const canvas = document.createElement("canvas");
+    webglDziala = Boolean(
+      window.WebGLRenderingContext &&
+        (canvas.getContext("webgl2", { failIfMajorPerformanceCaveat: true }) ||
+          canvas.getContext("webgl", { failIfMajorPerformanceCaveat: true }))
+    );
+  } catch {
+    webglDziala = false;
+  }
+
+  return mniejRuchu || malyEkran || slabePolaczenie || !webglDziala;
 }
 
 export default function Koperta3D() {
@@ -36,7 +49,12 @@ export default function Koperta3D() {
       const kamera = new THREE.PerspectiveCamera(34, 1, 0.1, 100);
       kamera.position.set(0, 0.15, 6.4);
 
-      renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: "high-performance" });
+      try {
+        renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: "high-performance" });
+      } catch {
+        setLekkiTryb(true);
+        return;
+      }
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.7));
       renderer.setClearColor(0x000000, 0);
       element.appendChild(renderer.domElement);
