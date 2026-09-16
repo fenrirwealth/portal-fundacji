@@ -1024,6 +1024,76 @@ select.pole-kontrolka {
 
 @media (max-width: 720px) { .fundusz-zaproszenie { grid-template-columns: 1fr; align-items: start; } }
 
+/* O akcji — kinowa opowieść w spójnym, nocnym języku strony głównej. */
+.o-akcji-premium {
+  position:relative;
+  isolation:isolate;
+  min-height:100vh;
+  overflow:hidden;
+  padding:clamp(128px,14vw,168px) 0 clamp(96px,11vw,144px);
+  color:#fff9f0;
+  background:
+    radial-gradient(circle at 50% -12%,rgba(25,75,64,.28),transparent 40%),
+    radial-gradient(circle at 105% 52%,rgba(123,24,48,.2),transparent 30%),
+    linear-gradient(155deg,#071127 0%,#09152f 48%,#0b1b38 100%);
+}
+.o-akcji-premium::after {
+  content:"";
+  position:absolute;
+  z-index:-1;
+  inset:0;
+  pointer-events:none;
+  opacity:.18;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.16'/%3E%3C/svg%3E");
+  mix-blend-mode:soft-light;
+}
+.o-akcji-swiatlo { position:absolute; z-index:-1; border-radius:999px; pointer-events:none; filter:blur(120px); }
+.o-akcji-swiatlo-gorne { top:-180px; left:50%; width:min(90vw,960px); height:600px; translate:-50% 0; background:rgba(18,61,50,.24); }
+.o-akcji-swiatlo-boczne { top:48%; right:-220px; width:520px; height:520px; background:rgba(143,92,39,.11); }
+.o-akcji-gwiazdy { position:absolute; z-index:-1; inset:0; pointer-events:none; opacity:.42; background-image:radial-gradient(circle,#f3e5cb 0 1px,transparent 1.5px); background-size:83px 83px; mask-image:linear-gradient(to bottom,#000,transparent 68%); }
+.o-akcji-wrap { position:relative; z-index:1; width:min(100% - 40px,1000px); margin-inline:auto; }
+.o-akcji-hero { display:flex; flex-direction:column; align-items:center; max-width:780px; margin-inline:auto; text-align:center; }
+.o-akcji-znak { display:grid; width:54px; height:54px; place-items:center; margin-bottom:22px; border:1px solid rgba(213,174,98,.35); border-radius:50%; color:#d5ae62; background:rgba(255,255,255,.045); box-shadow:0 0 44px rgba(213,174,98,.13); }
+.o-akcji-znak svg { width:23px; }
+.o-akcji-nadtytul,.o-akcji-sekcja-etykieta { margin:0 0 18px; color:#d5ae62; font-size:.72rem; font-weight:650; letter-spacing:.18em; text-transform:uppercase; }
+.o-akcji-hero h1 { max-width:14ch; color:#f3e5cb; font-size:clamp(3.2rem,7vw,6.4rem); font-weight:500; line-height:.94; letter-spacing:-.04em; text-shadow:0 18px 55px rgba(0,0,0,.38); }
+.o-akcji-hero h1 em { display:block; color:#d5ae62; font-style:italic; }
+.o-akcji-wstep { max-width:64ch; margin-top:32px; color:rgba(255,249,240,.74); font-size:clamp(1.05rem,1.7vw,1.23rem); font-weight:350; line-height:1.85; }
+.o-akcji-karty { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:28px; margin-top:clamp(70px,9vw,108px); }
+.o-akcji-karta,.o-akcji-zasady { position:relative; overflow:hidden; border:1px solid rgba(213,174,98,.2); background:linear-gradient(145deg,rgba(255,255,255,.075),rgba(255,255,255,.025)); box-shadow:0 28px 70px rgba(0,0,0,.3),inset 0 1px rgba(255,255,255,.08); backdrop-filter:blur(22px); }
+.o-akcji-karta { min-height:390px; padding:clamp(30px,5vw,50px); border-radius:28px; transition:transform .5s cubic-bezier(.22,1,.36,1),border-color .5s ease,box-shadow .5s ease; }
+.o-akcji-karta::after { content:""; position:absolute; right:-90px; bottom:-110px; width:230px; height:230px; border-radius:50%; background:rgba(213,174,98,.065); filter:blur(22px); }
+.o-akcji-karta:hover { transform:translateY(-7px); border-color:rgba(213,174,98,.44); box-shadow:0 36px 90px rgba(0,0,0,.4),0 0 42px rgba(213,174,98,.08); }
+.o-akcji-karta-ikona { display:grid; width:58px; height:58px; place-items:center; border:1px solid rgba(213,174,98,.25); border-radius:18px; color:#d5ae62; background:rgba(213,174,98,.08); }
+.o-akcji-karta-ikona svg { width:28px; }
+.o-akcji-karta-numer { position:absolute; top:34px; right:38px; margin:0; color:rgba(213,174,98,.25); font:500 2.8rem/1 var(--krój-tytuł); }
+.o-akcji-karta h2 { max-width:14ch; margin-top:72px; color:#d5ae62; font-size:clamp(2rem,3.7vw,2.8rem); font-weight:500; line-height:1.05; }
+.o-akcji-karta > p:last-child { margin-top:24px; color:rgba(255,249,240,.75); font-size:1.05rem; font-weight:350; line-height:1.8; }
+.o-akcji-zasady { margin-top:32px; padding:clamp(34px,6vw,64px); border-radius:30px; }
+.o-akcji-zasady::before { content:""; position:absolute; inset:0 auto auto 0; width:100%; height:1px; background:linear-gradient(90deg,transparent,#d5ae62aa,transparent); }
+.o-akcji-zasady-wstep { max-width:680px; }
+.o-akcji-zasady h2 { color:#f3e5cb; font-size:clamp(2.5rem,5vw,4.4rem); font-weight:500; }
+.o-akcji-zasady-wstep > p:last-child { max-width:60ch; margin-top:20px; color:rgba(255,249,240,.68); font-size:1.03rem; line-height:1.75; }
+.o-akcji-zasady ul { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px 24px; margin:42px 0 0; padding:0; list-style:none; }
+.o-akcji-zasady li { display:flex; align-items:flex-start; gap:14px; padding:18px 20px; border:1px solid rgba(213,174,98,.12); border-radius:14px; color:rgba(255,249,240,.8); background:rgba(2,8,20,.2); line-height:1.65; }
+.o-akcji-zasady li span { display:grid; flex:0 0 26px; height:26px; place-items:center; margin-top:1px; border-radius:50%; color:#09152f; background:#d5ae62; }
+.o-akcji-zasady li svg { width:15px; stroke-width:2.5; }
+.o-akcji-zasady li:nth-child(5) { grid-column:1/-1; }
+.o-akcji-akcje { display:flex; flex-wrap:wrap; gap:14px; margin-top:42px; }
+.o-akcji-akcje .btn svg { width:18px; }
+.o-akcji-btn-szklany { --btn-tlo:rgba(255,255,255,.045); --btn-tekst:#f3e5cb; --btn-krawedz:rgba(213,174,98,.28); border-radius:999px; backdrop-filter:blur(12px); }
+.o-akcji-btn-szklany:hover { --btn-tlo:rgba(213,174,98,.12); --btn-tekst:#fff9f0; }
+@media (max-width:720px) {
+  .o-akcji-wrap { width:min(100% - 28px,1000px); }
+  .o-akcji-karty,.o-akcji-zasady ul { grid-template-columns:1fr; }
+  .o-akcji-karta { min-height:auto; }
+  .o-akcji-karta h2 { margin-top:54px; }
+  .o-akcji-zasady li:nth-child(5) { grid-column:auto; }
+  .o-akcji-akcje { flex-direction:column; }
+  .o-akcji-akcje .btn { width:100%; }
+}
+@media (prefers-reduced-motion:reduce) { .o-akcji-karta { transition:none; } .o-akcji-karta:hover { transform:none; } }
+
 /* Podsumowanie <details> jako przycisk — domyślny trójkącik ma
    kilkanaście pikseli i nie spełnia minimum celu dotykowego. */
 summary.btn { list-style: none; cursor: pointer; }

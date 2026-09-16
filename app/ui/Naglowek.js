@@ -9,10 +9,10 @@ import { wyloguj } from "../akcje-sesji";
 export default function Naglowek({ email }) {
   const sciezka = usePathname();
   const [przewiniety, setPrzewiniety] = useState(false);
-  const stronaGlowna = sciezka === "/";
+  const stronaKinowa = sciezka === "/" || sciezka === "/o-akcji";
 
   useEffect(() => {
-    if (!stronaGlowna) return;
+    if (!stronaKinowa) return;
     const sprawdz = () => setPrzewiniety(window.scrollY > 50);
     const klatka = requestAnimationFrame(sprawdz);
     window.addEventListener("scroll", sprawdz, { passive: true });
@@ -20,9 +20,9 @@ export default function Naglowek({ email }) {
       cancelAnimationFrame(klatka);
       window.removeEventListener("scroll", sprawdz);
     };
-  }, [stronaGlowna]);
+  }, [stronaKinowa]);
 
-  const wariant = stronaGlowna
+  const wariant = stronaKinowa
     ? `naglowek-na-hero ${przewiniety ? "naglowek-przewiniety" : ""}`
     : "naglowek-jasny";
 
