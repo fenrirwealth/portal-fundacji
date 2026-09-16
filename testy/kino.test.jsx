@@ -46,9 +46,13 @@ describe("Hero integration", () => {
   it("links to existing letter routes without creating a reservation", () => {
     vi.stubGlobal("IntersectionObserver", class { observe() {} disconnect() {} });
     const request = vi.fn(); vi.stubGlobal("fetch", request);
-    render(<HeroMagia saListy etykieta="Akcja trwa" termin={null} />);
+    const { container } = render(<HeroMagia saListy etykieta="Akcja trwa" termin={null} />);
     expect(screen.getByText("Zostań Mikołajem tego listu").getAttribute("href")).toBe("/listy");
     expect(screen.getByText("Niech list wybierze mnie").getAttribute("href")).toBe("/listy/losowy");
+    fireEvent.click(screen.getByRole("button", { name: /Zajrzyj do środka/ }));
+    expect(screen.getByRole("button", { name: /Zamknij kopertę/ })).toBeTruthy();
+    expect(container.querySelector(".koperta-prezentacja-otwarta")).toBeTruthy();
+    expect(container.querySelector(".koperta-reveal-copy")).toBeNull();
     expect(request).not.toHaveBeenCalled();
   });
   it("uses the explanation section when no letters are published", () => {
