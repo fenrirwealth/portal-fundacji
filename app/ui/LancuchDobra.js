@@ -1,32 +1,42 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
+import { motion, useReducedMotion } from "motion/react";
+import { normalizujLicznik } from "../../lib/licznik-widok.mjs";
+import LiczbaAnimowana from "./LiczbaAnimowana";
 
 /** @param {{poczatkowy: {wszystkie:number, wolne:number, majaMikolaja?:number, procent?:number}|null}} props */
 export default function LancuchDobra({ poczatkowy }) {
   const [stan, setStan] = useState(poczatkowy);
+  const [polaczenie, setPolaczenie] = useState("Łączenie z aktualizacjami…");
+  const mniej = useReducedMotion();
 
   useEffect(() => {
-    if ((/** @type {any} */ (navigator)).connection?.saveData) return undefined;
-    const zrodlo = new EventSource("/api/licznik");
-    zrodlo.onmessage = (zdarzenie) => {
-      try { setStan(JSON.parse(zdarzenie.data)); } catch {}
+    let zrodlo;
+    const podlacz = () => {
+      zrodlo?.close();
+      if (document.hidden) return;
+      zrodlo = new EventSource("/api/licznik");
+      zrodlo.onmessage = (zdarzenie) => {
+        try {
+          const dane = normalizujLicznik(JSON.parse(zdarzenie.data));
+          if (dane) { setStan(dane); setPolaczenie("Aktualizacja na żywo"); }
+        } catch {}
+      };
+      zrodlo.onerror = () => setPolaczenie("Ponawiamy połączenie. Widoczne są ostatnie odebrane dane.");
     };
-    return () => zrodlo.close();
+    podlacz();
+    document.addEventListener("visibilitychange", podlacz);
+    return () => { zrodlo?.close(); document.removeEventListener("visibilitychange", podlacz); };
   }, []);
 
-  const dane = useMemo(() => {
-    if (!stan) return null;
-    const maja = stan.majaMikolaja ?? Math.max(stan.wszystkie - stan.wolne, 0);
-    const procent = stan.procent ?? (stan.wszystkie ? Math.round((maja / stan.wszystkie) * 100) : 0);
-    return { ...stan, majaMikolaja: maja, procent };
-  }, [stan]);
+  const dane = normalizujLicznik(stan);
 
   if (!dane || dane.wszystkie === 0) {
     return (
       <div className="lancuch-pusty">
         <span className="lancuch-gwiazda" aria-hidden="true">✦</span>
-        <p><b>Listy są właśnie weryfikowane.</b><br />Opublikujemy je, gdy każdy będzie bezpieczny i gotowy.</p>
+        <p><b>{dane ? "Listy są właśnie weryfikowane." : "Statystyki są chwilowo niedostępne."}</b><br />{dane ? "Opublikujemy je, gdy każdy będzie bezpieczny i gotowy." : "Ponawiamy połączenie — możesz nadal poznawać akcję."}</p>
       </div>
     );
   }
@@ -35,23 +45,23 @@ export default function LancuchDobra({ poczatkowy }) {
     [dane.wszystkie, "listów w akcji"],
     [dane.majaMikolaja, "ma już Mikołaja"],
     [dane.wolne, "wciąż czeka"],
-    [`${dane.procent}%`, "marzeń zaopiekowanych"],
+    [dane.procent, "marzeń zaopiekowanych"],
   ];
 
   return (
     <div className="lancuch" aria-live="polite">
       <div className="lancuch-linia" aria-hidden="true">
-        <span style={{ width: `${Math.max(dane.procent, 2)}%` }} />
+        <motion.span style={{ width: "100%", transformOrigin: "left" }} initial={false} animate={{ scaleX: dane.procent / 100 }} transition={{ duration: mniej ? 0 : 1.2, ease: [.22,1,.36,1] }} />
       </div>
       <dl>
         {liczby.map(([wartosc, opis]) => (
           <div key={opis}>
-            <dd>{wartosc}</dd>
+            <dd><LiczbaAnimowana wartosc={wartosc} suffix={opis === "marzeń zaopiekowanych" ? "%" : ""} /></dd>
             <dt>{opis}</dt>
           </div>
         ))}
       </dl>
-      <p className="drobny lancuch-opis">Liczby pochodzą bezpośrednio z aktywnej edycji i aktualizują się po zmianie statusu listu.</p>
+      <p className="drobny lancuch-opis">{polaczenie}. Dane zweryfikowanych listów aktywnej edycji.</p>
     </div>
   );
 }

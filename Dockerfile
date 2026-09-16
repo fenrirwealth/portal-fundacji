@@ -41,6 +41,7 @@ RUN mkdir -p /data/skany \
 
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 
 # Pelne node_modules swiadomie: wczesniej kopiowalem tylko katalogi
 # "prisma" i "@prisma", przez co narzedzie Prismy nie mialo zaleznosci,
