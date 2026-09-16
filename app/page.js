@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Gift, MailOpen, ShieldCheck, Star } from "lucide-react";
 import { aktywnaEdycja, formatujTermin, licznik } from "../lib/db";
 import HeroMagia from "./ui/HeroMagia";
 import LancuchDobra from "./ui/LancuchDobra";
@@ -15,10 +16,10 @@ export const metadata = {
 };
 
 const KROKI = [
-  ["01", "Wybierz list", "Poznaj marzenie bez nazwiska, adresu, nazwy placówki ani wizerunku dziecka."],
-  ["02", "Zostań Mikołajem", "Zaloguj się bez hasła i zarezerwuj list. Masz 3 dni na potwierdzenie."],
-  ["03", "Przygotuj prezent", "Nie musisz kupować wszystkiego. Liczy się gest, uważność i bezpieczny podarunek."],
-  ["04", "My go przekażemy", "Sprawdzamy, pakujemy i dostarczamy prezenty do zweryfikowanych placówek."],
+  { nr: "01", tytul: "Wybierz list", opis: "Poznaj marzenie bez nazwiska, adresu, nazwy placówki ani wizerunku dziecka.", Ikona: MailOpen },
+  { nr: "02", tytul: "Zostań Mikołajem", opis: "Zaloguj się bez hasła i zarezerwuj list. Masz 3 dni na potwierdzenie.", Ikona: Star },
+  { nr: "03", tytul: "Przygotuj prezent", opis: "Nie musisz kupować wszystkiego. Liczy się gest, uważność i bezpieczny podarunek.", Ikona: Gift },
+  { nr: "04", tytul: "My go przekażemy", opis: "Sprawdzamy, pakujemy i dostarczamy prezenty do zweryfikowanych placówek.", Ikona: ShieldCheck },
 ];
 
 function trybAkcji(edycja) {
@@ -58,22 +59,27 @@ export default async function Start() {
         </div>
       </section>
 
-      <section className="wrap sekcja jak-dziala" id="jak-to-dziala">
-        <Wejscie>
-          <p className="nadtytul nadtytul-ciemny"><span /> Prosto i bezpiecznie</p>
-          <div className="naglowek-sekcji">
-            <h2>Ty wybierasz marzenie. My czuwamy nad całą drogą prezentu.</h2>
-            <p>Jedna przejrzysta ścieżka od listu do dziecka, z kontrolą Fundacji na każdym etapie.</p>
-          </div>
-        </Wejscie>
-        <ol className="kroki-magiczne">
-          {KROKI.map(([nr, tytul, opis], i) => (
-            <Wejscie as="li" key={nr} opoznienie={i * 0.07}>
-              <span className="krok-numer">{nr}</span>
-              <div><h3>{tytul}</h3><p>{opis}</p></div>
-            </Wejscie>
-          ))}
-        </ol>
+      <section className="sekcja jak-dziala" id="jak-to-dziala">
+        <div className="jak-dziala-swiatlo jak-dziala-swiatlo-lewe" aria-hidden="true" />
+        <div className="jak-dziala-swiatlo jak-dziala-swiatlo-prawe" aria-hidden="true" />
+        <div className="wrap jak-dziala-tresc">
+          <Wejscie>
+            <p className="nadtytul"><span /> Prosto i bezpiecznie</p>
+            <div className="naglowek-sekcji">
+              <h2>Ty wybierasz marzenie. <em>My czuwamy nad całą drogą prezentu.</em></h2>
+              <p>Jedna przejrzysta ścieżka od listu do dziecka, z kontrolą Fundacji na każdym etapie.</p>
+            </div>
+          </Wejscie>
+          <ol className="kroki-magiczne">
+            {KROKI.map(({ nr, tytul, opis, Ikona }, i) => (
+              <Wejscie as="li" key={nr} opoznienie={i * 0.08}>
+                <span className="krok-numer" aria-hidden="true">{nr}</span>
+                <span className="krok-ikona" aria-hidden="true"><Ikona strokeWidth={1.45} /></span>
+                <div className="krok-tresc"><h3>{tytul}</h3><p>{opis}</p></div>
+              </Wejscie>
+            ))}
+          </ol>
+        </div>
       </section>
 
       <section className="sekcja archiwum-sekcja">
