@@ -5,6 +5,7 @@ import KinoweWejscie from "../app/ui/KinoweWejscie";
 import UdostepnijMarzenie from "../app/listy/[id]/UdostepnijMarzenie";
 import LancuchDobra from "../app/ui/LancuchDobra";
 import HeroMagia from "../app/ui/HeroMagia";
+import ArchiwumListow from "../app/ui/ArchiwumListow";
 import { normalizujLicznik } from "../lib/licznik-widok.mjs";
 
 vi.mock("../app/ui/Toast", () => ({ useToast: () => vi.fn() }));
@@ -55,6 +56,17 @@ describe("Hero integration", () => {
     render(<HeroMagia saListy={false} etykieta="Wkrótce" termin={null} />);
     expect(screen.getByText("Poznaj akcję").getAttribute("href")).toBe("#jak-to-dziala");
     expect(screen.queryByText("Niech list wybierze mnie")).toBeNull();
+  });
+});
+
+describe("Archive gallery", () => {
+  it("shows all nine letters and opens a focused preview", () => {
+    HTMLDialogElement.prototype.showModal = function () { this.open = true; };
+    HTMLDialogElement.prototype.close = function () { this.open = false; this.dispatchEvent(new Event("close")); };
+    render(<ArchiwumListow />);
+    expect(screen.getAllByRole("button", { name: /Powiększ list/ })).toHaveLength(9);
+    fireEvent.click(screen.getByRole("button", { name: "Powiększ list 1" }));
+    expect(screen.getByRole("button", { name: "Zamknij podgląd listu" })).toBeTruthy();
   });
 });
 

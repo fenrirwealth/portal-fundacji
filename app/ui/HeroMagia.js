@@ -22,7 +22,7 @@ export default function HeroMagia({ etykieta, saListy, termin }) {
     // This is a redirecting Route Handler, not an RSC page. Fetch it once,
     // after the gesture, without Next prefetch caching a random selection.
     // eslint-disable-next-line @next/next/no-location-assign-relative-destination
-    timer.current = setTimeout(() => window.location.assign("/listy/losowy"), 1450);
+    timer.current = setTimeout(() => window.location.assign("/listy/losowy"), 2850);
   }
   return <>
     <KinoweWejscie />
@@ -36,7 +36,7 @@ export default function HeroMagia({ etykieta, saListy, termin }) {
           <p className="hero-opis">Dzieci napisały, o czym marzą. Ty możesz dopisać do tej historii piękne zakończenie. My zadbamy o bezpieczną drogę prezentu.</p>
           <div className="hero-akcje">
             <Link className="btn btn-magiczny btn-duzy" href={saListy ? "/listy" : "#jak-to-dziala"}>{saListy ? "Zostań Mikołajem tego listu" : "Poznaj akcję"}<span aria-hidden="true">↗</span></Link>
-            {saListy && <Link prefetch={false} className="btn btn-szklany btn-duzy" href="/listy/losowy" onClick={losuj} aria-busy={otwarta}>{otwarta ? "Otwieramy Twoją historię…" : "Niech list wybierze mnie"}</Link>}
+            {saListy && <Link prefetch={false} className="btn btn-szklany btn-duzy" href="/listy/losowy" onClick={losuj} aria-busy={otwarta}>{otwarta ? "Magia wybiera Twój list…" : "Niech list wybierze mnie"}</Link>}
           </div>
           {termin && <p className="hero-termin">Prezenty przyjmujemy do {termin}.</p>}
           <p className="hero-zaufanie"><span aria-hidden="true">✧</span> Zweryfikowane listy. Chroniona prywatność. Prawdziwa pomoc.</p>

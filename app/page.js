@@ -3,6 +3,7 @@ import { aktywnaEdycja, formatujTermin, licznik } from "../lib/db";
 import HeroMagia from "./ui/HeroMagia";
 import LancuchDobra from "./ui/LancuchDobra";
 import Wejscie from "./ui/Wejscie";
+import ArchiwumListow from "./ui/ArchiwumListow";
 
 export const dynamic = "force-dynamic";
 
@@ -73,6 +74,20 @@ export default async function Start() {
             </Wejscie>
           ))}
         </ol>
+      </section>
+
+      <section className="sekcja archiwum-sekcja">
+        <div className="wrap">
+          <Wejscie>
+            <p className="nadtytul"><span /> Poprzednie edycje</p>
+            <div className="naglowek-sekcji archiwum-naglowek">
+              <h2>Tak wyglądają marzenia pisane dziecięcą ręką.</h2>
+              <p>Każda kartka to osobna historia. Te listy znalazły już swoich Mikołajów — dziś przypominają, jak wiele może zmienić jeden uważny gest.</p>
+            </div>
+          </Wejscie>
+        </div>
+        <Wejscie opoznienie={0.1}><ArchiwumListow /></Wejscie>
+        <div className="wrap archiwum-dopisek"><span aria-hidden="true">✦</span><p>Materiały z archiwum Fundacji. Galeria nie zawiera aktywnych listów do rezerwacji.</p></div>
       </section>
 
       <section className="wrap sekcja">
