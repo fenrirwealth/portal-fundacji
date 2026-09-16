@@ -9,7 +9,7 @@ import { wyloguj } from "../akcje-sesji";
 export default function Naglowek({ email }) {
   const sciezka = usePathname();
   const [przewiniety, setPrzewiniety] = useState(false);
-  const stronaKinowa = sciezka === "/" || sciezka === "/o-akcji";
+  const stronaKinowa = sciezka === "/" || sciezka === "/o-akcji" || sciezka === "/fundusz-ostatniej-gwiazdki";
 
   useEffect(() => {
     if (!stronaKinowa) return;

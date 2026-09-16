@@ -1024,6 +1024,66 @@ select.pole-kontrolka {
 
 @media (max-width: 720px) { .fundusz-zaproszenie { grid-template-columns: 1fr; align-items: start; } }
 
+/* Fundusz Ostatniej Gwiazdki — ciepłe światło nadziei w nocnej oprawie. */
+.fundusz-premium {
+  position:relative;
+  isolation:isolate;
+  min-height:100vh;
+  overflow:hidden;
+  padding:clamp(128px,14vw,168px) 0 clamp(96px,11vw,144px);
+  color:#fff9f0;
+  background:
+    radial-gradient(circle at 50% 18%,rgba(213,174,98,.11),transparent 33%),
+    radial-gradient(circle at 7% 70%,rgba(18,61,50,.27),transparent 32%),
+    linear-gradient(155deg,#071127 0%,#09152f 52%,#0b1b38 100%);
+}
+.fundusz-premium::after { content:""; position:absolute; z-index:-1; inset:0; pointer-events:none; opacity:.16; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.88' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.16'/%3E%3C/svg%3E"); mix-blend-mode:soft-light; }
+.fundusz-blask { position:absolute; z-index:-1; top:5%; left:50%; width:min(92vw,800px); height:800px; translate:-50% 0; border-radius:50%; pointer-events:none; background:rgba(213,174,98,.1); filter:blur(120px); animation:fundusz-blask 4s ease-in-out infinite alternate; }
+.fundusz-gwiazda-tlo { position:absolute; z-index:-1; top:9%; left:50%; width:min(54vw,310px); height:auto; translate:-50% 0; color:#d5ae62; opacity:.08; filter:blur(2px); animation:fundusz-gwiazda 5s ease-in-out infinite alternate; }
+.fundusz-pyl { position:absolute; z-index:-1; inset:0; pointer-events:none; opacity:.38; background-image:radial-gradient(circle,#f3e5cb 0 1px,transparent 1.5px); background-size:91px 91px; mask-image:linear-gradient(to bottom,#000,transparent 72%); }
+.fundusz-premium-wrap { position:relative; z-index:1; width:min(100% - 40px,1000px); margin-inline:auto; }
+.fundusz-premium-hero { display:flex; flex-direction:column; align-items:center; max-width:790px; margin-inline:auto; text-align:center; }
+.fundusz-gwiazda-znak { display:grid; width:64px; height:64px; place-items:center; margin-bottom:24px; border:1px solid rgba(213,174,98,.38); border-radius:50%; color:#d5ae62; background:rgba(255,255,255,.055); box-shadow:0 0 38px rgba(213,174,98,.22),inset 0 1px rgba(255,255,255,.08); }
+.fundusz-gwiazda-znak svg { width:31px; height:31px; }
+.fundusz-premium-nadtytul,.fundusz-etykieta { margin:0 0 18px; color:#d5ae62; font-size:.72rem; font-weight:650; letter-spacing:.18em; text-transform:uppercase; }
+.fundusz-premium-hero h1 { max-width:13ch; color:#f3e5cb; font-size:clamp(3.2rem,7vw,6.3rem); font-weight:500; line-height:.94; letter-spacing:-.04em; text-shadow:0 18px 55px rgba(0,0,0,.4); }
+.fundusz-premium-hero h1 em { display:block; color:#d5ae62; font-style:italic; }
+.fundusz-premium-hero > p:last-child { max-width:64ch; margin-top:32px; color:rgba(255,249,240,.75); font-size:clamp(1.05rem,1.7vw,1.23rem); font-weight:350; line-height:1.85; }
+.fundusz-moduly { display:grid; gap:30px; margin-top:clamp(70px,9vw,108px); }
+.fundusz-szklo { position:relative; overflow:hidden; border:1px solid rgba(213,174,98,.22); border-radius:28px; background:linear-gradient(145deg,rgba(255,255,255,.075),rgba(255,255,255,.025)); box-shadow:0 28px 76px rgba(0,0,0,.34),inset 0 1px rgba(255,255,255,.08); backdrop-filter:blur(22px); }
+.fundusz-misja { padding:clamp(34px,6vw,64px); }
+.fundusz-misja h2,.fundusz-wplata h2 { color:#d5ae62; font-size:clamp(2.3rem,4.5vw,3.8rem); font-weight:500; line-height:1.04; }
+.fundusz-misja ul { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; margin:38px 0 0; padding:0; list-style:none; }
+.fundusz-misja li { display:flex; flex-direction:column; gap:20px; min-height:190px; padding:24px; border:1px solid rgba(213,174,98,.14); border-radius:18px; color:rgba(255,249,240,.8); background:rgba(2,8,20,.22); font-size:1rem; line-height:1.65; }
+.fundusz-misja li span { display:grid; width:30px; height:30px; place-items:center; border-radius:50%; color:#09152f; background:#d5ae62; }
+.fundusz-misja li svg { width:17px; stroke-width:2.5; }
+.fundusz-wplata { padding:clamp(38px,7vw,72px); text-align:center; border-color:rgba(213,174,98,.42); background:radial-gradient(circle at 50% 0,rgba(213,174,98,.14),transparent 35%),linear-gradient(155deg,rgba(18,61,50,.82),rgba(8,34,34,.78) 58%,rgba(255,255,255,.035)); box-shadow:0 32px 90px rgba(1,15,17,.52),0 0 52px rgba(18,61,50,.32),inset 0 1px rgba(255,255,255,.1); transition:border-color .5s ease,box-shadow .5s ease; }
+.fundusz-wplata:hover { border-color:rgba(213,174,98,.7); box-shadow:0 38px 100px rgba(1,15,17,.6),0 0 70px rgba(18,61,50,.42),inset 0 1px rgba(255,255,255,.1); }
+.fundusz-wplata-gwiazda { display:grid; width:50px; height:50px; place-items:center; margin:0 auto 24px; color:#d5ae62; filter:drop-shadow(0 0 18px rgba(213,174,98,.4)); }
+.fundusz-wplata-gwiazda svg { width:42px; height:42px; }
+.fundusz-wplata h2 { color:#f3e5cb; }
+.fundusz-konto-panel { width:min(100%,620px); margin:34px auto 0; padding:26px; border:1px solid rgba(213,174,98,.25); border-radius:18px; background:rgba(0,0,0,.28); box-shadow:inset 0 1px rgba(255,255,255,.04); }
+.fundusz-konto-panel > p:first-child { margin:0 0 12px; color:#d5ae62; font-size:.7rem; font-weight:650; letter-spacing:.17em; text-transform:uppercase; }
+.fundusz-numer-konta { margin:0; color:#fff; font:600 clamp(1.12rem,2.8vw,1.65rem)/1.5 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.045em; overflow-wrap:anywhere; }
+.fundusz-tytul { margin:16px 0 0; color:rgba(255,249,240,.68); font-size:.85rem; }
+.fundusz-wplata > .btn { margin-top:24px; border-radius:999px; }
+.fundusz-brak-konta { max-width:54ch; margin:32px auto 0; color:rgba(255,249,240,.72); font-size:1.05rem; line-height:1.75; }
+.fundusz-wybor { display:grid; grid-template-columns:1fr auto; align-items:center; gap:34px; padding:clamp(30px,5vw,50px); }
+.fundusz-wybor h2 { color:#f3e5cb; font-size:clamp(2rem,4vw,3rem); }
+.fundusz-wybor p { max-width:56ch; margin-top:14px; color:rgba(255,249,240,.68); line-height:1.7; }
+.fundusz-wybor .btn { border-radius:999px; white-space:nowrap; }
+.fundusz-wybor .btn svg { width:18px; }
+@keyframes fundusz-blask { to { opacity:.7; transform:scale(1.12); } }
+@keyframes fundusz-gwiazda { to { opacity:.14; transform:scale(1.06) rotate(3deg); } }
+@media (max-width:760px) {
+  .fundusz-premium-wrap { width:min(100% - 28px,1000px); }
+  .fundusz-misja ul { grid-template-columns:1fr; }
+  .fundusz-misja li { min-height:auto; }
+  .fundusz-wybor { grid-template-columns:1fr; }
+  .fundusz-wybor .btn { width:100%; }
+}
+@media (prefers-reduced-motion:reduce) { .fundusz-blask,.fundusz-gwiazda-tlo { animation:none; } .fundusz-wplata { transition:none; } }
+
 /* O akcji — kinowa opowieść w spójnym, nocnym języku strony głównej. */
 .o-akcji-premium {
   position:relative;
