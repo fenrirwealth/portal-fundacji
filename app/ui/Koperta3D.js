@@ -45,9 +45,9 @@ export default function Koperta3D({ otwarta = false }) {
   }, []);
   const czyOtwarta = otwarta || podglad;
   return <div className={`koperta-prezentacja ${czyOtwarta ? "koperta-prezentacja-otwarta" : ""}`} ref={kontener}>
-    <div className="koperta-scena" aria-hidden="true">
-      <div className="koperta-aura" />
-      <div className="koperta-gwiazdy">{Array.from({ length: 16 }, (_, i) => <span key={i} style={/** @type {import("react").CSSProperties & Record<string, number>} */ ({ "--i": i })} />)}</div>
+    <div className="koperta-scena">
+      <div className="koperta-aura" aria-hidden="true" />
+      <div className="koperta-gwiazdy" aria-hidden="true">{Array.from({ length: 16 }, (_, i) => <span key={i} style={/** @type {import("react").CSSProperties & Record<string, number>} */ ({ "--i": i })} />)}</div>
       <div className="koperta-list-dom" aria-hidden="true">
         <span>Każde marzenie</span>
         <strong>zasługuje na magię</strong>
@@ -55,12 +55,14 @@ export default function Koperta3D({ otwarta = false }) {
       </div>
       <Image src="/magia/koperta.webp" alt="" fill sizes="(max-width: 760px) 90vw, 48vw" priority className={`koperta-fotografia ${czyOtwarta ? "koperta-fotografia-otwarta" : ""}`} />
       {webgl && <BezpiecznaScena onFailure={() => setWebgl(false)}><Scena otwarta={czyOtwarta} aktywna={widoczna && ruch} onReady={() => setGotowa(true)} onFailure={() => { setWebgl(false); setGotowa(false); }} /></BezpiecznaScena>}
-      <div className="koperta-reveal-copy"><small>Ten list czeka</small><strong>na swojego Mikołaja</strong><span>✦</span></div>
+      <div className="scena-kontrolki">
+        <button className="scena-otworz" type="button" aria-expanded={podglad} onClick={() => setPodglad(!podglad)}>
+          <span aria-hidden="true">{podglad ? "×" : "✦"}</span>
+          {podglad ? "Zamknij kopertę" : "Zajrzyj do środka"}
+        </button>
+        {webgl && gotowa && <button className="scena-ruch" type="button" aria-pressed={!ruch} onClick={() => setRuch(!ruch)}>{ruch ? "Zatrzymaj śnieg" : "Wznów śnieg"}</button>}
+      </div>
     </div>
     <p className="koperta-podpis">Mały list. <span>Wielka historia.</span></p>
-    {webgl && gotowa && <div className="scena-kontrolki">
-      <button type="button" aria-expanded={podglad} onClick={() => setPodglad(!podglad)}>{podglad ? "Zamknij kopertę" : "Zajrzyj do środka"}</button>
-      <button type="button" aria-pressed={!ruch} onClick={() => setRuch(!ruch)}>{ruch ? "Zatrzymaj animację" : "Wznów animację"}</button>
-    </div>}
   </div>;
 }
