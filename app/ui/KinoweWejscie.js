@@ -15,7 +15,9 @@ export default function KinoweWejscie() {
   const [grafika, setGrafika] = useState(false);
   useEffect(() => {
     const mniej = window.matchMedia("(prefers-reduced-motion: reduce)");
-    if (mniej.matches || (/** @type {any} */ (navigator)).connection?.saveData) return;
+    // Nie przejmuj przewijania, gdy użytkownik wszedł bezpośrednio do
+    // konkretnej sekcji. Modal potrafił wtedy zostawić stronę w połowie hero.
+    if (window.location.hash || mniej.matches || (/** @type {any} */ (navigator)).connection?.saveData) return;
     try {
       if (sessionStorage.getItem(KLUCZ)) return;
       sessionStorage.setItem(KLUCZ, "1");
