@@ -65,10 +65,14 @@ export default function Koperta3D({ otwarta = false }) {
       setCzujnik(true); setKomunikat("Delikatnie przechyl telefon.");
     } catch { setKomunikat("Czujnik niedostępny. Użyj dotyku."); }
   }
-  return <div className="koperta-prezentacja" ref={kontener}>
+  const czyOtwarta = otwarta || podglad;
+  return <div className={`koperta-prezentacja ${czyOtwarta ? "koperta-prezentacja-otwarta" : ""}`} ref={kontener}>
     <div className="koperta-scena" aria-hidden="true">
-      <Image src="/magia/koperta.webp" alt="" fill sizes="(max-width: 760px) 90vw, 48vw" priority className={`koperta-fotografia ${webgl && gotowa ? "koperta-fotografia-ukryta" : ""}`} />
-      {webgl && <BezpiecznaScena onFailure={() => setWebgl(false)}><Scena otwarta={otwarta || podglad} aktywna={widoczna && ruch} przechyl={przechyl} onReady={() => setGotowa(true)} onFailure={() => { setWebgl(false); setGotowa(false); }} /></BezpiecznaScena>}
+      <div className="koperta-aura" />
+      <div className="koperta-gwiazdy">{Array.from({ length: 16 }, (_, i) => <span key={i} style={/** @type {import("react").CSSProperties & Record<string, number>} */ ({ "--i": i })} />)}</div>
+      <Image src="/magia/koperta.webp" alt="" fill sizes="(max-width: 760px) 90vw, 48vw" priority className={`koperta-fotografia ${czyOtwarta ? "koperta-fotografia-otwarta" : ""} ${webgl && gotowa ? "koperta-fotografia-ukryta" : ""}`} />
+      {webgl && <BezpiecznaScena onFailure={() => setWebgl(false)}><Scena otwarta={czyOtwarta} aktywna={widoczna && ruch} przechyl={przechyl} onReady={() => setGotowa(true)} onFailure={() => { setWebgl(false); setGotowa(false); }} /></BezpiecznaScena>}
+      <div className="koperta-reveal-copy"><small>Ten list czeka</small><strong>na swojego Mikołaja</strong><span>✦</span></div>
     </div>
     <p className="koperta-podpis">Mały list. <span>Wielka historia.</span></p>
     {webgl && gotowa && <div className="scena-kontrolki">

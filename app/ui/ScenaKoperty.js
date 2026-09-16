@@ -39,11 +39,75 @@ export function Czasteczki() {
   return <points ref={ref}><bufferGeometry><bufferAttribute attach="attributes-position" args={[positions, 3]} /><bufferAttribute attach="attributes-color" args={[colors, 3]} /></bufferGeometry><pointsMaterial size={.027} vertexColors transparent opacity={.75} depthWrite={false} blending={THREE.AdditiveBlending} /></points>;
 }
 
+function easeOutExpo(t) {
+  return t === 1 ? 1 : 1 - 2 ** (-10 * t);
+}
+
+/** Złoty impuls uruchamiany w chwili pęknięcia laku. */
+export function MagicznyWybuch({ otwarta }) {
+  const punkty = useRef(null);
+  const material = useRef(null);
+  const pierscien = useRef(null);
+  const postep = useRef(0);
+  const { start, kierunki } = useMemo(() => {
+    const start = new Float32Array(260 * 3);
+    const kierunki = new Float32Array(260 * 3);
+    for (let i = 0; i < 260; i++) {
+      const a = ((i * 137.508) * Math.PI) / 180;
+      const r = .06 + (i % 13) * .009;
+      start.set([Math.cos(a) * r, -.08 + Math.sin(i * 2.13) * .055, .42], i * 3);
+      const moc = .65 + (i % 17) / 13;
+      kierunki.set([Math.cos(a) * moc, Math.sin(a) * moc * .72 + .28, (i % 7) * .055], i * 3);
+    }
+    return { start, kierunki };
+  }, []);
+  useFrame((_, delta) => {
+    const dt = Math.min(delta, .04);
+    postep.current = THREE.MathUtils.damp(postep.current, otwarta ? 1 : 0, otwarta ? 2.7 : 7, dt);
+    const p = postep.current;
+    const e = easeOutExpo(Math.min(1, p));
+    const pozycje = punkty.current.geometry.attributes.position;
+    for (let i = 0; i < pozycje.count; i++) {
+      const o = i * 3;
+      pozycje.setXYZ(i, start[o] + kierunki[o] * e * 2.45, start[o + 1] + kierunki[o + 1] * e * 2.45 - p * p * .75, start[o + 2] + kierunki[o + 2] * e);
+    }
+    pozycje.needsUpdate = true;
+    material.current.opacity = Math.max(0, Math.sin(Math.min(1, p) * Math.PI) * .95);
+    const skala = .2 + e * 3.5;
+    pierscien.current.scale.setScalar(skala);
+    pierscien.current.material.opacity = Math.max(0, (1 - p) * .72);
+  });
+  return <group position={[0, -.05, .42]}>
+    <points ref={punkty}>
+      <bufferGeometry><bufferAttribute attach="attributes-position" args={[start.slice(), 3]} /></bufferGeometry>
+      <pointsMaterial ref={material} color="#ffd982" size={.065} transparent opacity={0} depthWrite={false} blending={THREE.AdditiveBlending} />
+    </points>
+    <mesh ref={pierscien} scale={.2} rotation={[0,0,.12]}>
+      <torusGeometry args={[.46,.012,8,96]} />
+      <meshBasicMaterial color="#ffe7a8" transparent opacity={0} blending={THREE.AdditiveBlending} depthWrite={false} />
+    </mesh>
+  </group>;
+}
+
+function KinowyRig({ otwarta }) {
+  useFrame(({ camera }, delta) => {
+    const dt = Math.min(delta, .04);
+    camera.position.z = THREE.MathUtils.damp(camera.position.z, otwarta ? 6.45 : 7.5, 2.8, dt);
+    camera.position.y = THREE.MathUtils.damp(camera.position.y, otwarta ? .18 : 0, 2.8, dt);
+    camera.lookAt(0, otwarta ? .14 : 0, 0);
+  });
+  return null;
+}
+
 export function List({ otwarta, przechyl }) {
   const grupa = useRef(null);
   const klapa = useRef(null);
   const list = useRef(null);
   const swiatlo = useRef(null);
+  const listMaterial = useRef(null);
+  const lakLewy = useRef(null);
+  const lakPrawy = useRef(null);
+  const postep = useRef(0);
   const ksztalt = useMemo(() => {
     const s = new THREE.Shape(); s.moveTo(-1.8, 0); s.lineTo(1.8, 0); s.lineTo(0, -1.35); s.closePath(); return s;
   }, []);
@@ -57,25 +121,49 @@ export function List({ otwarta, przechyl }) {
   useFrame(({ pointer, clock }, delta) => {
     const dt = Math.min(delta, .04);
     const cel = przechyl || pointer;
-    grupa.current.rotation.y = THREE.MathUtils.damp(grupa.current.rotation.y, cel.x * .22 - .1, 4, dt);
-    grupa.current.rotation.x = THREE.MathUtils.damp(grupa.current.rotation.x, -cel.y * .13 + .06, 4, dt);
-    grupa.current.position.y = Math.sin(clock.elapsedTime * .7) * .075;
-    klapa.current.rotation.x = THREE.MathUtils.damp(klapa.current.rotation.x, otwarta ? -2.7 : -.035, 3, dt);
-    list.current.position.y = THREE.MathUtils.damp(list.current.position.y, otwarta ? .9 : .06, 3, dt);
-    swiatlo.current.intensity = THREE.MathUtils.damp(swiatlo.current.intensity, otwarta ? 8 : 1.5, 3, dt);
+    postep.current = THREE.MathUtils.damp(postep.current, otwarta ? 1 : 0, otwarta ? 2.55 : 5.5, dt);
+    const p = postep.current;
+    const reveal = easeOutExpo(Math.min(1, p));
+    grupa.current.rotation.y = THREE.MathUtils.damp(grupa.current.rotation.y, cel.x * .18 - .08, 4, dt);
+    grupa.current.rotation.x = THREE.MathUtils.damp(grupa.current.rotation.x, -cel.y * .1 + (otwarta ? -.03 : .06), 4, dt);
+    grupa.current.rotation.z = THREE.MathUtils.damp(grupa.current.rotation.z, otwarta ? 0 : -.045, 3.5, dt);
+    grupa.current.position.y = Math.sin(clock.elapsedTime * .7) * .055 - p * .08;
+    const skala = 1 + Math.sin(Math.min(1, p) * Math.PI) * .075;
+    grupa.current.scale.setScalar(skala);
+    klapa.current.rotation.x = THREE.MathUtils.damp(klapa.current.rotation.x, otwarta ? -2.92 : -.035, 3.4, dt);
+    list.current.position.y = THREE.MathUtils.damp(list.current.position.y, otwarta ? 1.42 : .06, 2.7, dt);
+    list.current.position.z = THREE.MathUtils.damp(list.current.position.z, otwarta ? .62 : .01, 3, dt);
+    list.current.rotation.z = THREE.MathUtils.damp(list.current.rotation.z, otwarta ? -.025 : .018, 3, dt);
+    list.current.scale.setScalar(.94 + reveal * .1);
+    swiatlo.current.intensity = THREE.MathUtils.damp(swiatlo.current.intensity, otwarta ? 20 : 1.5, 3.6, dt);
+    listMaterial.current.emissiveIntensity = .08 + Math.sin(Math.min(1, p) * Math.PI) * .48;
+    lakLewy.current.position.x = -.08 - reveal * .32;
+    lakPrawy.current.position.x = .08 + reveal * .32;
+    lakLewy.current.rotation.z = -reveal * .85;
+    lakPrawy.current.rotation.z = Math.PI + reveal * .85;
+    lakLewy.current.scale.setScalar(1 - reveal * .22);
+    lakPrawy.current.scale.setScalar(1 - reveal * .22);
   });
   return <group ref={grupa} rotation={[.06, -.1, -.045]}>
     <mesh position={[0, 0, -.06]}><boxGeometry args={[3.65, 2.3, .09]} /><meshStandardMaterial map={papier} roughness={.92} /></mesh>
-    <mesh ref={list} position={[0, .06, .01]}><boxGeometry args={[3.2, 2.05, .025]} /><meshStandardMaterial color="#fff9f0" map={papier} roughness={.85} /></mesh>
+    <group ref={list} position={[0, .06, .01]} rotation={[0,0,.018]}>
+      <mesh><boxGeometry args={[3.2, 2.05, .025]} /><meshStandardMaterial ref={listMaterial} color="#fff9f0" emissive="#d8a243" emissiveIntensity={.08} map={papier} roughness={.82} /></mesh>
+      <mesh position={[0,.42,.026]}><torusGeometry args={[.18,.012,8,48]} /><meshStandardMaterial color="#D5AE62" metalness={.75} roughness={.25} /></mesh>
+      <mesh position={[0,.42,.032]} rotation={[0,0,Math.PI/4]}><boxGeometry args={[.095,.095,.012]} /><meshStandardMaterial color="#D5AE62" metalness={.7} roughness={.22} /></mesh>
+      {[.08,-.15,-.38].map((y,i) => <mesh key={y} position={[0,y,.027]}><boxGeometry args={[i === 2 ? 1.45 : 1.9,.018,.008]} /><meshBasicMaterial color="#8f775c" transparent opacity={.42 - i * .06} /></mesh>)}
+    </group>
     <mesh position={[0, -.25, .07]}><boxGeometry args={[3.65, 1.8, .06]} /><meshStandardMaterial map={papier} roughness={.8} /></mesh>
     {[[-1.66, 0, .015, 1.95], [1.66, 0, .015, 1.95], [0, -.96, 3.33, .015], [0, .96, 3.33, .015]].map(([x,y,w,h], i) => <mesh key={i} position={[x,y,.115]}><boxGeometry args={[w,h,.007]} /><meshStandardMaterial color="#D5AE62" metalness={.85} roughness={.25} /></mesh>)}
     <group name="klapa" ref={klapa} position={[0, 1.13, .13]}>
       <mesh><shapeGeometry args={[ksztalt]} /><meshStandardMaterial map={papier} side={THREE.DoubleSide} roughness={.8} /></mesh>
-      <mesh position={[0, -1.06, .045]} rotation={[Math.PI / 2, 0, 0]}><cylinderGeometry args={[.285,.31,.07,48]} /><meshStandardMaterial color="#7B1830" roughness={.35} metalness={.12} /></mesh>
-      <mesh position={[0, -1.06, .09]}><torusGeometry args={[.22,.012,8,48]} /><meshStandardMaterial color="#b46d55" metalness={.5} roughness={.3} /></mesh>
-      <mesh position={[0, -1.06, .10]} rotation={[0,0,Math.PI/4]}><boxGeometry args={[.12,.12,.016]} /><meshStandardMaterial color="#D5AE62" metalness={.7} roughness={.25} /></mesh>
+      <group position={[0,-1.06,.09]}>
+        <mesh ref={lakLewy} position={[-.08,0,0]}><circleGeometry args={[.31,48,Math.PI / 2,Math.PI]} /><meshStandardMaterial color="#7B1830" roughness={.28} metalness={.16} side={THREE.DoubleSide} /></mesh>
+        <mesh ref={lakPrawy} position={[.08,0,.002]} rotation={[0,0,Math.PI]}><circleGeometry args={[.31,48,Math.PI / 2,Math.PI]} /><meshStandardMaterial color="#8d203a" roughness={.28} metalness={.16} side={THREE.DoubleSide} /></mesh>
+        <mesh position={[0,0,.012]}><torusGeometry args={[.22,.012,8,48]} /><meshStandardMaterial color="#d68a68" metalness={.5} roughness={.3} /></mesh>
+        <mesh position={[0,0,.019]} rotation={[0,0,Math.PI/4]}><boxGeometry args={[.12,.12,.016]} /><meshStandardMaterial color="#D5AE62" metalness={.7} roughness={.25} /></mesh>
+      </group>
     </group>
-    <pointLight ref={swiatlo} position={[0,.8,.5]} color="#ffc76a" intensity={1.5} distance={4} />
+    <pointLight ref={swiatlo} position={[0,.8,.7]} color="#ffc76a" intensity={1.5} distance={6} decay={1.7} />
   </group>;
 }
 
@@ -116,9 +204,10 @@ export default function ScenaKoperty({ otwarta, aktywna, przechyl, onReady, onFa
     return () => canvas?.removeEventListener("webglcontextlost", utrata);
   }, [onFailure]);
   return <div className="koperta-webgl"><Canvas ref={canvasRef} frameloop={aktywna ? "always" : "never"} dpr={[1, 1.5]} camera={{ position: [0,0,7.5], fov: 35 }} gl={{ alpha: true, antialias: true, powerPreference: "default" }} fallback={null} onCreated={onReady}>
+    <KinowyRig otwarta={otwarta} />
     <ambientLight intensity={1.4} color="#fff3dc" />
     <directionalLight position={[-3,4,5]} intensity={3.5} color="#ffe6b5" />
     <directionalLight position={[3,-1,2]} intensity={1} color="#829bc2" />
-    <Skrytka otwarta={otwarta} /><List otwarta={otwarta} przechyl={przechyl} /><Czasteczki />
+    <Skrytka otwarta={otwarta} /><List otwarta={otwarta} przechyl={przechyl} /><MagicznyWybuch otwarta={otwarta} /><Czasteczki />
   </Canvas></div>;
 }
