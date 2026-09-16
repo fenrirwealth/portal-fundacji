@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ArrowUpRight, Mail } from "lucide-react";
 // Karta listu — komponent wspoldzielony przez liste i wyniki wyszukiwania.
 //
 // Obszar zdjecia ma STALE proporcje 4:3 niezaleznie od tego, czy zdjecie
@@ -24,14 +25,9 @@ const OPISY_STATUSU = {
  */
 export default function KartaListu({ list }) {
   const [opis, klasa] = OPISY_STATUSU[list.status] || ["", "plakietka-zajety"];
-  const wolny = list.status === "OPUBLIKOWANY";
-
   return (
-    <Link
-      className="karta karta-listu"
-      href={`/listy/${list.id}`}
-      aria-label={`List od ${list.imie}, ${list.wiek} lat. ${opis}.`}
-    >
+    <article className="karta-listu">
+      <div className="karta-listu-poswiata" aria-hidden="true" />
       <div className="karta-listu-zdjecie">
         {list.zdjecieUrl ? (
           <img src={list.zdjecieUrl} alt={`Zdjęcie listu napisanego przez ${list.imie}`} loading="lazy" />
@@ -46,16 +42,24 @@ export default function KartaListu({ list }) {
       </div>
 
       <div className="karta-tresc">
-        <h3 style={{ fontSize: "var(--t-lg)" }}>
-          {list.imie}, {list.wiek} {list.wiek === 1 ? "rok" : "lat"}
-        </h3>
-        <p className="drobny cichy" style={{ margin: "var(--o-1) 0 var(--o-3)" }}>
+        <span className="karta-listu-ikona" aria-hidden="true"><Mail /></span>
+        <div className="karta-listu-meta">
+          <h3>{list.imie}</h3>
+          <p>Wiek: {list.wiek} {list.wiek === 1 ? "rok" : "lat"}</p>
+        </div>
+        <p className="karta-listu-szczegoly">
           woj. {list.wojewodztwo.toLowerCase()} · {list.kategoria.toLowerCase()}
           {list.rozmiar ? ` · rozmiar ${list.rozmiar}` : ""}
         </p>
-        <p className="maly" style={{ margin: 0 }}>{list.marzenie}</p>
-        {wolny && <span className="karta-listu-akcja" aria-hidden="true">Zostań Mikołajem tego listu →</span>}
+        <p className="karta-listu-marzenie">„{list.marzenie}”</p>
+        <Link
+          className="karta-listu-akcja"
+          href={`/listy/${list.id}`}
+          aria-label={`Otwórz list od ${list.imie}, ${list.wiek} lat. ${opis}.`}
+        >
+          <span>Otwórz ten list</span><ArrowUpRight aria-hidden="true" />
+        </Link>
       </div>
-    </Link>
+    </article>
   );
 }

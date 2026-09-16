@@ -6,6 +6,7 @@ import KartaListu from "../ui/KartaListu";
 import { SzkieletListy } from "../ui/Szkielet";
 import Szukajka from "./Szukajka";
 import Link from "next/link";
+import { MailOpen, Sparkles } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -68,17 +69,17 @@ async function Wyniki({ params }) {
 
   return (
     <>
-      <p className="maly cichy" role="status" style={{ marginBottom: "var(--o-4)" }}>
+      <p className="listy-wynik" role="status">
         {cos
           ? `Pokazujemy ${listy.length} z ${stan.wszystkie} listów`
           : stan.wszystkie === 0 ? "" : "Żaden list nie pasuje do wybranych filtrów"}
       </p>
 
-      <div className="siatka siatka-listy">
+      <div className="siatka siatka-listy listy-siatka">
         {cos && listy.map((l) => <KartaListu key={l.id} list={l} />)}
 
         {!cos && (
-          <div className="pusto">
+          <div className="pusto listy-pusto">
             <h3>{stan.wszystkie === 0 ? "Listy pojawią się wkrótce" : "Nic tu nie ma przy tych filtrach"}</h3>
             <p>
               {stan.wszystkie === 0
@@ -86,7 +87,7 @@ async function Wyniki({ params }) {
                 : "Spróbuj zmienić wiek, kategorię albo wyczyścić wyszukiwanie."}
             </p>
             {stan.wszystkie > 0 && (
-              <Link className="btn btn-cichy" href="/listy" style={{ marginTop: "var(--o-4)" }}>
+              <Link className="btn listy-btn-szklany" href="/listy">
                 Wyczyść filtry
               </Link>
             )}
@@ -107,49 +108,56 @@ export default async function Listy({ searchParams }) {
   const klucz = JSON.stringify(params);
 
   return (
-    <div className="wrap sekcja">
-      <header style={{ marginBottom: "var(--o-6)" }}>
-        <h1 style={{ fontSize: "var(--t-3xl)" }}>Listy dzieci</h1>
-        <p className="czytanie cichy" style={{ marginTop: "var(--o-3)" }}>
-          Każdy list przeszedł weryfikację placówki i Fundacji. Publikujemy imię,
-          wiek, województwo, opis marzenia i kategorię prezentu, w razie potrzeby
-          rozmiar, oraz zdjęcie listu przygotowane przez Fundację. Nie publikujemy
-          nazwisk, nazwy placówki, miejscowości, adresu ani wizerunku dziecka.
-        </p>
-      </header>
+    <div className="listy-premium">
+      <div className="listy-swiatlo" aria-hidden="true" />
+      <div className="listy-gwiazdy" aria-hidden="true" />
 
-      <LicznikNaZywo poczatkowy={stan} termin={formatujTermin(edycja?.terminDostarczenia)} />
+      <div className="listy-premium-wrap">
+        <header className="listy-hero">
+          <span className="listy-hero-ikona" aria-hidden="true"><MailOpen /></span>
+          <p className="listy-nadtytul"><Sparkles /> Magiczne archiwum życzeń</p>
+          <h1>Wybierz list, który czeka na <em>swojego Mikołaja</em></h1>
+          <p className="listy-wstep">
+            Każdy list przeszedł weryfikację placówki i Fundacji. Publikujemy imię,
+            wiek, województwo, opis marzenia i kategorię prezentu, w razie potrzeby
+            rozmiar, oraz zdjęcie listu przygotowane przez Fundację. Nie publikujemy
+            nazwisk, nazwy placówki, miejscowości, adresu ani wizerunku dziecka.
+          </p>
+        </header>
 
-      <section aria-label="Filtry" style={{ margin: "var(--o-6) 0 var(--o-5)" }}>
-        <Szukajka poczatkowa={params.szukaj || ""} />
+        <LicznikNaZywo poczatkowy={stan} termin={formatujTermin(edycja?.terminDostarczenia)} />
 
-        <div className="filtry" style={{ marginTop: "var(--o-4)" }}>
-          <div className="filtry-grupa">
-            {KATEGORIE.map(([w, n]) => (
-              <Link key={w || "all"} className="filtr" aria-pressed={kategoria === w}
-                 href={link(params, { kategoria: w })}>{n}</Link>
-            ))}
+        <section className="listy-filtry-panel" aria-label="Filtry">
+          <Szukajka poczatkowa={params.szukaj || ""} />
+
+          <div className="filtry listy-filtry">
+            <div className="filtry-grupa">
+              {KATEGORIE.map(([w, n]) => (
+                <Link key={w || "all"} className="filtr" aria-pressed={kategoria === w}
+                   href={link(params, { kategoria: w })}>{n}</Link>
+              ))}
+            </div>
+            <div className="filtry-grupa">
+              {WIEKI.map(([w, n]) => (
+                <Link key={w || "any"} className="filtr" aria-pressed={wiek === w}
+                   href={link(params, { wiek: w })}>{n}</Link>
+              ))}
+            </div>
+            <div className="filtry-grupa">
+              <Link className="filtr" aria-pressed={wolne} href={link(params, { wolne: wolne ? "" : "1" })}>
+                Tylko wolne
+              </Link>
+            </div>
           </div>
-          <div className="filtry-grupa">
-            {WIEKI.map(([w, n]) => (
-              <Link key={w || "any"} className="filtr" aria-pressed={wiek === w}
-                 href={link(params, { wiek: w })}>{n}</Link>
-            ))}
-          </div>
-          <div className="filtry-grupa">
-            <Link className="filtr" aria-pressed={wolne} href={link(params, { wolne: wolne ? "" : "1" })}>
-              Tylko wolne
-            </Link>
-          </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Suspense z szkieletem: przy wolnym łączu użytkownik widzi układ
-          docelowy zamiast pustej strony, a wymiary się zgadzają, więc nic
-          nie przeskakuje po wczytaniu. */}
-      <Suspense key={klucz} fallback={<SzkieletListy />}>
-        <Wyniki params={params} />
-      </Suspense>
+        {/* Suspense z szkieletem: przy wolnym łączu użytkownik widzi układ
+            docelowy zamiast pustej strony, a wymiary się zgadzają, więc nic
+            nie przeskakuje po wczytaniu. */}
+        <Suspense key={klucz} fallback={<SzkieletListy />}>
+          <Wyniki params={params} />
+        </Suspense>
+      </div>
     </div>
   );
 }

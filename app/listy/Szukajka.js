@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import Link from "next/link";
+import { Search, X } from "lucide-react";
 
 // Wyszukiwarka po prawdziwych danych: imię, marzenie, opis.
 // Jako formularz, nie filtrowanie w locie — wynik ma własny adres,
@@ -22,20 +23,22 @@ export default function Szukajka({ poczatkowa }) {
   }
 
   return (
-    <form onSubmit={wyslij} role="search" style={{ display: "flex", gap: "var(--o-2)", maxWidth: 520 }}>
+    <form onSubmit={wyslij} role="search" className="listy-szukajka">
       <label htmlFor="szukaj" className="tylko-dla-czytnika">Szukaj w listach</label>
-      <input
-        id="szukaj"
-        className="pole-kontrolka"
-        type="search"
-        value={wartosc}
-        onChange={(e) => setWartosc(e.target.value)}
-        placeholder="Szukaj: imię, marzenie, np. rower"
-        maxLength={60}
-      />
-      <button className="btn btn-cichy" type="submit">Szukaj</button>
+      <div className="listy-szukajka-pole">
+        <Search aria-hidden="true" />
+        <input
+          id="szukaj"
+          type="search"
+          value={wartosc}
+          onChange={(e) => setWartosc(e.target.value)}
+          placeholder="Szukaj: imię, marzenie, np. rower"
+          maxLength={60}
+        />
+      </div>
+      <button className="listy-szukajka-przycisk" type="submit">Szukaj</button>
       {poczatkowa && (
-        <Link className="btn btn-tekstowy" href="/listy" aria-label="Wyczyść wyszukiwanie">Wyczyść</Link>
+        <Link className="listy-szukajka-wyczysc" href="/listy" aria-label="Wyczyść wyszukiwanie"><X aria-hidden="true" /> Wyczyść</Link>
       )}
     </form>
   );

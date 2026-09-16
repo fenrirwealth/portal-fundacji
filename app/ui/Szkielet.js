@@ -4,8 +4,8 @@
 
 export function SzkieletKarty() {
   return (
-    <div className="karta" aria-hidden="true">
-      <div className="szkielet" style={{ aspectRatio: "4 / 3", borderRadius: 0 }} />
+    <div className="karta karta-listu karta-listu-szkielet" aria-hidden="true">
+      <div className="szkielet" style={{ aspectRatio: "4 / 3", borderRadius: "16px 16px 0 0" }} />
       <div className="karta-tresc">
         <div className="szkielet szkielet-tekst" style={{ width: "55%", height: "1.2em" }} />
         <div className="szkielet szkielet-tekst" style={{ width: "35%" }} />
