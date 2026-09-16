@@ -1062,11 +1062,14 @@ summary.btn::-webkit-details-marker { display: none; }
 .hero-kino .hero-siatka { min-height:100svh; grid-template-columns:minmax(0,.94fr) minmax(480px,1.06fr); gap:clamp(28px,4vw,68px); padding-block:clamp(104px,12vh,138px) clamp(54px,7vh,84px); }
 .hero-kino .hero-copy h1 { max-width:16ch; font-weight:500; font-size:clamp(3rem,4.55vw,5.35rem); line-height:.94; text-wrap:balance; }
 .hero-kino .hero-copy h1 em { display:block; font-style:italic; }
+.hero-kino .hero-copy { z-index:10; display:flex; width:min(100%,56rem); flex-direction:column; align-items:center; gap:clamp(24px,2.5vw,32px); margin:24px auto 0; padding-inline:16px; text-align:center; }
+.hero-kino .hero-copy > * { margin-block:0; }
 .hero-kino .hero-opis { max-width:43ch; font-size:1.04rem; line-height:1.8; }
-.hero-zaufanie { color:#d1c8b9; font-size:.72rem; line-height:1.8; margin-top:26px; max-width:46ch; }
+.hero-kino .hero-akcje { justify-content:center; }
+.hero-zaufanie { color:#d1c8b9; font-size:.72rem; line-height:1.8; max-width:46ch; }
 .hero-zaufanie span { color:#d5ae62; margin-right:6px; }
 .hero-kino .hero-przewin { color:#ddd0b7; min-height:28px; text-decoration:none; }
-.koperta-prezentacja { min-width:0; width:100%; align-self:center; position:relative; }
+.koperta-prezentacja { min-width:0; width:100%; align-self:center; position:relative; z-index:20; display:flex; flex-direction:column; align-items:center; justify-content:center; margin:16px auto 32px; }
 .koperta-interakcja { display:block; padding:0; border:0; color:inherit; background:transparent; cursor:pointer; font:inherit; -webkit-tap-highlight-color:transparent; }
 .koperta-interakcja:focus-visible { outline:2px solid var(--bursztyn-400); outline-offset:8px; border-radius:26px; }
 .koperta-fotografia { z-index:2; object-fit:contain; transition:transform 1.25s cubic-bezier(.16,1,.3,1),filter 1s ease; border-radius:24%; mask-image:radial-gradient(ellipse,#000 51%,transparent 76%); filter:drop-shadow(0 28px 38px #0008); }
@@ -1085,11 +1088,11 @@ summary.btn::-webkit-details-marker { display: none; }
 .koperta-gwiazdy span { --kat:calc(var(--i) * 22.5deg); position:absolute; left:50%; top:51%; width:5px; height:5px; border-radius:50%; opacity:0; background:#fff4cc; box-shadow:0 0 8px 3px #ffc85a,0 0 22px 8px #d5ae6255; }
 .koperta-prezentacja-otwarta .koperta-gwiazdy span { animation:gwiazda-wybuch 1.55s cubic-bezier(.12,.75,.2,1) calc(var(--i) * 24ms) both; }
 .koperta-prezentacja-otwarta .koperta-podpis { opacity:.2; transform:translateY(6px); }
-.koperta-podpis { text-align:center; color:#f3e5cb; font:500 clamp(1.5rem,2.5vw,2rem)/1.3 var(--krój-odreczny); margin-top:-20px; position:relative; }
+.koperta-podpis { position:relative; margin:16px 0 0; color:#f3e5cb; font:500 clamp(1.5rem,2.5vw,2rem)/1.3 var(--krój-odreczny); text-align:center; }
 .koperta-podpis span { color:#d5ae62; }
-.koperta-instrukcja { position:absolute; z-index:7; left:50%; bottom:1%; width:max-content; max-width:88%; transform:translateX(-50%); color:#e8c979; font:600 .68rem/1.3 var(--krój-tekst); letter-spacing:.14em; text-transform:uppercase; text-shadow:0 2px 18px #000; opacity:.88; transition:opacity .42s ease,transform .7s cubic-bezier(.22,1,.36,1); animation:instrukcja-oddech 1.8s ease-in-out infinite alternate; }
+.koperta-instrukcja { position:relative; z-index:7; display:flex; min-height:24px; align-items:center; justify-content:center; margin-top:40px; padding-inline:16px; color:#d5ae62; font:600 clamp(.72rem,1.15vw,.9rem)/1.3 var(--krój-tytuł); letter-spacing:.14em; text-align:center; text-transform:uppercase; text-shadow:0 2px 18px #000; opacity:.8; transition:opacity .5s ease,transform .5s ease; animation:instrukcja-oddech 1.8s ease-in-out infinite alternate; }
 .koperta-instrukcja i { margin-left:7px; font-style:normal; }
-.koperta-prezentacja-otwarta .koperta-instrukcja { opacity:0; transform:translate(-50%,8px); animation:none; }
+.koperta-prezentacja-otwarta .koperta-instrukcja { opacity:0; transform:translateY(16px); animation:none; }
 @keyframes gwiazda-wybuch {
   0% { opacity:0; transform:rotate(var(--kat)) translateY(-12px) scale(.2); }
   18% { opacity:1; }
@@ -1167,9 +1170,8 @@ body:has(.story-dialog[open]) { overflow:hidden; }
   .hero-kino .hero-siatka { padding-block:56px 45px; gap:32px; }
   .koperta-prezentacja .koperta-scena { height:290px; margin:0; }
   .hero-kino .hero-copy h1 { font-size:clamp(2.7rem,11.8vw,4.5rem); max-width:14ch; }
-  .koperta-podpis { margin-top:-8px; }
   .koperta-list-skan { bottom:20%; width:min(50%,205px); }
-  .koperta-instrukcja { bottom:-1%; font-size:.58rem; letter-spacing:.11em; }
+  .koperta-instrukcja { margin-top:28px; font-size:.68rem; letter-spacing:.11em; }
   .archiwum-listow { display:flex; width:100%; overflow-x:auto; scroll-snap-type:x mandatory; overscroll-behavior-inline:contain; padding-inline:20px; scrollbar-width:none; }
   .archiwum-listow::-webkit-scrollbar { display:none; }
   .archiwum-karta { flex:0 0 min(72vw,280px); scroll-snap-align:center; }

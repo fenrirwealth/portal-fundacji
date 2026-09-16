@@ -49,7 +49,10 @@ describe("Hero integration", () => {
     const { container } = render(<HeroMagia saListy etykieta="Akcja trwa" termin={null} />);
     expect(screen.getByText("Zostań Mikołajem tego listu").getAttribute("href")).toBe("/listy");
     expect(screen.getByText("Niech list wybierze mnie").getAttribute("href")).toBe("/listy/losowy");
-    fireEvent.click(screen.getByRole("button", { name: /Otwórz magiczną kopertę/ }));
+    const koperta = screen.getByRole("button", { name: /Otwórz magiczną kopertę/ });
+    const instrukcja = container.querySelector(".koperta-instrukcja");
+    expect(koperta.contains(instrukcja)).toBe(false);
+    fireEvent.click(koperta);
     expect(screen.getByRole("button", { name: /Schowaj list w kopercie/ })).toBeTruthy();
     expect(container.querySelector(".koperta-prezentacja-otwarta")).toBeTruthy();
     expect(container.querySelector(".koperta-list-obraz")).toBeTruthy();

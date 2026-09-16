@@ -78,8 +78,10 @@ export default function Koperta3D({ otwarta = false }) {
       </div>
       <Image src="/magia/koperta.webp" alt="" fill sizes="(max-width: 760px) 90vw, 48vw" priority className={`koperta-fotografia ${czyOtwarta ? "koperta-fotografia-otwarta" : ""}`} />
       {webgl && <BezpiecznaScena onFailure={() => setWebgl(false)}><Scena otwarta={czyOtwarta} aktywna={widoczna} onReady={() => {}} onFailure={() => setWebgl(false)} /></BezpiecznaScena>}
-      <span className="koperta-instrukcja" aria-hidden="true">Kliknij kopertę, aby ją otworzyć <i>✦</i></span>
     </button>
+    <div className="koperta-instrukcja" aria-hidden="true">
+      <span>Kliknij, aby otworzyć <i>✦</i></span>
+    </div>
     <p className="koperta-podpis">Mały list. <span>Wielka historia.</span></p>
   </div>;
 }
