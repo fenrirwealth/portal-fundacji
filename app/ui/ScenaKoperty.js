@@ -89,16 +89,6 @@ export function MagicznyWybuch({ otwarta }) {
   </group>;
 }
 
-function KinowyRig({ otwarta }) {
-  useFrame(({ camera }, delta) => {
-    const dt = Math.min(delta, .04);
-    camera.position.z = THREE.MathUtils.damp(camera.position.z, otwarta ? 6.45 : 7.5, 2.8, dt);
-    camera.position.y = THREE.MathUtils.damp(camera.position.y, otwarta ? .18 : 0, 2.8, dt);
-    camera.lookAt(0, otwarta ? .14 : 0, 0);
-  });
-  return null;
-}
-
 export function List({ otwarta, przechyl }) {
   const grupa = useRef(null);
   const klapa = useRef(null);
@@ -195,7 +185,7 @@ export function Skrytka({ otwarta }) {
   </group>;
 }
 
-export default function ScenaKoperty({ otwarta, aktywna, przechyl, onReady, onFailure }) {
+export default function ScenaKoperty({ otwarta, aktywna, onReady, onFailure }) {
   const canvasRef = useRef(null);
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -204,10 +194,6 @@ export default function ScenaKoperty({ otwarta, aktywna, przechyl, onReady, onFa
     return () => canvas?.removeEventListener("webglcontextlost", utrata);
   }, [onFailure]);
   return <div className="koperta-webgl"><Canvas ref={canvasRef} frameloop={aktywna ? "always" : "never"} dpr={[1, 1.5]} camera={{ position: [0,0,7.5], fov: 35 }} gl={{ alpha: true, antialias: true, powerPreference: "default" }} fallback={null} onCreated={onReady}>
-    <KinowyRig otwarta={otwarta} />
-    <ambientLight intensity={1.4} color="#fff3dc" />
-    <directionalLight position={[-3,4,5]} intensity={3.5} color="#ffe6b5" />
-    <directionalLight position={[3,-1,2]} intensity={1} color="#829bc2" />
-    <Skrytka otwarta={otwarta} /><List otwarta={otwarta} przechyl={przechyl} /><MagicznyWybuch otwarta={otwarta} /><Czasteczki />
+    <MagicznyWybuch otwarta={otwarta} /><Czasteczki />
   </Canvas></div>;
 }

@@ -20,9 +20,6 @@ export default function Koperta3D({ otwarta = false }) {
   const [gotowa, setGotowa] = useState(false);
   const [widoczna, setWidoczna] = useState(true);
   const [ruch, setRuch] = useState(true);
-  const [przechyl, setPrzechyl] = useState(null);
-  const [czujnik, setCzujnik] = useState(false);
-  const [komunikat, setKomunikat] = useState("");
   const [podglad, setPodglad] = useState(false);
   useEffect(() => {
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -46,40 +43,24 @@ export default function Koperta3D({ otwarta = false }) {
     document.addEventListener("visibilitychange", widok);
     return () => { cancelAnimationFrame(klatka); media.removeEventListener("change", sprawdz); obserwator.disconnect(); document.removeEventListener("visibilitychange", widok); };
   }, []);
-  useEffect(() => {
-    if (!czujnik) return;
-    const zmiana = (e) => {
-      if (e.gamma === null || e.beta === null) return;
-      setPrzechyl({ x: Math.max(-1, Math.min(1, e.gamma / 35)), y: Math.max(-1, Math.min(1, (e.beta - 45) / 35)) });
-    };
-    window.addEventListener("deviceorientation", zmiana, { passive: true });
-    return () => window.removeEventListener("deviceorientation", zmiana);
-  }, [czujnik]);
-  async function wlaczCzujnik() {
-    try {
-      const Sensor = /** @type {any} */ (window).DeviceOrientationEvent;
-      if (!Sensor) { setKomunikat("To urządzenie nie udostępnia czujnika ruchu."); return; }
-      if (Sensor.requestPermission && await Sensor.requestPermission() !== "granted") {
-        setKomunikat("Możesz nadal poruszać kopertą palcem."); return;
-      }
-      setCzujnik(true); setKomunikat("Delikatnie przechyl telefon.");
-    } catch { setKomunikat("Czujnik niedostępny. Użyj dotyku."); }
-  }
   const czyOtwarta = otwarta || podglad;
   return <div className={`koperta-prezentacja ${czyOtwarta ? "koperta-prezentacja-otwarta" : ""}`} ref={kontener}>
     <div className="koperta-scena" aria-hidden="true">
       <div className="koperta-aura" />
       <div className="koperta-gwiazdy">{Array.from({ length: 16 }, (_, i) => <span key={i} style={/** @type {import("react").CSSProperties & Record<string, number>} */ ({ "--i": i })} />)}</div>
-      <Image src="/magia/koperta.webp" alt="" fill sizes="(max-width: 760px) 90vw, 48vw" priority className={`koperta-fotografia ${czyOtwarta ? "koperta-fotografia-otwarta" : ""} ${webgl && gotowa ? "koperta-fotografia-ukryta" : ""}`} />
-      {webgl && <BezpiecznaScena onFailure={() => setWebgl(false)}><Scena otwarta={czyOtwarta} aktywna={widoczna && ruch} przechyl={przechyl} onReady={() => setGotowa(true)} onFailure={() => { setWebgl(false); setGotowa(false); }} /></BezpiecznaScena>}
+      <div className="koperta-list-dom" aria-hidden="true">
+        <span>Każde marzenie</span>
+        <strong>zasługuje na magię</strong>
+        <i>✦</i>
+      </div>
+      <Image src="/magia/koperta.webp" alt="" fill sizes="(max-width: 760px) 90vw, 48vw" priority className={`koperta-fotografia ${czyOtwarta ? "koperta-fotografia-otwarta" : ""}`} />
+      {webgl && <BezpiecznaScena onFailure={() => setWebgl(false)}><Scena otwarta={czyOtwarta} aktywna={widoczna && ruch} onReady={() => setGotowa(true)} onFailure={() => { setWebgl(false); setGotowa(false); }} /></BezpiecznaScena>}
       <div className="koperta-reveal-copy"><small>Ten list czeka</small><strong>na swojego Mikołaja</strong><span>✦</span></div>
     </div>
     <p className="koperta-podpis">Mały list. <span>Wielka historia.</span></p>
     {webgl && gotowa && <div className="scena-kontrolki">
       <button type="button" aria-expanded={podglad} onClick={() => setPodglad(!podglad)}>{podglad ? "Zamknij kopertę" : "Zajrzyj do środka"}</button>
       <button type="button" aria-pressed={!ruch} onClick={() => setRuch(!ruch)}>{ruch ? "Zatrzymaj animację" : "Wznów animację"}</button>
-      <button type="button" className="czujnik-przycisk" disabled={czujnik} onClick={wlaczCzujnik}>{czujnik ? "Czujnik włączony" : "Steruj przechyleniem"}</button>
     </div>}
-    <span className="sr-only" role="status">{komunikat}</span>
   </div>;
 }
