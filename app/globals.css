@@ -174,6 +174,7 @@ img, svg { max-width: 100%; height: auto; display: block; }
   background: color-mix(in srgb, var(--papier-50) 90%, transparent);
   backdrop-filter: saturate(1.4) blur(10px);
   border-bottom: 1px solid var(--linia);
+  transition: background 300ms ease, border-color 300ms ease, box-shadow 300ms ease, backdrop-filter 300ms ease;
 }
 .naglowek-tresc {
   display: flex; align-items: center; gap: var(--o-5);
@@ -203,6 +204,30 @@ img, svg { max-width: 100%; height: auto; display: block; }
 }
 .menu a:hover { color: var(--tekst); }
 .menu .konto { color: var(--tekst-cichy); font-size: var(--t-xs); }
+
+.naglowek-na-hero {
+  position: fixed;
+  inset: 0 0 auto;
+  color: var(--papier-50);
+  background: transparent;
+  border-bottom-color: transparent;
+  backdrop-filter: none;
+}
+.naglowek-na-hero .znak,
+.naglowek-na-hero .znak span,
+.naglowek-na-hero .menu a,
+.naglowek-na-hero .menu .btn-tekstowy,
+.naglowek-na-hero .menu .konto { color: var(--papier-50); }
+.naglowek-na-hero .menu a,
+.naglowek-na-hero .menu .btn-tekstowy { text-shadow: 0 1px 18px rgba(0,0,0,.5); }
+.naglowek-na-hero .menu a:hover,
+.naglowek-na-hero .menu .btn-tekstowy:hover { color: var(--bursztyn-400); }
+.naglowek-przewiniety {
+  background: rgba(9,21,47,.9);
+  border-bottom-color: rgba(213,174,98,.2);
+  box-shadow: 0 10px 34px rgba(3,9,22,.22);
+  backdrop-filter: saturate(1.25) blur(14px);
+}
 
 /* ============================================================
    PRZYCISKI
@@ -1034,7 +1059,7 @@ summary.btn::-webkit-details-marker { display: none; }
 .hero-kino { background:#09152f; }
 .hero-tlo { object-fit:cover; z-index:-2; opacity:.78; }
 .hero-kino::after { background:linear-gradient(90deg,rgba(5,12,28,.7),rgba(9,21,47,.22) 70%),linear-gradient(0deg,#09152f,transparent 22%); }
-.hero-kino .hero-siatka { min-height:calc(100svh - 88px); grid-template-columns:minmax(0,.94fr) minmax(480px,1.06fr); gap:clamp(28px,4vw,68px); padding-block:clamp(38px,5vh,66px); }
+.hero-kino .hero-siatka { min-height:100svh; grid-template-columns:minmax(0,.94fr) minmax(480px,1.06fr); gap:clamp(28px,4vw,68px); padding-block:clamp(104px,12vh,138px) clamp(54px,7vh,84px); }
 .hero-kino .hero-copy h1 { max-width:16ch; font-weight:500; font-size:clamp(3rem,4.55vw,5.35rem); line-height:.94; text-wrap:balance; }
 .hero-kino .hero-copy h1 em { display:block; font-style:italic; }
 .hero-kino .hero-opis { max-width:43ch; font-size:1.04rem; line-height:1.8; }
@@ -1042,16 +1067,18 @@ summary.btn::-webkit-details-marker { display: none; }
 .hero-zaufanie span { color:#d5ae62; margin-right:6px; }
 .hero-kino .hero-przewin { color:#ddd0b7; min-height:28px; text-decoration:none; }
 .koperta-prezentacja { min-width:0; width:100%; align-self:center; position:relative; }
+.koperta-interakcja { display:block; padding:0; border:0; color:inherit; background:transparent; cursor:pointer; font:inherit; -webkit-tap-highlight-color:transparent; }
+.koperta-interakcja:focus-visible { outline:2px solid var(--bursztyn-400); outline-offset:8px; border-radius:26px; }
 .koperta-fotografia { z-index:2; object-fit:contain; transition:transform 1.25s cubic-bezier(.16,1,.3,1),filter 1s ease; border-radius:24%; mask-image:radial-gradient(ellipse,#000 51%,transparent 76%); filter:drop-shadow(0 28px 38px #0008); }
-.koperta-fotografia-otwarta { transform:scale(1.035) translateY(7%); filter:brightness(1.12) drop-shadow(0 0 42px #ffc96a99); }
+.koperta-interakcja:hover .koperta-fotografia { transform:scale(1.025) rotate(-.35deg); filter:brightness(1.06) drop-shadow(0 32px 42px #0009) drop-shadow(0 0 26px #ffc96a44); }
+.koperta-fotografia-otwarta,
+.koperta-interakcja:hover .koperta-fotografia-otwarta { transform:scale(1.035) translateY(7%); filter:brightness(1.12) drop-shadow(0 0 42px #ffc96a99); }
 .koperta-prezentacja .koperta-scena { width:100%; height:clamp(340px,34vw,520px); filter:drop-shadow(0 30px 35px #0005); isolation:isolate; overflow:visible; }
 .koperta-webgl { position:absolute; z-index:5; inset:0; width:100%; height:100%; pointer-events:none; }
-.koperta-list-dom { position:absolute; z-index:1; left:17%; right:17%; top:27%; height:49%; display:grid; align-content:start; justify-items:center; padding:7.5% 8% 6%; color:#5b1830; text-align:center; background:linear-gradient(145deg,#fffaf0,#ead7b5); border:1px solid #d5ae62aa; box-shadow:0 20px 55px #0008,0 0 45px #ffc96833; transform:translateY(16%) scale(.84); opacity:0; transition:transform 1.2s .12s cubic-bezier(.16,1,.3,1),opacity .34s .1s ease; }
-.koperta-list-dom::before { content:""; position:absolute; inset:10px; border:1px solid #b7893f77; pointer-events:none; }
-.koperta-list-dom span { color:#876d4c; font-size:.64rem; font-weight:700; letter-spacing:.18em; text-transform:uppercase; }
-.koperta-list-dom strong { margin-top:8px; font:500 clamp(1.08rem,1.65vw,1.65rem)/1.05 var(--krój-tytuł); }
-.koperta-list-dom i { margin-top:13px; color:#c6953f; font-style:normal; }
-.koperta-prezentacja-otwarta .koperta-list-dom { opacity:1; transform:translateY(-62%) scale(.92) rotate(-1deg); }
+.koperta-list-skan { position:absolute; z-index:1; left:50%; bottom:19%; width:min(46%,270px); aspect-ratio:.72; overflow:hidden; border:1px solid #d5ae6277; border-radius:3px; background:#f3e5cb; box-shadow:0 22px 58px #0009,0 0 48px #ffc96838; transform:translate(-50%,29%) scale(.86); transform-origin:50% 100%; opacity:0; transition:transform 1.05s cubic-bezier(.22,1,.36,1),opacity .3s ease,filter .8s ease; }
+.koperta-list-skan::after { content:""; position:absolute; inset:0; box-shadow:inset 0 0 34px rgba(83,53,20,.16); pointer-events:none; }
+.koperta-list-obraz { object-fit:contain; object-position:center; filter:sepia(.08) saturate(.9) contrast(.96); }
+.koperta-prezentacja-otwarta .koperta-list-skan { opacity:1; transform:translate(-50%,-34%) rotate(2deg) scale(1); filter:drop-shadow(0 13px 18px rgba(0,0,0,.28)); }
 .koperta-aura { position:absolute; z-index:-1; inset:15% 7%; border-radius:50%; pointer-events:none; opacity:.28; transform:scale(.75); background:radial-gradient(circle,#ffd98d88 0 5%,#c77a3244 24%,#7b183033 47%,transparent 72%); filter:blur(28px); transition:transform 1.2s cubic-bezier(.16,1,.3,1),opacity .8s ease,filter .8s ease; }
 .koperta-prezentacja-otwarta .koperta-aura { opacity:1; transform:scale(1.35); filter:blur(20px); animation:aura-oddech 1.45s ease-in-out infinite alternate; }
 .koperta-gwiazdy { position:absolute; z-index:3; inset:0; pointer-events:none; overflow:visible; }
@@ -1060,13 +1087,9 @@ summary.btn::-webkit-details-marker { display: none; }
 .koperta-prezentacja-otwarta .koperta-podpis { opacity:.2; transform:translateY(6px); }
 .koperta-podpis { text-align:center; color:#f3e5cb; font:500 clamp(1.5rem,2.5vw,2rem)/1.3 var(--krój-odreczny); margin-top:-20px; position:relative; }
 .koperta-podpis span { color:#d5ae62; }
-.scena-kontrolki { position:absolute; z-index:8; left:50%; bottom:3%; display:flex; align-items:center; justify-content:center; gap:10px; width:max-content; max-width:94%; transform:translateX(-50%); }
-.scena-kontrolki button { font:650 .94rem/1 var(--krój-tekst); cursor:pointer; transition:transform .25s ease,background .25s ease,box-shadow .25s ease,border-color .25s ease; }
-.scena-otworz { display:inline-flex; align-items:center; justify-content:center; gap:10px; min-height:52px; padding:14px 26px; border:1px solid #efcd83aa; border-radius:999px; color:#fff9f0; background:#09152fe8; box-shadow:0 10px 35px #0009,0 0 28px #d5ae6238; backdrop-filter:blur(12px); }
-.scena-otworz span { display:grid; place-items:center; width:23px; height:23px; border-radius:50%; color:#09152f; background:#d5ae62; font-size:.78rem; }
-.scena-otworz:hover { transform:translateY(-2px); border-color:#f6d995; background:#122447f2; box-shadow:0 14px 42px #000a,0 0 38px #d5ae6255; }
-.scena-ruch { min-height:44px; padding:10px 13px; border:0; color:#d6cbb9; background:transparent; text-decoration:underline; text-underline-offset:4px; }
-.scena-ruch:hover { color:#fff9f0; }
+.koperta-instrukcja { position:absolute; z-index:7; left:50%; bottom:1%; width:max-content; max-width:88%; transform:translateX(-50%); color:#e8c979; font:600 .68rem/1.3 var(--krój-tekst); letter-spacing:.14em; text-transform:uppercase; text-shadow:0 2px 18px #000; opacity:.88; transition:opacity .42s ease,transform .7s cubic-bezier(.22,1,.36,1); animation:instrukcja-oddech 1.8s ease-in-out infinite alternate; }
+.koperta-instrukcja i { margin-left:7px; font-style:normal; }
+.koperta-prezentacja-otwarta .koperta-instrukcja { opacity:0; transform:translate(-50%,8px); animation:none; }
 @keyframes gwiazda-wybuch {
   0% { opacity:0; transform:rotate(var(--kat)) translateY(-12px) scale(.2); }
   18% { opacity:1; }
@@ -1075,6 +1098,7 @@ summary.btn::-webkit-details-marker { display: none; }
 }
 @keyframes aura-oddech { to { opacity:.72; transform:scale(1.48); } }
 @keyframes gwiazda-puls { to { transform:scale(1.35) rotate(12deg); text-shadow:0 0 20px #ffd36f; } }
+@keyframes instrukcja-oddech { to { opacity:.52; } }
 
 .archiwum-sekcja { overflow:hidden; padding-block:clamp(84px,10vw,140px); color:var(--papier-50); background:
   radial-gradient(circle at 13% 16%,#7b183045,transparent 31%),
@@ -1144,10 +1168,8 @@ body:has(.story-dialog[open]) { overflow:hidden; }
   .koperta-prezentacja .koperta-scena { height:290px; margin:0; }
   .hero-kino .hero-copy h1 { font-size:clamp(2.7rem,11.8vw,4.5rem); max-width:14ch; }
   .koperta-podpis { margin-top:-8px; }
-  .koperta-list-dom { left:15%; right:15%; top:29%; height:48%; padding-top:8%; }
-  .scena-kontrolki { bottom:0; }
-  .scena-otworz { min-height:48px; padding:12px 19px; font-size:.86rem; }
-  .scena-ruch { display:none; }
+  .koperta-list-skan { bottom:20%; width:min(50%,205px); }
+  .koperta-instrukcja { bottom:-1%; font-size:.58rem; letter-spacing:.11em; }
   .archiwum-listow { display:flex; width:100%; overflow-x:auto; scroll-snap-type:x mandatory; overscroll-behavior-inline:contain; padding-inline:20px; scrollbar-width:none; }
   .archiwum-listow::-webkit-scrollbar { display:none; }
   .archiwum-karta { flex:0 0 min(72vw,280px); scroll-snap-align:center; }
@@ -1157,7 +1179,7 @@ body:has(.story-dialog[open]) { overflow:hidden; }
 @media (prefers-reduced-motion:reduce) {
   .hero-copy > *, .intro-zdanie, .intro-postep span, .intro-szron-css, .route-reveal { animation:none; }
   .koperta-fotografia { transition:none; }
-  .koperta-aura,.koperta-podpis { transition:none; animation:none; }
+  .koperta-aura,.koperta-podpis,.koperta-instrukcja { transition:none; animation:none; }
   .koperta-gwiazdy { display:none; }
   .archiwum-karta,.archiwum-karta img,.archiwum-karta::after,.archiwum-karta > span { transition:none; }
   .karta-listu:hover { transform:none; }

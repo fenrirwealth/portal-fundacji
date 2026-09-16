@@ -5,10 +5,10 @@ import "@fontsource-variable/dm-sans";
 import "@fontsource/caveat/500.css";
 import "@fontsource/caveat/600.css";
 import { auth } from "../auth";
-import { wyloguj } from "./akcje-sesji";
 import { ToastProvider } from "./ui/Toast";
 import Link from "next/link";
 import PlynnyScroll from "./ui/PlynnyScroll";
+import Naglowek from "./ui/Naglowek";
 
 export const metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_PORTAL_URL || "https://portal.fundacjalepszydomlepszejutro.pl"),
@@ -71,36 +71,7 @@ export default async function Layout({ children }) {
         <ToastProvider>
           <a className="skip" href="#tresc">Przejdź do treści</a>
 
-          <header className="naglowek">
-            <div className="wrap naglowek-tresc">
-              <Link className="znak" href="/">
-                <b>Listy do Mikołaja</b>
-                <span>Lepszy Dom Lepsze Jutro</span>
-              </Link>
-
-              <nav className="menu" aria-label="Główna">
-                <Link href="/listy">Listy dzieci</Link>
-                <Link href="/#jak-to-dziala">Jak to działa</Link>
-                <Link href="/o-akcji">O akcji</Link>
-                <Link href="/fundusz-ostatniej-gwiazdki">Fundusz</Link>
-                {sesja?.user ? (
-                  <>
-                    <Link href="/moje-rezerwacje">Moje listy</Link>
-                    <span className="konto" title={sesja.user.email}>{sesja.user.email}</span>
-                    {/* Wylogowanie jako formularz, nie odnośnik: zmienia stan,
-                        więc nie może wykonać się przez samo wejście na adres.
-                        Akcja jest nazwana i leży w osobnym module — łatwiej
-                        ją wtedy wskazać w testach i nie powiela się w układzie. */}
-                    <form action={wyloguj}>
-                      <button type="submit" className="btn btn-tekstowy">Wyloguj</button>
-                    </form>
-                  </>
-                ) : (
-                  <Link href="/zaloguj">Moje listy / Zaloguj się</Link>
-                )}
-              </nav>
-            </div>
-          </header>
+          <Naglowek email={sesja?.user?.email} />
 
           <main id="tresc">{children}</main>
 
