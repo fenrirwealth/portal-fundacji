@@ -778,14 +778,106 @@ select.pole-kontrolka {
 .lancuch-pusty { margin-top: 46px; display: flex; gap: 20px; align-items: center; padding: 30px; border: 1px solid var(--linia); border-radius: 20px; background: var(--papier-100); }
 .lancuch-gwiazda { display: grid; place-items: center; flex: 0 0 52px; height: 52px; border-radius: 50%; background: var(--atrament-800); color: var(--bursztyn-400); }
 
-.jak-dziala { padding-block: clamp(80px, 10vw, 132px); }
-.kroki-magiczne { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0; margin: 68px 0 0; padding: 0; list-style: none; border-top: 1px solid var(--linia); }
-.kroki-magiczne li { display: grid; grid-template-columns: 72px 1fr; gap: 24px; padding: 34px 34px 34px 0; border-bottom: 1px solid var(--linia); }
-.kroki-magiczne li:nth-child(odd) { border-right: 1px solid var(--linia); }
-.kroki-magiczne li:nth-child(even) { padding-left: 34px; }
-.krok-numer { color: var(--bursztyn-600); font: 500 1rem/1 var(--krój-tytuł); }
-.kroki-magiczne h3 { font-size: var(--t-xl); }
-.kroki-magiczne p { margin-top: 10px; color: var(--tekst-cichy); font-size: var(--t-sm); }
+.jak-dziala {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  padding-block: clamp(88px, 11vw, 144px);
+  color: var(--papier-50);
+  background:
+    linear-gradient(180deg, rgba(7,17,38,.12), rgba(7,17,38,.72)),
+    radial-gradient(circle at 50% -10%, #18315c 0, var(--atrament-800) 42%, var(--atrament-900) 100%);
+}
+.jak-dziala::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  opacity: .2;
+  pointer-events: none;
+  background-image: radial-gradient(rgba(255,249,240,.58) .55px, transparent .8px);
+  background-size: 31px 31px;
+  mask-image: linear-gradient(to bottom, transparent, #000 24%, #000 80%, transparent);
+}
+.jak-dziala-tresc { position: relative; z-index: 1; }
+.jak-dziala .naglowek-sekcji h2 { max-width: 19ch; color: var(--papier-50); }
+.jak-dziala .naglowek-sekcji h2 em { color: var(--bursztyn-400); font-style: italic; }
+.jak-dziala .naglowek-sekcji > p { color: color-mix(in srgb, var(--papier-50) 67%, transparent); }
+.jak-dziala-swiatlo {
+  position: absolute;
+  z-index: -1;
+  width: 520px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(120px);
+  opacity: .15;
+}
+.jak-dziala-swiatlo-lewe { left: -220px; top: -140px; background: var(--bursztyn-400); }
+.jak-dziala-swiatlo-prawe { right: -240px; bottom: -220px; background: #27735b; }
+.kroki-magiczne {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+  margin: 68px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.kroki-magiczne li {
+  position: relative;
+  min-height: 310px;
+  overflow: hidden;
+  padding: 1px;
+  border: 1px solid rgba(213,174,98,.26);
+  border-radius: 22px;
+  background: linear-gradient(155deg, rgba(213,174,98,.14), rgba(255,255,255,.025) 42%, rgba(213,174,98,.04));
+  box-shadow: inset 0 1px rgba(255,255,255,.07), 0 22px 50px rgba(0,0,0,.12);
+  backdrop-filter: blur(14px) saturate(1.15);
+  transition: transform var(--ruch-kinowy), border-color var(--ruch), box-shadow var(--ruch-kinowy), background var(--ruch-kinowy);
+}
+.kroki-magiczne li::before {
+  content: "";
+  position: absolute;
+  inset: -55% -45%;
+  opacity: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at 50% 50%, rgba(213,174,98,.2), transparent 45%);
+  transform: translate3d(-18%, 18%, 0);
+  transition: opacity 600ms ease, transform 900ms cubic-bezier(.22,1,.36,1);
+}
+.kroki-magiczne li:hover {
+  transform: translate3d(0, -8px, 0);
+  border-color: rgba(213,174,98,.52);
+  background: linear-gradient(155deg, rgba(213,174,98,.18), rgba(255,255,255,.055) 48%, rgba(213,174,98,.07));
+  box-shadow: inset 0 1px rgba(255,255,255,.1), 0 30px 70px rgba(0,0,0,.24), 0 0 42px rgba(213,174,98,.08);
+}
+.kroki-magiczne li:hover::before { opacity: 1; transform: translate3d(18%, -12%, 0); }
+.krok-numer {
+  position: absolute;
+  top: 24px;
+  right: 26px;
+  color: rgba(213,174,98,.52);
+  font: 500 .8rem/1 var(--krój-tytuł);
+  letter-spacing: .12em;
+}
+.krok-ikona {
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  margin: 28px 28px 34px;
+  border: 1px solid rgba(213,174,98,.22);
+  border-radius: 50%;
+  color: var(--bursztyn-400);
+  background: rgba(213,174,98,.08);
+  box-shadow: inset 0 0 18px rgba(213,174,98,.03), 0 0 30px rgba(213,174,98,.08);
+  transition: transform var(--ruch-kinowy), box-shadow var(--ruch-kinowy), background var(--ruch);
+}
+.krok-ikona svg { width: 27px; height: 27px; }
+.kroki-magiczne li:hover .krok-ikona { transform: translateY(-2px) rotate(-3deg); background: rgba(213,174,98,.13); box-shadow: 0 0 38px rgba(213,174,98,.18); }
+.krok-tresc { position: relative; padding: 0 28px 30px; }
+.kroki-magiczne h3 { color: var(--papier-50); font-size: clamp(1.25rem, 1.55vw, 1.5rem); }
+.kroki-magiczne p { margin-top: 13px; color: rgba(255,249,240,.62); font-size: var(--t-sm); line-height: 1.65; }
 
 .pasek-finalowy { display: grid; grid-template-columns: 1fr auto; gap: 44px; align-items: center; padding: clamp(32px, 6vw, 64px); border-radius: 26px; color: var(--papier-50); background: linear-gradient(125deg, var(--czerwien-700), var(--czerwien-600) 45%, #4b0c1c); box-shadow: 0 28px 70px rgba(97,17,38,.18); }
 .pasek-finalowy h2 { max-width: 15ch; color: var(--papier-50); font-size: var(--t-3xl); }
@@ -802,6 +894,7 @@ select.pole-kontrolka {
   .lancuch dl div:nth-child(3) { border-left: 0; padding-left: 0; }
   .pasek-finalowy { grid-template-columns: 1fr; }
   .pasek-finalowy-akcje { justify-content: flex-start; }
+  .kroki-magiczne { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 @media (max-width: 640px) {
@@ -815,8 +908,8 @@ select.pole-kontrolka {
   .lancuch { padding: 26px 20px; }
   .lancuch dl { gap: 26px 14px; }
   .lancuch dl div { padding-left: 14px; }
-  .kroki-magiczne { grid-template-columns: 1fr; }
-  .kroki-magiczne li, .kroki-magiczne li:nth-child(even) { grid-template-columns: 54px 1fr; padding: 28px 0; border-right: 0; }
+  .kroki-magiczne { grid-template-columns: 1fr; margin-top: 48px; }
+  .kroki-magiczne li { min-height: 270px; }
   .pasek-finalowy-akcje { flex-direction: column; }
   .pasek-finalowy-akcje .btn { width: 100%; }
 }
