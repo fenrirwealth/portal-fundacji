@@ -7,6 +7,7 @@ import "@fontsource/caveat/600.css";
 import { auth } from "../auth";
 import { ToastProvider } from "./ui/Toast";
 import Link from "next/link";
+import { ArrowUpRight, ExternalLink, Mail, Phone } from "lucide-react";
 import PlynnyScroll from "./ui/PlynnyScroll";
 import Naglowek from "./ui/Naglowek";
 
@@ -75,25 +76,52 @@ export default async function Layout({ children }) {
 
           <main id="tresc">{children}</main>
 
-          <footer style={{ borderTop: "1px solid var(--linia)", marginTop: "var(--o-9)" }}>
-            <div className="wrap sekcja-ciasna">
-              <div className="siatka siatka-2" style={{ alignItems: "start" }}>
-                <div>
-                  <p style={{ fontFamily: "var(--krój-tytuł)", fontSize: "var(--t-lg)", fontWeight: 600, marginBottom: "var(--o-2)" }}>
-                    Fundacja Lepszy Dom Lepsze Jutro
+          <footer className="portal-footer">
+            <div className="portal-footer-blask" aria-hidden="true" />
+            <div className="wrap portal-footer-tresc">
+              <div className="portal-footer-glowna">
+                <div className="portal-footer-marka">
+                  <p className="portal-footer-etykieta">Fundacja Lepszy Dom Lepsze Jutro</p>
+                  <h2>Każde marzenie zasługuje na uważnego Mikołaja.</h2>
+                  <p>
+                    Łączymy darczyńców ze zweryfikowanymi listami dzieci, chroniąc ich
+                    prywatność i dbając o bezpieczną drogę każdego prezentu.
                   </p>
-                  <p className="maly cichy">
-                    Złota 75A/7, 00-819 Warszawa<br />
-                    KRS 0000971976 · NIP 5273002294 · REGON 522030190
-                  </p>
-                  <p className="drobny" style={{ marginTop: "var(--o-3)" }}><Link href="/fundusz-ostatniej-gwiazdki">Fundusz Ostatniej Gwiazdki</Link> · <Link href="/regulamin">Regulamin</Link></p>
+                  <Link className="portal-footer-link-glowny" href="/listy">
+                    Zobacz listy dzieci <ArrowUpRight aria-hidden="true" />
+                  </Link>
                 </div>
-                  <p className="drobny cichy czytanie">
-                  Przy każdym liście publikujemy imię, wiek, województwo, opis marzenia
-                  i kategorię prezentu, w razie potrzeby rozmiar ubrania lub buta, oraz
-                  zdjęcie listu przygotowane przez Fundację. Nie publikujemy nazwisk,
-                  nazwy placówki, miejscowości, adresu ani wizerunku dziecka.
-                  </p>
+
+                <div className="portal-footer-kolumna">
+                  <p className="portal-footer-tytul">Portal</p>
+                  <Link href="/listy">Listy dzieci</Link>
+                  <Link href="/#jak-to-dziala">Jak to działa</Link>
+                  <Link href="/o-akcji">O akcji</Link>
+                  <Link href="/fundusz-ostatniej-gwiazdki">Fundusz Ostatniej Gwiazdki</Link>
+                  <Link href="/zglos-placowke">Zgłoś placówkę</Link>
+                </div>
+
+                <div className="portal-footer-kolumna portal-footer-kontakt">
+                  <p className="portal-footer-tytul">Kontakt</p>
+                  <a href="tel:+48570747779"><Phone aria-hidden="true" /> +48 570 747 779</a>
+                  <a href="mailto:kontakt@fundacjalepszydomlepszejutro.pl"><Mail aria-hidden="true" /> Napisz do Fundacji</a>
+                  <a href="https://www.facebook.com/LEPSZYDOMLEPSZEJUTRO" target="_blank" rel="noreferrer"><ExternalLink aria-hidden="true" /> Facebook</a>
+                  <p>Złota 75A/7<br />00-819 Warszawa</p>
+                </div>
+              </div>
+
+              <div className="portal-footer-prywatnosc">
+                <span aria-hidden="true">✦</span>
+                <p>
+                  Publikujemy wyłącznie informacje potrzebne do wyboru prezentu. Nie
+                  ujawniamy nazwisk, adresów, nazw placówek ani wizerunków dzieci.
+                </p>
+              </div>
+
+              <div className="portal-footer-dol">
+                <p>© {new Date().getFullYear()} Fundacja Lepszy Dom Lepsze Jutro</p>
+                <p>KRS 0000971976 · NIP 5273002294 · REGON 522030190</p>
+                <Link href="/regulamin">Regulamin portalu</Link>
               </div>
             </div>
           </footer>

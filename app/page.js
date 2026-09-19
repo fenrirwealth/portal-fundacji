@@ -96,27 +96,34 @@ export default async function Start() {
         <div className="wrap archiwum-dopisek"><span aria-hidden="true">✦</span><p>Materiały z archiwum Fundacji. Galeria nie zawiera aktywnych listów do rezerwacji.</p></div>
       </section>
 
-      <section className="wrap sekcja">
-        <Wejscie className="fundusz-zaproszenie">
-          <div><p className="nadtytul nadtytul-ciemny"><span /> Fundusz Ostatniej Gwiazdki</p><h2>Pomóż nam domknąć ostatnie marzenia.</h2><p>Wpłaty wykorzystujemy, gdy list nie znajdzie Mikołaja albo dostarczony prezent wymaga uzupełnienia.</p></div>
-          <Link className="btn btn-cichy btn-duzy" href="/fundusz-ostatniej-gwiazdki">Poznaj fundusz</Link>
-        </Wejscie>
-      </section>
+      <section className="domkniecie-strony">
+        <div className="domkniecie-blask domkniecie-blask-lewy" aria-hidden="true" />
+        <div className="domkniecie-blask domkniecie-blask-prawy" aria-hidden="true" />
+        <div className="wrap domkniecie-siatka">
+          <Wejscie className="fundusz-zaproszenie">
+            <div className="fundusz-zaproszenie-znak" aria-hidden="true">✦</div>
+            <div>
+              <p className="nadtytul"><span /> Fundusz Ostatniej Gwiazdki</p>
+              <h2>Pomóż nam domknąć ostatnie marzenia.</h2>
+              <p>Wpłaty wykorzystujemy, gdy list nie znajdzie Mikołaja albo dostarczony prezent wymaga uzupełnienia.</p>
+            </div>
+            <Link className="btn btn-szklany btn-duzy" href="/fundusz-ostatniej-gwiazdki">Poznaj fundusz <span aria-hidden="true">↗</span></Link>
+          </Wejscie>
 
-      <section className="wrap sekcja">
-        <Wejscie className="pasek-finalowy">
-          <div>
-            <p className="nadtytul"><span /> Jeden gest uruchamia kolejny</p>
-            <h2>Znajdź list, który poruszy właśnie Ciebie.</h2>
-            <p>Możesz go wybrać świadomie albo pozwolić, by to marzenie znalazło swojego Mikołaja.</p>
-          </div>
-          <div className="pasek-finalowy-akcje">
-            <Link className="btn btn-magiczny btn-duzy" href="/listy">Zobacz listy</Link>
-            {edycja && (
-              <Link className="btn btn-szklany btn-duzy" href="/zglos-placowke">Zgłoś placówkę</Link>
-            )}
-          </div>
-        </Wejscie>
+          <Wejscie className="pasek-finalowy">
+            <div>
+              <p className="nadtytul"><span /> Jeden gest uruchamia kolejny</p>
+              <h2>Znajdź list, który poruszy właśnie Ciebie.</h2>
+              <p>Możesz go wybrać świadomie albo pozwolić, by to marzenie znalazło swojego Mikołaja.</p>
+            </div>
+            <div className="pasek-finalowy-akcje">
+              <Link className="btn btn-magiczny btn-duzy" href="/listy">Zobacz listy <span aria-hidden="true">↗</span></Link>
+              {edycja && (
+                <Link className="btn btn-szklany btn-duzy" href="/zglos-placowke">Zgłoś placówkę</Link>
+              )}
+            </div>
+          </Wejscie>
+        </div>
       </section>
     </>
   );
