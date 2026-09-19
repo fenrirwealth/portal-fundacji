@@ -513,13 +513,13 @@ textarea.pole-kontrolka { min-height: 120px; resize: vertical; }
 
 .btn-udostepnij {
   --btn-tlo: transparent;
-  --btn-tekst: var(--czerwien-600);
-  --btn-krawedz: color-mix(in srgb, var(--czerwien-600) 35%, transparent);
+  --btn-tekst: var(--bursztyn-600);
+  --btn-krawedz: color-mix(in srgb, var(--bursztyn-500) 42%, transparent);
   border-radius: 999px;
 }
 .btn-udostepnij:hover {
-  --btn-tlo: color-mix(in srgb, var(--czerwien-600) 7%, transparent);
-  --btn-tekst: var(--czerwien-700);
+  --btn-tlo: color-mix(in srgb, var(--bursztyn-500) 10%, transparent);
+  --btn-tekst: var(--atrament-900);
 }
 
 .karta-mikolaja {
@@ -1094,7 +1094,7 @@ select.pole-kontrolka {
   color:#fff9f0;
   background:
     radial-gradient(circle at 50% -12%,rgba(25,75,64,.28),transparent 40%),
-    radial-gradient(circle at 105% 52%,rgba(123,24,48,.2),transparent 30%),
+    radial-gradient(circle at 105% 52%,rgba(18,61,50,.3),transparent 30%),
     linear-gradient(155deg,#071127 0%,#09152f 48%,#0b1b38 100%);
 }
 .o-akcji-premium::after {
@@ -1606,7 +1606,7 @@ main { min-width: 0; }
   color: var(--papier-50);
   background:
     radial-gradient(circle at 18% 15%, rgba(18,61,50,.38), transparent 34%),
-    radial-gradient(circle at 88% 72%, rgba(123,24,48,.3), transparent 32%),
+    radial-gradient(circle at 88% 72%, rgba(213,174,98,.16), transparent 32%),
     linear-gradient(155deg, #071127, #09152f 54%, #0b1934);
 }
 .domkniecie-strony::before {

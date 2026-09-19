@@ -147,9 +147,9 @@ export function List({ otwarta, przechyl }) {
     <group name="klapa" ref={klapa} position={[0, 1.13, .13]}>
       <mesh><shapeGeometry args={[ksztalt]} /><meshStandardMaterial map={papier} side={THREE.DoubleSide} roughness={.8} /></mesh>
       <group position={[0,-1.06,.09]}>
-        <mesh ref={lakLewy} position={[-.08,0,0]}><circleGeometry args={[.31,48,Math.PI / 2,Math.PI]} /><meshStandardMaterial color="#7B1830" roughness={.28} metalness={.16} side={THREE.DoubleSide} /></mesh>
-        <mesh ref={lakPrawy} position={[.08,0,.002]} rotation={[0,0,Math.PI]}><circleGeometry args={[.31,48,Math.PI / 2,Math.PI]} /><meshStandardMaterial color="#8d203a" roughness={.28} metalness={.16} side={THREE.DoubleSide} /></mesh>
-        <mesh position={[0,0,.012]}><torusGeometry args={[.22,.012,8,48]} /><meshStandardMaterial color="#d68a68" metalness={.5} roughness={.3} /></mesh>
+        <mesh ref={lakLewy} position={[-.08,0,0]}><circleGeometry args={[.31,48,Math.PI / 2,Math.PI]} /><meshStandardMaterial color="#123D32" roughness={.28} metalness={.16} side={THREE.DoubleSide} /></mesh>
+        <mesh ref={lakPrawy} position={[.08,0,.002]} rotation={[0,0,Math.PI]}><circleGeometry args={[.31,48,Math.PI / 2,Math.PI]} /><meshStandardMaterial color="#0B2E26" roughness={.28} metalness={.16} side={THREE.DoubleSide} /></mesh>
+        <mesh position={[0,0,.012]}><torusGeometry args={[.22,.012,8,48]} /><meshStandardMaterial color="#D5AE62" metalness={.5} roughness={.3} /></mesh>
         <mesh position={[0,0,.019]} rotation={[0,0,Math.PI/4]}><boxGeometry args={[.12,.12,.016]} /><meshStandardMaterial color="#D5AE62" metalness={.7} roughness={.25} /></mesh>
       </group>
     </group>
