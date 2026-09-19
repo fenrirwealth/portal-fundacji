@@ -1,3 +1,4 @@
+ 1 file changed, 7 insertions(+), 7 deletions(-)
 /* ============================================================
    SYSTEM PROJEKTOWY — Portal Fundacji Lepszy Dom Lepsze Jutro
    ============================================================
@@ -741,7 +742,7 @@ select.pole-kontrolka {
   overflow: hidden;
   color: var(--papier-50);
   background:
-    radial-gradient(circle at 72% 42%, color-mix(in srgb, var(--czerwien-600) 44%, transparent), transparent 31%),
+    radial-gradient(circle at 72% 42%, color-mix(in srgb, var(--bursztyn-500) 20%, transparent), transparent 31%),
     radial-gradient(circle at 13% 80%, color-mix(in srgb, var(--zielen-600) 68%, transparent), transparent 38%),
     linear-gradient(145deg, #050b1a 0%, var(--atrament-800) 48%, #0b1934 100%);
   isolation: isolate;
@@ -904,7 +905,7 @@ select.pole-kontrolka {
 .kroki-magiczne h3 { color: var(--papier-50); font-size: clamp(1.25rem, 1.55vw, 1.5rem); }
 .kroki-magiczne p { margin-top: 13px; color: rgba(255,249,240,.62); font-size: var(--t-sm); line-height: 1.65; }
 
-.pasek-finalowy { display: grid; grid-template-columns: 1fr auto; gap: 44px; align-items: center; padding: clamp(32px, 6vw, 64px); border-radius: 26px; color: var(--papier-50); background: linear-gradient(125deg, var(--czerwien-700), var(--czerwien-600) 45%, #4b0c1c); box-shadow: 0 28px 70px rgba(97,17,38,.18); }
+.pasek-finalowy { display: grid; grid-template-columns: 1fr auto; gap: 44px; align-items: center; padding: clamp(32px, 6vw, 64px); border-radius: 26px; color: var(--papier-50); background: linear-gradient(125deg, var(--atrament-900), var(--zielen-700) 52%, var(--atrament-800)); box-shadow: 0 28px 70px rgba(3,12,28,.28); }
 .pasek-finalowy h2 { max-width: 15ch; color: var(--papier-50); font-size: var(--t-3xl); }
 .pasek-finalowy p:not(.nadtytul) { max-width: 54ch; margin-top: 16px; color: rgba(255,249,240,.7); }
 .pasek-finalowy-akcje { display: flex; gap: 12px; flex-wrap: wrap; justify-content: flex-end; }
@@ -1212,7 +1213,7 @@ summary.btn::-webkit-details-marker { display: none; }
 .koperta-list-skan::after { content:""; position:absolute; inset:0; box-shadow:inset 0 0 34px rgba(83,53,20,.16); pointer-events:none; }
 .koperta-list-obraz { object-fit:contain; object-position:center; filter:sepia(.08) saturate(.9) contrast(.96); }
 .koperta-prezentacja-otwarta .koperta-list-skan { opacity:1; transform:translate(-50%,-15%) rotate(2deg) scale(1.1); filter:drop-shadow(0 13px 18px rgba(0,0,0,.28)); }
-.koperta-aura { position:absolute; z-index:-1; inset:15% 7%; border-radius:50%; pointer-events:none; opacity:.28; transform:scale(.75); background:radial-gradient(circle,#ffd98d88 0 5%,#c77a3244 24%,#7b183033 47%,transparent 72%); filter:blur(28px); transition:transform 1.2s cubic-bezier(.16,1,.3,1),opacity .8s ease,filter .8s ease; }
+.koperta-aura { position:absolute; z-index:-1; inset:15% 7%; border-radius:50%; pointer-events:none; opacity:.28; transform:scale(.75); background:radial-gradient(circle,#ffd98d88 0 5%,#c79b4f44 24%,#123d3238 47%,transparent 72%); filter:blur(28px); transition:transform 1.2s cubic-bezier(.16,1,.3,1),opacity .8s ease,filter .8s ease; }
 .koperta-prezentacja-otwarta .koperta-aura { opacity:1; transform:scale(1.35); filter:blur(20px); animation:aura-oddech 1.45s ease-in-out infinite alternate; }
 .koperta-gwiazdy { position:absolute; z-index:3; inset:0; pointer-events:none; overflow:visible; }
 .koperta-gwiazdy span { --kat:calc(var(--i) * 22.5deg); position:absolute; left:50%; top:51%; width:5px; height:5px; border-radius:50%; opacity:0; background:#fff4cc; box-shadow:0 0 8px 3px #ffc85a,0 0 22px 8px #d5ae6255; }
@@ -1234,7 +1235,7 @@ summary.btn::-webkit-details-marker { display: none; }
 @keyframes instrukcja-oddech { to { opacity:.52; } }
 
 .archiwum-sekcja { overflow:hidden; padding-block:clamp(84px,10vw,140px); color:var(--papier-50); background:
-  radial-gradient(circle at 13% 16%,#7b183045,transparent 31%),
+  radial-gradient(circle at 13% 16%,#123d326b,transparent 31%),
   radial-gradient(circle at 88% 78%,#d5ae621c,transparent 27%),
   linear-gradient(145deg,#071127,#0c1b38 55%,#09152f); }
 .archiwum-sekcja .nadtytul { color:#e0bb70; }
@@ -1631,7 +1632,7 @@ main { min-width: 0; }
   opacity: .18;
 }
 .domkniecie-blask-lewy { top: -180px; left: -140px; background: var(--bursztyn-400); }
-.domkniecie-blask-prawy { right: -160px; bottom: -180px; background: var(--czerwien-500); }
+.domkniecie-blask-prawy { right: -160px; bottom: -180px; background: var(--bursztyn-500); }
 .domkniecie-siatka { display: grid; gap: clamp(22px, 3vw, 38px); }
 
 .domkniecie-strony .fundusz-zaproszenie,
@@ -1678,8 +1679,8 @@ main { min-width: 0; }
 .domkniecie-strony .pasek-finalowy {
   padding: clamp(42px, 7vw, 82px);
   background:
-    radial-gradient(circle at 82% 24%, rgba(213,174,98,.18), transparent 27%),
-    linear-gradient(125deg, #681229, #7b1830 48%, #460918);
+    radial-gradient(circle at 82% 24%, rgba(213,174,98,.2), transparent 27%),
+    linear-gradient(125deg, #071126, #0b2e26 52%, #09152f);
 }
 .domkniecie-strony .pasek-finalowy h2 { font-size: clamp(2.4rem, 5.1vw, 4.9rem); }
 .domkniecie-strony .pasek-finalowy p:not(.nadtytul) { font-size: 1.04rem; line-height: 1.75; }
