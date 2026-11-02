@@ -36,7 +36,7 @@ export default function ListaKontrolna({ pozycje, wartosci, zgodaPoczatkowa, zab
       <p className={"kontrolna-postep" + (komplet ? " kontrolna-gotowa" : "")} aria-live="polite">
         {komplet
           ? "Komplet — publikacja jest możliwa"
-          : `Zaznaczono ${ile} z ${pozycje.length}${zgoda ? "" : ", brakuje też zgody dyrektora"}`}
+          : `Zaznaczono ${ile} z ${pozycje.length}${zgoda ? "" : ", brakuje też zgody opiekuna prawnego lub dyrektora"}`}
       </p>
 
       <label className="checkbox">
@@ -46,7 +46,7 @@ export default function ListaKontrolna({ pozycje, wartosci, zgodaPoczatkowa, zab
           checked={zgoda}
           onChange={(e) => setZgoda(e.target.checked)}
         />
-        <span><b>Zgoda dyrektora została przyjęta</b><br />
+        <span><b>Zgoda opiekuna prawnego lub dyrektora została przyjęta</b><br />
           <span className="drobny cichy">Podpisany dokument zostaje w dokumentacji Fundacji, nie w portalu.</span>
         </span>
       </label>

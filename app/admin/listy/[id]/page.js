@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
 export const metadata = { title: "Edycja listu", robots: { index: false, follow: false } };
 
 const KONTROLA = [
-  ["zgodaDolaczona", "Zgoda dyrektora jest w dokumentacji Fundacji"],
+  ["zgodaDolaczona", "Zgoda opiekuna prawnego lub dyrektora jest w dokumentacji Fundacji"],
   ["brakNazwiska", "Brak nazwiska dziecka"],
   ["brakPlacowki", "Brak nazwy i adresu placówki"],
   ["brakMiejscowosci", "Brak miejscowości pozwalającej zidentyfikować dziecko"],
@@ -73,7 +73,7 @@ export default async function EdycjaListu({ params, searchParams }) {
         <div>
           <h1 className="tytul">List nr {list.numer}: {list.imie}</h1>
           <p className="wstep" style={{ marginTop: "var(--o-2)" }}>
-            {list.placowka.nazwa} · {list.edycja.nazwa}
+            {(list.placowka?.nazwa || "Bez placówki · Fundacja")} · {list.edycja.nazwa}
           </p>
         </div>
         <Status status={list.status} />

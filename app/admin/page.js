@@ -75,7 +75,7 @@ export default async function Admin({ searchParams }) {
   const wszystkich = liczby.reduce((s, l) => s + l._count, 0);
 
   return (
-    <div className="wrap sekcja">
+    <div className="wrap sekcja"><Link className="btn btn-tekstowy" href="/admin/haslo">Ustaw hasło do panelu</Link>
       <div className="naglowek-rzad">
         <div>
           <h1 className="tytul">Panel redakcji</h1>
@@ -136,7 +136,7 @@ export default async function Admin({ searchParams }) {
             <thead><tr><th>Placówka</th><th>Przesłano</th><th>Status</th><th>Akcje</th></tr></thead>
             <tbody>{skany.map((s) => (
               <tr key={s.id}>
-                <td><b>{s.udzial.placowka.nazwa}</b></td>
+                <td><b>{s.udzia(l.placowka?.nazwa || "Bez placówki · Fundacja")}</b></td>
                 <td className="maly">{s.utworzony.toLocaleString("pl-PL")}</td>
                 <td><Status status={s.status} /></td>
                 <td><div className="naglowek-rzad">
@@ -227,7 +227,7 @@ export default async function Admin({ searchParams }) {
               <tr key={l.id}>
                 <td className="cichy">{l.numer}</td>
                 <td><b>{l.imie}</b>, {l.wiek} lat<br /><span className="drobny cichy">{l.marzenie.slice(0, 48)}{l.marzenie.length > 48 ? "…" : ""}</span></td>
-                <td className="maly">{l.placowka.nazwa}</td>
+                <td className="maly">{(l.placowka?.nazwa || "Bez placówki · Fundacja")}</td>
                 <td><Status status={l.status} /></td>
                 <td className="drobny">{l.weryfikacja?.zakonczona ? "zakończona" : <span className="cichy">w toku</span>}</td>
                 <td><Link className="btn drugorzedny" href={"/admin/listy/" + l.id}>Otwórz</Link></td>
