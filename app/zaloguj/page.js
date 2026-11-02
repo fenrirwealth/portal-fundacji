@@ -1,3 +1,4 @@
+import { zalogujHaslem } from "./haslo-actions";
 import { signIn } from "../../auth";
 import { bezpiecznaSciezka } from "../../lib/db";
 import Pole from "../ui/Pole";
@@ -12,8 +13,18 @@ export default async function Zaloguj({ searchParams }) {
     <div className="wrap sekcja">
       <div className="waski" style={{ marginInline: "auto" }}>
         <h1 style={{ fontSize: "var(--t-2xl)" }}>Zaloguj się</h1>
+        {p.ustawione && <p role="status">Hasło zapisane. Zaloguj się nowym hasłem.</p>}
+        {p.blad && <p role="alert" className="blad">{p.blad}</p>}
+        <h2 style={{ marginTop: "var(--o-5)" }}>Panel administratora</h2>
+        <form action={zalogujHaslem}>
+          <Pole id="admin-email" name="email" typ="email" etykieta="E-mail administratora" wymagane autoComplete="username" />
+          <Pole id="admin-haslo" name="haslo" typ="password" etykieta="Hasło" wymagane autoComplete="current-password" maxLength={128} />
+          <button className="btn btn-pelny" type="submit">Zaloguj do panelu</button>
+        </form>
+        <p className="drobny">Pierwsze logowanie lub odzyskanie dostępu: użyj linku poniżej, następnie wybierz „Ustaw hasło” w panelu.</p>
+        <h2 style={{ marginTop: "var(--o-6)" }}>Logowanie linkiem</h2>
         <p className="cichy" style={{ marginTop: "var(--o-3)" }}>
-          Nie zakładamy haseł. Podaj adres e-mail, a wyślemy na niego link
+          Podaj adres e-mail, a wyślemy na niego jednorazowy link
           do logowania. Tego samego adresu użyjemy do kontaktu w sprawie akcji.
         </p>
 
