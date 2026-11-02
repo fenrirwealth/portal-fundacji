@@ -11,7 +11,7 @@ const STAN_POCZATKOWY = { ok: true, bledy: {}, wartosci: {} };
  * i trafiaja do konkretnych pol, a wpisane wartosci sa odtwarzane —
  * wczesniej kazdy blad przeladowywal strone i kasowal cala prace.
  */
-export default function FormularzNowy({ akcja, udzialy, skany, domyslnySkanId, domyslnyUdzialId, wojewodztwa, kategorie }) {
+export default function FormularzNowy({ akcja, bezPlacowki = false, udzialy, skany, domyslnySkanId, domyslnyUdzialId, wojewodztwa, kategorie }) {
   const [stan, wyslij, wTrakcie] = useActionState(akcja, STAN_POCZATKOWY);
   const b = stan?.bledy || {};
   const w = stan?.wartosci || {};
@@ -29,7 +29,7 @@ export default function FormularzNowy({ akcja, udzialy, skany, domyslnySkanId, d
         <PoleAdmin nazwa="udzialId" etykieta="Placówka" blad={b.udzialId}
                    podpowiedz="Widoczne są wyłącznie placówki zatwierdzone w aktywnej edycji.">
           <select name="udzialId" defaultValue={w.udzialId || domyslnyUdzialId || ""}>
-            <option value="" disabled>wybierz z listy zatwierdzonych</option>
+            <option value="" disabled={!bezPlacowki}>{bezPlacowki ? "Bez placówki — list dodany przez Fundację" : "wybierz z listy zatwierdzonych"}</option>
             {udzialy.map((u) => <option key={u.id} value={u.id}>{u.nazwa} — {u.wojewodztwo}</option>)}
           </select>
         </PoleAdmin>
