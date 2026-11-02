@@ -37,6 +37,9 @@ model User {
   id            String    @id @default(cuid())
   email         String    @unique
   emailVerified DateTime?
+  passwordHash  String?
+  passwordFailures Int @default(0)
+  passwordWindow DateTime?
   name          String?
   image         String?
 
@@ -286,8 +289,8 @@ model List {
   skan   SkanListu? @relation(fields: [skanId], references: [id])
 
   // --- dane wewnetrzne ---
-  placowkaId String
-  placowka   Placowka @relation(fields: [placowkaId], references: [id])
+  placowkaId String?
+  placowka   Placowka? @relation(fields: [placowkaId], references: [id])
 
   // Podpisana zgoda dyrektora zostaje w dokumentacji fundacji, NIE
   // w portalu. To najbardziej wrazliwy dokument w calej akcji —
