@@ -232,17 +232,20 @@ export async function utworzList(_poprzedni, formData) {
   const w = wartosciListu(formData);
 
   const mapa = sprawdzPolaListu(w);
-  if (!w.udzialId) mapa.udzialId = "Wybierz placówkę.";
+  if (!w.udzialId && redaktor.rola !== "ZARZAD") mapa.udzialId = "Wybierz placówkę.";
   if (Object.keys(mapa).length) return bledy(mapa, w);
 
-  const udzial = await db.udzialPlacowki.findFirst({
+  const udzial = w.udzialId ? await db.udzialPlacowki.findFirst({
     where: { id: w.udzialId, status: "POTWIERDZILA", edycja: { aktywna: true } },
     select: { placowkaId: true, edycjaId: true },
-  });
-  if (!udzial) {
+  }) : null;
+  const edycja = !w.udzialId ? await db.edycjaAkcji.findFirst({ where: { aktywna: true }, select: { id: true } }) : null;
+  if (!w.udzialId && !edycja) return bledy({ udzialId: "Najpierw uruchom aktywną edycję akcji." }, w);
+  if (w.udzialId && !udzial) {
     return bledy({ udzialId: "Ta placówka nie jest zatwierdzona w aktywnej edycji." }, w);
   }
 
+  if (w.skanId && !w.udzialId) return bledy({ skanId: "Skan placówki wymaga wybrania jej zgłoszenia." }, w);
   if (w.skanId) {
     const skan = await db.skanListu.findFirst({
       where: { id: w.skanId, udzialId: w.udzialId, status: { in: ["NOWY", "W_MODERACJI"] }, list: null },
@@ -253,8 +256,8 @@ export async function utworzList(_poprzedni, formData) {
 
   const list = await db.list.create({
     data: {
-      edycjaId: udzial.edycjaId,
-      placowkaId: udzial.placowkaId,
+      edycjaId: udzial?.edycjaId || edycja.id,
+      placowkaId: udzial?.placowkaId || null,
       imie: w.imie,
       wiek: Number(w.wiek),
       wojewodztwo: w.wojewodztwo,
