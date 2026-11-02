@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 export const metadata = { title: "Nowy list", robots: { index: false, follow: false } };
 
 export default async function NowyList({ searchParams }) {
-  await wymagajRedakcji("/admin/listy/nowy");
+  const konto = await wymagajRedakcji("/admin/listy/nowy");
   const p = (await searchParams) || {};
 
   const [udzialy, skany] = await Promise.all([
@@ -35,12 +35,12 @@ export default async function NowyList({ searchParams }) {
       <h1 className="tytul" style={{ marginTop: "var(--o-4)" }}>Nowy list</h1>
       <p className="wstep" style={{ marginTop: "var(--o-2)" }}>
         List powstaje jako szkic. Publikacja będzie możliwa dopiero po przyjęciu
-        zgody dyrektora i zaznaczeniu całej listy kontrolnej.
+        zgody opiekuna prawnego lub dyrektora i zaznaczeniu całej listy kontrolnej.
       </p>
 
       {p.blad && <p className="blad" role="alert">{p.blad}</p>}
 
-      {udzialy.length === 0 ? (
+      {udzialy.length === 0 && konto.rola !== "ZARZAD" ? (
         <div className="pusto" style={{ marginTop: "var(--o-6)" }}>
           <h3>Brak zatwierdzonych placówek</h3>
           <p>
@@ -53,6 +53,7 @@ export default async function NowyList({ searchParams }) {
         </div>
       ) : (
         <FormularzNowy
+          bezPlacowki={konto.rola === "ZARZAD"}
           akcja={utworzList}
           udzialy={udzialy.map((u) => ({ id: u.id, nazwa: u.placowka.nazwa, wojewodztwo: u.placowka.wojewodztwo }))}
           skany={skany.map((s) => ({ id: s.id, udzialId: s.udzialId, nazwa: s.udzial.placowka.nazwa, data: s.utworzony.toLocaleDateString("pl-PL") }))}
