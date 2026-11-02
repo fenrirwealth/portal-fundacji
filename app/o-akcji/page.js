@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowUpRight, Check, Gift, ShieldCheck, Sparkles } from "lucide-react";
 
 export const metadata = {
@@ -20,10 +21,25 @@ export default function OAkcji() {
           <p className="o-akcji-nadtytul">Fundacja Lepszy Dom Lepsze Jutro</p>
           <h1>Magia świąt, <em>za którą stoi odpowiedzialność.</em></h1>
           <p className="o-akcji-wstep">
-            Łączymy zweryfikowane placówki z osobami, które chcą przygotować prezent dla konkretnego dziecka.
+            Pomagamy dzieciom z domów dziecka, placówek opiekuńczych i rodzin zastępczych spotkać osoby, które chcą spełnić ich świąteczne marzenia.
             Fundacja prowadzi list przez cały proces: od sprawdzenia treści, przez rezerwację, aż po bezpieczne przekazanie podarunku.
           </p>
         </header>
+
+        <section className="akcja-plakat" aria-labelledby="akcja-plakat-tytul">
+          <div className="akcja-plakat-tekst">
+            <p className="akcja-plakat-edycja">5. Świąteczna Zbiórka Pełna Miłości</p>
+            <h2 id="akcja-plakat-tytul">Podaruj magię Świąt <em>prosto z serca.</em></h2>
+            <p>Jeden prezent, jeden wybrany list, jedna dobra wiadomość: ktoś pamięta. Dołącz do naszej piątej edycji i pomóż przygotować świąteczne podarunki dla dzieci i młodzieży.</p>
+            <div className="akcja-plakat-termin"><span>Prezenty przyjmujemy do</span><strong>11 grudnia 2026</strong></div>
+            <h3>Co możesz podarować?</h3>
+            <ul className="akcja-plakat-dary"><li>Klocki LEGO, gry planszowe i puzzle</li><li>Książki, zabawki i zestawy kreatywne</li><li>Kosmetyki i upominki dla młodzieży</li></ul>
+            <p className="akcja-plakat-dopisek">Wybierz list, aby poznać konkretne marzenia. Możesz też pomóc dotrzeć do kolejnych darczyńców — wydrukuj plakat i powieś go w sklepie, biurze lub miejscu spotkań.</p>
+            <div className="akcja-plakat-przyciski"><Link className="btn btn-magiczny btn-duzy" href="/listy">Wybierz list <ArrowUpRight aria-hidden="true" /></Link><a className="btn o-akcji-btn-szklany btn-duzy" href="/api/dekoracje/plakat" download>Pobierz plakat</a></div>
+            <p className="akcja-plakat-kontakt">Chcesz przekazać dary lub zorganizować zbiórkę?<br /><a href="tel:+48570747779">570 747 779</a><span aria-hidden="true"> · </span><a href="mailto:kontakt@fundacjalepszydomlepszejutro.pl">Napisz do Fundacji</a></p>
+          </div>
+          <figure className="akcja-plakat-figura"><a href="https://fundacjalepszydomlepszejutro.pl/assets/kampanie/plakat-swieta-2026.png" target="_blank" rel="noopener noreferrer" aria-label="Otwórz plakat w pełnej rozdzielczości"><Image src="https://fundacjalepszydomlepszejutro.pl/assets/kampanie/plakat-swieta-2026.webp" alt="Czerwono-złoty plakat piątej Świątecznej Zbiórki Pełnej Miłości. Termin: 11 grudnia 2026." width={930} height={1311} sizes="(max-width: 800px) 90vw, 480px" unoptimized /></a><figcaption>Udostępnij plakat. Zaproś innych do pomagania.</figcaption></figure>
+        </section>
 
         <section className="o-akcji-karty" aria-label="Standardy akcji">
           <article className="o-akcji-karta">
