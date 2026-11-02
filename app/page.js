@@ -1,4 +1,5 @@
 import Link from "next/link";
+import PracowniaSwiateczna from "./ui/PracowniaSwiateczna";
 import { Gift, MailOpen, ShieldCheck, Star } from "lucide-react";
 import { aktywnaEdycja, formatujTermin, licznik } from "../lib/db";
 import HeroMagia from "./ui/HeroMagia";
@@ -45,6 +46,7 @@ export default async function Start() {
   return (
     <>
       <HeroMagia etykieta={etykieta} saListy={saListy} termin={termin} />
+      <PracowniaSwiateczna />
 
       <section className="sekcja-lancucha">
         <div className="wrap">
