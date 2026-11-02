@@ -1,3 +1,4 @@
+import PracowniaSwiateczna from "../ui/PracowniaSwiateczna";
 import { Suspense } from "react";
 import { listyPubliczne, licznik, aktywnaEdycja, formatujTermin } from "../../lib/db";
 import { zwolnijWygasle } from "../api/rezerwacja/route";
@@ -118,12 +119,13 @@ export default async function Listy({ searchParams }) {
           <p className="listy-nadtytul"><Sparkles /> Magiczne archiwum życzeń</p>
           <h1>Wybierz list, który czeka na <em>swojego Mikołaja</em></h1>
           <p className="listy-wstep">
-            Każdy list przeszedł weryfikację placówki i Fundacji. Publikujemy imię,
+            Każdy list przeszedł weryfikację Fundacji. Publikujemy imię,
             wiek, województwo, opis marzenia i kategorię prezentu, w razie potrzeby
             rozmiar, oraz zdjęcie listu przygotowane przez Fundację. Nie publikujemy
             nazwisk, nazwy placówki, miejscowości, adresu ani wizerunku dziecka.
           </p>
         </header>
+        <PracowniaSwiateczna />
 
         <LicznikNaZywo poczatkowy={stan} termin={formatujTermin(edycja?.terminDostarczenia)} />
 
