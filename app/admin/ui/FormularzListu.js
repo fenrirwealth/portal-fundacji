@@ -63,8 +63,8 @@ export default function FormularzListu({
               <input name="imie" maxLength={80} defaultValue={v("imie", list.imie)} />
             </PoleAdmin>
 
-            <PoleAdmin nazwa="wiek" etykieta="Wiek" blad={b.wiek}>
-              <input name="wiek" type="number" min="1" max="25" defaultValue={v("wiek", list.wiek)} />
+            <PoleAdmin nazwa="wiek" etykieta="Wiek w latach (0 — poniżej roku)" blad={b.wiek}>
+              <input name="wiek" type="number" min="0" max="25" defaultValue={v("wiek", list.wiek)} />
             </PoleAdmin>
 
             <PoleAdmin nazwa="wojewodztwo" etykieta="Województwo" blad={b.wojewodztwo}>

@@ -1,3 +1,4 @@
+import { wiekPL } from "../../lib/wiek.mjs";
 import Link from "next/link";
 import { ArrowUpRight, Mail } from "lucide-react";
 // Karta listu — komponent wspoldzielony przez liste i wyniki wyszukiwania.
@@ -45,7 +46,7 @@ export default function KartaListu({ list }) {
         <span className="karta-listu-ikona" aria-hidden="true"><Mail /></span>
         <div className="karta-listu-meta">
           <h3>{list.imie}</h3>
-          <p>Wiek: {list.wiek} {list.wiek === 1 ? "rok" : "lat"}</p>
+          <p>Wiek: {wiekPL(list.wiek)}</p>
         </div>
         <p className="karta-listu-szczegoly">
           {list.wojewodztwo ? `woj. ${list.wojewodztwo.toLowerCase()} · ` : ""}{list.kategoria.toLowerCase()}
@@ -55,7 +56,7 @@ export default function KartaListu({ list }) {
         <Link
           className="karta-listu-akcja"
           href={`/listy/${list.id}`}
-          aria-label={`Otwórz list od ${list.imie}, ${list.wiek} lat. ${opis}.`}
+          aria-label={`Otwórz list od ${list.imie}, ${wiekPL(list.wiek)}. ${opis}.`}
         >
           <span>Otwórz ten list</span><ArrowUpRight aria-hidden="true" />
         </Link>

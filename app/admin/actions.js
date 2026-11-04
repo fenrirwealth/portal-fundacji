@@ -76,8 +76,8 @@ function sprawdzPolaListu(w) {
   else if (w.imie.length > 80) mapa.imie = "Imię jest za długie.";
 
   const wiek = Number(w.wiek);
-  if (!Number.isInteger(wiek) || wiek < 1 || wiek > 25) {
-    mapa.wiek = "Wiek musi być liczbą od 1 do 25.";
+  if (w.wiek === "" || !Number.isInteger(wiek) || wiek < 0 || wiek > 25) {
+    mapa.wiek = "Podaj wiek od 0 do 25 lat; 0 oznacza dziecko poniżej roku.";
   }
   if (w.wojewodztwo && !WOJEWODZTWA.includes(w.wojewodztwo)) mapa.wojewodztwo = "Wybierz województwo z listy.";
   if (!KATEGORIE.includes(w.kategoria)) mapa.kategoria = "Wybierz kategorię z listy.";

@@ -1,3 +1,4 @@
+import { wiekPL } from "../../lib/wiek.mjs";
 import Link from "next/link";
 import { db } from "../../lib/db";
 import { wymagajRedakcji } from "../../lib/admin";
@@ -252,7 +253,7 @@ export default async function Admin({ searchParams }) {
               <tr key={l.id}>
                 <td><MiniaturaListu id={l.id} numer={l.numer} imie={l.imie} zdjecieUrl={l.zdjecieUrl} /></td>
                 <td className="cichy">{l.numer}</td>
-                <td><b>{l.imie}</b>, {l.wiek} lat<br /><span className="drobny cichy">{l.marzenie.slice(0, 48)}{l.marzenie.length > 48 ? "…" : ""}</span></td>
+                <td><b>{l.imie}</b>, {wiekPL(l.wiek)}<br /><span className="drobny cichy">{l.marzenie.slice(0, 48)}{l.marzenie.length > 48 ? "…" : ""}</span></td>
                 <td className="maly">{(l.placowka?.nazwa || "Bez placówki · Fundacja")}</td>
                 <td><Status status={l.status} />{l.rezerwacjaReczna && <p className="drobny cichy">Rezerwacja ręczna Fundacji</p>}</td>
                 <td className="drobny">{l.weryfikacja?.zakonczona ? "zakończona" : <span className="cichy">w toku</span>}</td>

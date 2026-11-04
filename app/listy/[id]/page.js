@@ -1,3 +1,4 @@
+import { wiekPL } from "../../../lib/wiek.mjs";
 import { notFound } from "next/navigation";
 import { listPubliczny, aktywnaEdycja, formatujTermin } from "../../../lib/db";
 import { zwolnijWygasle } from "../../api/rezerwacja/route";
@@ -12,11 +13,11 @@ export async function generateMetadata({ params }) {
   const list = await listPubliczny(p.id);
   if (!list) return { title: "Nie znaleziono listu" };
   return {
-    title: `List od ${list.imie}, ${list.wiek} lat`,
+    title: `List od ${list.imie}, ${wiekPL(list.wiek)}`,
     description: `Marzenie: ${list.marzenie}. Sprawdź, jak przekazać prezent.`,
     openGraph: {
       title: list.status === "OPUBLIKOWANY" ? `Ten list nadal czeka na Mikołaja` : `Ten list ma już swojego Mikołaja`,
-      description: `${list.imie}, ${list.wiek} lat — ${list.marzenie}`,
+      description: `${list.imie}, ${wiekPL(list.wiek)} — ${list.marzenie}`,
       images: [{ url: `/api/listy/${list.id}/story?format=og`, width: 1200, height: 630 }],
     },
     // Pojedynczy list NIE trafia do wyszukiwarek. Strona zbiorcza
@@ -47,7 +48,7 @@ export default async function Szczegol({ params }) {
         <figure style={{ margin: 0 }}>
           <div className="list-zdjecie">
             {list.zdjecieUrl ? (
-              <img src={list.zdjecieUrl} alt={`Zdjęcie listu napisanego przez ${list.imie}, ${list.wiek} lat`} />
+              <img src={list.zdjecieUrl} alt={`Zdjęcie listu napisanego przez ${list.imie}, ${wiekPL(list.wiek)}`} />
             ) : (
               <div className="karta-listu-zastepnik zastepnik" aria-hidden="true">
                 <span>zdjęcie listu nr {list.numer} w przygotowaniu</span>
@@ -64,7 +65,7 @@ export default async function Szczegol({ params }) {
         <div className="panel-rezerwacji">
           <div className="karta karta-tresc">
             <h1 style={{ fontSize: "var(--t-2xl)" }}>
-              {list.imie}, {list.wiek} {list.wiek === 1 ? "rok" : "lat"}
+              {list.imie}, {wiekPL(list.wiek)}
             </h1>
             <p className="drobny cichy" style={{ marginTop: "var(--o-2)" }}>
               {list.wojewodztwo ? `woj. ${list.wojewodztwo.toLowerCase()} · ` : ""}{list.kategoria.toLowerCase()}
@@ -108,7 +109,7 @@ export default async function Szczegol({ params }) {
           pierwszym ekranem. Pasek trzyma go zawsze w zasięgu kciuka. */}
       <div className="pasek-mobilny">
         <span className="opis">
-          {list.imie}, {list.wiek} lat<br />{list.marzenie}
+          {list.imie}, {wiekPL(list.wiek)}<br />{list.marzenie}
         </span>
         <PrzyciskRezerwacji listId={list.id} wolny={wolny} status={list.status} zwiezly />
       </div>
