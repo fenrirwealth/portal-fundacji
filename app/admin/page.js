@@ -5,6 +5,7 @@ import { moderujSkan, odnowLinkPlacowki, rozpatrzZgloszenie, utworzEdycje, potwi
 import { zwolnijWygasle } from "../api/rezerwacja/route";
 import { terminPL } from "../../lib/zasady-akcji.mjs";
 import SzybkieAkcje from "./ui/SzybkieAkcje";
+import MiniaturaListu from "./ui/MiniaturaListu";
 import Status, { ETYKIETY } from "./ui/Status";
 
 export const dynamic = "force-dynamic";
@@ -246,9 +247,10 @@ export default async function Admin({ searchParams }) {
           </div>
         ) : (
           <div className="tabela-przewijana"><table className="tabela">
-            <thead><tr><th>Nr</th><th>Dziecko</th><th>Placówka</th><th>Status</th><th>Weryfikacja</th><th><span className="tylko-dla-czytnika">Akcje</span></th></tr></thead>
+            <thead><tr><th>Zdjęcie</th><th>Nr</th><th>Dziecko</th><th>Placówka</th><th>Status</th><th>Weryfikacja</th><th><span className="tylko-dla-czytnika">Akcje</span></th></tr></thead>
             <tbody>{listy.map((l) => (
               <tr key={l.id}>
+                <td><MiniaturaListu id={l.id} numer={l.numer} imie={l.imie} zdjecieUrl={l.zdjecieUrl} /></td>
                 <td className="cichy">{l.numer}</td>
                 <td><b>{l.imie}</b>, {l.wiek} lat<br /><span className="drobny cichy">{l.marzenie.slice(0, 48)}{l.marzenie.length > 48 ? "…" : ""}</span></td>
                 <td className="maly">{(l.placowka?.nazwa || "Bez placówki · Fundacja")}</td>
