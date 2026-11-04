@@ -88,3 +88,7 @@ Darczyńca potwierdza e-mail linkiem jednorazowym. Osobna, niezaznaczona domyśl
 Nowa rezerwacja czeka maksymalnie 48 godzin na potwierdzenie odbytej rozmowy przez redakcję/Zarząd. Darczyńca nie ma endpointu pozwalającego potwierdzić ją samemu. Panel pokazuje termin, osobę potwierdzającą i datę rozmowy. Worker co minutę uruchamia chronioną kontrolę terminów, więc wygaśnięcie działa również bez odwiedzin strony; wymagane są REDIS_URL i CRON_SECRET. Dotychczasowy cron może pozostać jako zabezpieczenie.
 
 Każda rezerwacja, przypomnienie o rozmowie, przypomnienie o dostarczeniu i potwierdzenie kontaktu tworzą niezależne zadania e-mail dla darczyńcy i kontakt@fundacjalepszydomlepszejutro.pl. Linki logowania nie są kopiowane do Fundacji.
+
+## Zarządzanie listami
+
+Nawigacja kont REDAKCJA/ZARZAD pokazuje „Panel zarządzania” z wejściem bezpośrednio do tabeli listów. Przy liście dostępne są edycja, ręczna rezerwacja, zwolnienie oraz usunięcie do odwracalnego archiwum. Rezerwacja ręczna działa tylko dla opublikowanego, zweryfikowanego listu aktywnej edycji, zapisuje administratora i prywatną notatkę oraz nie tworzy fikcyjnego darczyńcy. Jest zatwierdzona przez Fundację i nie podlega terminowi 48 godzin. Fundacja otrzymuje osobne powiadomienie e-mail. Listu w aktywnej realizacji nie da się usunąć przed zwolnieniem. Wszystkie operacje ponownie sprawdzają rolę i wersję rekordu.

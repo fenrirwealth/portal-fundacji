@@ -58,6 +58,7 @@ const daneFundacji = {
 
 export default async function Layout({ children }) {
   const sesja = await auth();
+  const administrator = ["REDAKCJA", "ZARZAD"].includes(/** @type {any} */ (sesja?.user)?.rola);
 
   return (
     <html lang="pl">
@@ -72,7 +73,7 @@ export default async function Layout({ children }) {
         <ToastProvider>
           <a className="skip" href="#tresc">Przejdź do treści</a>
 
-          <Naglowek email={sesja?.user?.email} />
+          <Naglowek email={sesja?.user?.email} administrator={administrator} />
 
           <main id="tresc">{children}</main>
 

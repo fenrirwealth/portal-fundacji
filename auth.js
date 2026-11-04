@@ -77,6 +77,13 @@ const adapter = {
       zgodaZapamietania: zapamietana ? new Date() : null,
     } });
   },
+  async deleteSession(sessionToken) {
+    // Stare ciasteczko może wskazywać sesję usuniętą wcześniej.
+    // Jej ponowne usunięcie nie powinno blokować logowania do panelu.
+    const poprzednia = await db.session.findUnique({ where: { sessionToken } });
+    await db.session.deleteMany({ where: { sessionToken } });
+    return poprzednia;
+  },
 };
 
 export const { handlers, auth, signIn, signOut } = NextAuth(async () => ({

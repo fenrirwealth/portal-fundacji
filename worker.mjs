@@ -107,6 +107,16 @@ const worker = new Worker(NAZWA, async (zadanie) => {
     return;
   }
 
+  if (zadanie.name === "REZERWACJA_RECZNA") {
+    const list = await db.list.findUnique({ where: { id: zadanie.data.listId }, select: { id: true, numer: true, imie: true } });
+    if (!list) return;
+    await transport.sendMail({ from: nadawca(), to: EMAIL_FUNDACJI,
+      subject: `Ręczna rezerwacja Fundacji — list nr ${list.numer}`,
+      text: `List nr ${list.numer} od ${list.imie} oznaczono ręcznie jako zarezerwowany. Administrator: ${zadanie.data.administratorEmail}. Data: ${terminPL(zadanie.data.data)}. Ta rezerwacja nie wygasa po 48 godzinach. Panel: ${portal}/admin/listy/${list.id}`,
+      html: htmlEmail("Ręczna rezerwacja listu", `<p>List nr <b>${list.numer}</b> od <b>${esc(list.imie)}</b> został ręcznie oznaczony jako zarezerwowany.</p><p>Administrator: ${esc(zadanie.data.administratorEmail)}. Data: ${terminPL(zadanie.data.data)}.</p><p>Rezerwacja jest zatwierdzona przez Fundację i nie wygasa po 48 godzinach.</p>`, "Otwórz list w panelu", `${portal}/admin/listy/${list.id}`) });
+    return;
+  }
+
   if (zadanie.name === "LINK_PLACOWKI") {
     const { email, nazwa, link } = zadanie.data;
     await transport.sendMail({ from: nadawca(), to: email, subject: "Bezpieczny link do przesłania listów dzieci",
