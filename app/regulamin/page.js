@@ -34,9 +34,12 @@ export default async function Regulamin({ searchParams }) {
       <div className="czytanie" style={{ marginTop: "var(--o-6)" }}>
         <p><b>1.</b> Organizatorem akcji jest Fundacja Lepszy Dom Lepsze Jutro,
         KRS 0000971976.</p>
-        <p><b>2.</b> Darczyńca rezerwuje jeden list naraz. Rezerwację należy
-        potwierdzić w ciągu 3 dni, w przeciwnym razie list wraca do puli
-        i może go wybrać ktoś inny.</p>
+        <p><b>2.</b> Darczyńca rezerwuje jeden list naraz. W ciągu 48 godzin od rezerwacji należy
+        skontaktować się telefonicznie z Fundacją pod numerem +48 570 747 779
+        w celu ustalenia szczegółów. Administrator Fundacji potwierdza odbytą rozmowę
+        w portalu. Jeżeli nie potwierdzi kontaktu przed upływem 48 godzin,
+        rezerwacja wygasa i list wraca do puli. Darczyńca nie może samodzielnie
+        potwierdzić rozmowy ani zatrzymać rezerwacji.</p>
         <p><b>3.</b> Prezent należy dostarczyć do siedziby Fundacji w terminie
         podanym przy liście. Paczki nie należy owijać — Fundacja sprawdza
         zawartość przed przekazaniem i pakuje ją samodzielnie.</p>
@@ -51,7 +54,11 @@ export default async function Regulamin({ searchParams }) {
         lub buta, oraz zdjęcie listu przygotowane przez Fundację. Nie publikujemy
         nazwisk, nazwy placówki, miejscowości, adresu ani wizerunku dziecka.</p>
         <p><b>7.</b> Administratorem danych darczyńcy jest Fundacja. Dane służą
-        wyłącznie obsłudze akcji. Przysługuje prawo dostępu, sprostowania,
+        wyłącznie obsłudze akcji. Po osobnym, dobrowolnym zaznaczeniu zgody
+        logowanie na danym urządzeniu jest zapamiętywane przez 30 dni od
+        potwierdzenia adresu e-mail. Bez tej zgody sesja wygasa po 8 godzinach.
+        Wylogowanie kończy sesję wcześniej. Nie należy zapamiętywać logowania
+        na urządzeniu publicznym lub współdzielonym. Przysługuje prawo dostępu, sprostowania,
         usunięcia oraz wniesienia skargi do Prezesa UODO.</p>
         <p><b>8.</b> Udział w akcji jest nieodpłatny i dobrowolny. Rezerwację
         można anulować w każdej chwili w panelu &bdquo;Moje listy&rdquo;.</p>

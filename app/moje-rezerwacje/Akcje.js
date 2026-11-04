@@ -30,7 +30,7 @@ export default function Akcje({ id, status, imie = "" }) {
       if (!odp.ok) {
         toast(dane.blad || "Nie udało się wykonać operacji.", "blad");
       } else {
-        toast(akcja === "potwierdz" ? "Rezerwacja potwierdzona." : "Rezerwacja anulowana. List wrócił do puli.");
+        toast("Rezerwacja anulowana. List wrócił do puli.");
       }
     } catch {
       toast("Brak połączenia. Spróbuj jeszcze raz.", "blad");
@@ -42,12 +42,7 @@ export default function Akcje({ id, status, imie = "" }) {
 
   return (
     <div style={{ display: "flex", gap: "var(--o-2)", justifyContent: "flex-end", flexWrap: "wrap" }}>
-      {status === "OCZEKUJE" && (
-        <button className="btn" disabled={stan === "czekam"} aria-busy={stan === "czekam"}
-                onClick={() => wyslij("potwierdz")}>
-          Potwierdzam
-        </button>
-      )}
+
 
       {/* Rezygnacja to operacja nieodwracalna — list od razu wraca do puli
           i może go zająć ktoś inny. Dlatego potwierdzenie w miejscu,

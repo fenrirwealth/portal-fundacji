@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { db } from "../../lib/db";
 import { wymagajRedakcji } from "../../lib/admin";
-import { moderujSkan, odnowLinkPlacowki, rozpatrzZgloszenie, utworzEdycje } from "./actions";
+import { moderujSkan, odnowLinkPlacowki, rozpatrzZgloszenie, utworzEdycje, potwierdzKontaktTelefoniczny } from "./actions";
+import { zwolnijWygasle } from "../api/rezerwacja/route";
+import { terminPL } from "../../lib/zasady-akcji.mjs";
 import Status, { ETYKIETY } from "./ui/Status";
 
 export const dynamic = "force-dynamic";
@@ -23,6 +25,7 @@ function link(params, zmiana) {
 
 export default async function Admin({ searchParams }) {
   const konto = await wymagajRedakcji();
+  await zwolnijWygasle();
   const p = (await searchParams) || {};
 
   const filtrStatus = STATUSY.includes(p.status) || p.status === "WYCOFANY" ? p.status : "";
@@ -71,6 +74,12 @@ export default async function Admin({ searchParams }) {
     db.list.groupBy({ by: ["status"], _count: true }),
   ]);
 
+  const kontakty = await db.rezerwacja.findMany({
+    where: { status: "OCZEKUJE", wygasa: { gt: new Date() }, list: { edycja: { aktywna: true } } },
+    select: { id: true, wygasa: true, user: { select: { email: true } }, list: { select: { id: true, numer: true, imie: true } } },
+    orderBy: { wygasa: "asc" }, take: 100,
+  });
+
   const licznik = Object.fromEntries(liczby.map((l) => [l.status, l._count]));
   const wszystkich = liczby.reduce((s, l) => s + l._count, 0);
 
@@ -86,6 +95,19 @@ export default async function Admin({ searchParams }) {
 
       {p.blad && <p className="blad" role="alert">{p.blad}</p>}
       {p.sukces && <p className="info" role="status">Operacja zakończona poprawnie.</p>}
+
+      <section className="kontakt-rezerwacji">
+        <h2>Rezerwacje czekające na kontakt telefoniczny ({kontakty.length})</h2>
+        <p className="drobny cichy">Potwierdź dopiero po rozmowie z darczyńcą. Bez potwierdzenia rezerwacja wygasa po 48 godzinach.</p>
+        {kontakty.length === 0 ? <p>Wszystkie bieżące kontakty są obsłużone.</p> : <div className="tabela-przewijana"><table className="tabela">
+          <thead><tr><th>List</th><th>Darczyńca</th><th>Potwierdź do</th><th>Kontakt</th></tr></thead>
+          <tbody>{kontakty.map((r) => <tr key={r.id}>
+            <td><Link href={`/admin/listy/${r.list.id}`}>Nr {r.list.numer} · {r.list.imie}</Link></td>
+            <td>{r.user.email}</td><td>{terminPL(r.wygasa)}</td>
+            <td><form action={potwierdzKontaktTelefoniczny}><input type="hidden" name="rezerwacjaId" value={r.id} /><button className="btn" type="submit">Kontakt telefoniczny odbył się</button></form></td>
+          </tr>)}</tbody>
+        </table></div>}
+      </section>
 
       <section style={{ marginTop: "var(--o-7)" }}>
         <h2 style={{ fontSize: "var(--t-xl)" }}>Aktywna edycja</h2>
@@ -136,7 +158,7 @@ export default async function Admin({ searchParams }) {
             <thead><tr><th>Placówka</th><th>Przesłano</th><th>Status</th><th>Akcje</th></tr></thead>
             <tbody>{skany.map((s) => (
               <tr key={s.id}>
-                <td><b>{s.udzia(l.placowka?.nazwa || "Bez placówki · Fundacja")}</b></td>
+                <td><b>{(s.udzial?.placowka?.nazwa || "Bez placówki · Fundacja")}</b></td>
                 <td className="maly">{s.utworzony.toLocaleString("pl-PL")}</td>
                 <td><Status status={s.status} /></td>
                 <td><div className="naglowek-rzad">

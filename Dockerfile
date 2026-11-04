@@ -53,6 +53,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/scripts ./scripts
 COPY --from=builder --chown=nextjs:nodejs /app/package.json ./package.json
 COPY --from=builder --chown=nextjs:nodejs /app/cluster-server.cjs ./cluster-server.cjs
 COPY --from=builder --chown=nextjs:nodejs /app/worker.mjs ./worker.mjs
+COPY --from=builder --chown=nextjs:nodejs /app/lib/zasady-akcji.mjs ./lib/zasady-akcji.mjs
 
 COPY docker-entrypoint.sh ./
 RUN chmod +x docker-entrypoint.sh

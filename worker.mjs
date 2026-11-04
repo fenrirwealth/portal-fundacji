@@ -3,6 +3,7 @@ import Redis from "ioredis";
 import sharp from "sharp";
 import nodemailer from "nodemailer";
 import { PrismaClient } from "@prisma/client";
+import { EMAIL_FUNDACJI, TELEFON_FUNDACJI, terminPL } from "./lib/zasady-akcji.mjs";
 
 const NAZWA = "portal-email-v1";
 const db = new PrismaClient();
@@ -47,21 +48,49 @@ async function kartkaPodziekowania(imie) {
 }
 
 const worker = new Worker(NAZWA, async (zadanie) => {
-  if (["REZERWACJA", "PRZYPOMNIENIE", "PRZYPOMNIENIE_DOSTARCZENIA", "PODZIEKOWANIE"].includes(zadanie.name)) {
+  const typ = zadanie.name.replace(/^FUNDACJA_/, "");
+  const dlaFundacji = zadanie.name.startsWith("FUNDACJA_");
+  if (["REZERWACJA", "PRZYPOMNIENIE", "PRZYPOMNIENIE_DOSTARCZENIA", "KONTAKT_POTWIERDZONY", "PODZIEKOWANIE"].includes(typ)) {
     const r = await daneRezerwacji(zadanie.data.rezerwacjaId);
     if (!r?.user?.email) return;
     const panel = `${portal}/moje-rezerwacje`;
-    if (zadanie.name === "REZERWACJA") {
+    if (typ === "PRZYPOMNIENIE" && (r.status !== "OCZEKUJE" || new Date(r.wygasa) <= new Date())) return;
+    if (typ === "PRZYPOMNIENIE_DOSTARCZENIA" && r.status !== "POTWIERDZONA") return;
+    const terminKontaktu = terminPL(r.wygasa);
+    if (dlaFundacji) {
+      const tytuly = {
+        REZERWACJA: "Nowa rezerwacja — potrzebny kontakt telefoniczny",
+        PRZYPOMNIENIE: "Przypomnienie — rezerwacja czeka na rozmowę",
+        PRZYPOMNIENIE_DOSTARCZENIA: "Przypomnienie — zbliża się termin dostarczenia prezentu",
+        KONTAKT_POTWIERDZONY: "Kontakt telefoniczny został potwierdzony",
+      };
+      const komunikat = typ === "PRZYPOMNIENIE_DOSTARCZENIA"
+        ? `Termin dostarczenia prezentu: ${terminPL(r.list.edycja.terminDostarczenia)}.`
+        : typ === "KONTAKT_POTWIERDZONY"
+          ? `Rozmowa została potwierdzona w panelu ${terminPL(r.kontaktTelefoniczny)}. Rezerwacja pozostaje aktywna.`
+          : `Potwierdź w panelu odbytą rozmowę do ${terminKontaktu}. Bez potwierdzenia administratora rezerwacja automatycznie wygaśnie po 48 godzinach.`;
+      await transport.sendMail({ from: nadawca(), to: EMAIL_FUNDACJI,
+        subject: `${tytuly[typ]} — list nr ${r.list.numer}`,
+        text: `List nr ${r.list.numer}, ${r.list.imie}. Darczyńca: ${r.user.email}. ${komunikat} Panel: ${portal}/admin/listy/${r.list.id}`,
+        html: htmlEmail(tytuly[typ], `<p>List nr <b>${r.list.numer}</b> · ${esc(r.list.imie)}</p><p>Darczyńca: <b>${esc(r.user.email)}</b></p><p>${esc(komunikat)}</p>`, "Otwórz rezerwację w panelu", `${portal}/admin/listy/${r.list.id}`) });
+      return;
+    }
+    if (typ === "REZERWACJA") {
       await transport.sendMail({ from: nadawca(), to: r.user.email,
-        subject: `List nr ${r.list.numer} czeka na Twoje potwierdzenie`,
-        text: `List od ${r.list.imie} został zarezerwowany. Potwierdź rezerwację w ciągu 3 dni: ${panel}`,
-        html: htmlEmail("List czeka na Twoje potwierdzenie", `<p>List od <b>${esc(r.list.imie)}</b> został dla Ciebie zarezerwowany.</p><p>Potwierdź decyzję w ciągu 3 dni. Po tym czasie niepotwierdzony list automatycznie wróci do puli.</p>`, "Otwórz moje rezerwacje", panel) });
-    } else if (zadanie.name === "PRZYPOMNIENIE") {
+        subject: `List nr ${r.list.numer} zarezerwowany — zadzwoń do Fundacji`,
+        text: `List od ${r.list.imie} został zarezerwowany. Zadzwoń do Fundacji: ${TELEFON_FUNDACJI}, aby ustalić szczegóły. Administrator musi potwierdzić rozmowę do ${terminKontaktu} (48 godzin od rezerwacji). Bez tego list wróci do puli. Szczegóły: ${panel}`,
+        html: htmlEmail("Teraz zadzwoń do Fundacji", `<p>List nr <b>${r.list.numer}</b> od <b>${esc(r.list.imie)}</b> został zarezerwowany.</p><p>Zadzwoń pod <b>${TELEFON_FUNDACJI}</b> i umów szczegóły.</p><p>Fundacja musi potwierdzić rozmowę do <b>${terminKontaktu}</b> — w ciągu 48 godzin od rezerwacji. Bez potwierdzenia administratora list automatycznie wróci do puli.</p>`, "Sprawdź swoją rezerwację", panel) });
+    } else if (typ === "PRZYPOMNIENIE") {
       await transport.sendMail({ from: nadawca(), to: r.user.email,
-        subject: `Przypomnienie: potwierdź list nr ${r.list.numer}`,
-        text: `Rezerwacja listu od ${r.list.imie} wkrótce wygaśnie. Potwierdź ją tutaj: ${panel}`,
-        html: htmlEmail("Twoja rezerwacja wkrótce wygaśnie", `<p>List od <b>${esc(r.list.imie)}</b> nadal czeka na potwierdzenie.</p><p>Jeśli chcesz przygotować prezent, potwierdź rezerwację przed upływem terminu.</p>`, "Potwierdź rezerwację", panel) });
-    } else if (zadanie.name === "PRZYPOMNIENIE_DOSTARCZENIA") {
+        subject: `Przypomnienie: zadzwoń w sprawie listu nr ${r.list.numer}`,
+        text: `Rezerwacja listu od ${r.list.imie} czeka na potwierdzenie rozmowy przez Fundację do ${terminKontaktu}. Zadzwoń: ${TELEFON_FUNDACJI}. Bez potwierdzenia list wróci do puli. ${panel}`,
+        html: htmlEmail("Twoja rezerwacja czeka na rozmowę", `<p>W sprawie listu nr <b>${r.list.numer}</b> od <b>${esc(r.list.imie)}</b> zadzwoń pod <b>${TELEFON_FUNDACJI}</b>.</p><p>Administrator musi potwierdzić kontakt do <b>${terminKontaktu}</b>. Bez tego rezerwacja wygaśnie.</p>`, "Sprawdź swoją rezerwację", panel) });
+    } else if (typ === "KONTAKT_POTWIERDZONY") {
+      await transport.sendMail({ from: nadawca(), to: r.user.email,
+        subject: `Kontakt potwierdzony — list nr ${r.list.numer}`,
+        text: `Fundacja potwierdziła rozmowę w sprawie listu od ${r.list.imie}. Rezerwacja pozostaje aktywna. Szczegóły: ${panel}`,
+        html: htmlEmail("Dziękujemy za rozmowę", `<p>Fundacja potwierdziła kontakt telefoniczny w sprawie listu nr <b>${r.list.numer}</b> od <b>${esc(r.list.imie)}</b>.</p><p>Rezerwacja pozostaje aktywna. Przygotuj prezent zgodnie z ustaleniami.</p>`, "Otwórz moje listy", panel) });
+    } else if (typ === "PRZYPOMNIENIE_DOSTARCZENIA") {
       const termin = new Date(r.list.edycja.terminDostarczenia).toLocaleDateString("pl-PL");
       await transport.sendMail({ from: nadawca(), to: r.user.email,
         subject: `Dwa dni do terminu przekazania prezentu dla ${r.list.imie}`,
@@ -97,7 +126,24 @@ const worker = new Worker(NAZWA, async (zadanie) => {
 worker.on("completed", (zadanie) => console.log(`[email-worker] Wysłano ${zadanie.name} (${zadanie.id}).`));
 worker.on("failed", (zadanie, blad) => console.error(`[email-worker] Błąd ${zadanie?.name}:`, blad.message));
 
+let kontrolaTrwa = false;
+async function sprawdzTerminy() {
+  if (kontrolaTrwa || !process.env.CRON_SECRET) return;
+  kontrolaTrwa = true;
+  try {
+    const odp = await fetch(`http://127.0.0.1:${process.env.PORT || 3000}/api/zadania/przypomnienia`, {
+      method: "POST", headers: { authorization: `Bearer ${process.env.CRON_SECRET}` },
+      signal: AbortSignal.timeout(25000),
+    });
+    if (!odp.ok) console.error("[terminy] Kontrola terminów:", odp.status);
+  } catch (blad) { console.error("[terminy]", blad.message); }
+  finally { kontrolaTrwa = false; }
+}
+const kontrolaTerminow = setInterval(sprawdzTerminy, 60_000);
+kontrolaTerminow.unref();
+
 async function zakoncz() {
+  clearInterval(kontrolaTerminow);
   await worker.close();
   await db.$disconnect();
   await polaczenie.quit();

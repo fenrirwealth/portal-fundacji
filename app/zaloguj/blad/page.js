@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
+import { bezpiecznaSciezka } from "../../../lib/db";
 export const metadata = { title: "Nie udało się zalogować", robots: { index: false, follow: false } };
 
 const OPISY = {
@@ -9,6 +11,7 @@ const OPISY = {
 
 export default async function BladLogowania({ searchParams }) {
   const p = (await searchParams) || {};
+  const wroc = bezpiecznaSciezka((await cookies()).get("portal-powrot-logowania")?.value);
   const opis = OPISY[p.error] || "Logowanie się nie powiodło. Spróbuj jeszcze raz.";
 
   return (
@@ -20,7 +23,7 @@ export default async function BladLogowania({ searchParams }) {
         </div>
 
         <h1 style={{ fontSize: "var(--t-2xl)" }}>Nie udało się zalogować</h1>
-        <Link className="btn" href="/zaloguj" style={{ marginTop: "var(--o-5)" }}>
+        <Link className="btn" href={"/zaloguj?wroc=" + encodeURIComponent(wroc)} style={{ marginTop: "var(--o-5)" }}>
           Wróć do logowania
         </Link>
       </div>

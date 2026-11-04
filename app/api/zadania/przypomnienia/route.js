@@ -1,6 +1,7 @@
 import { db } from "../../../../lib/db";
 import { poprawnyTokenCron } from "../../../../lib/cron.mjs";
 import { kolejkujEmail } from "../../../../lib/kolejka-email";
+import { zwolnijWygasle } from "../../rezerwacja/route";
 import { usunPrywatnySkan } from "../../../../lib/skany";
 
 export const dynamic = "force-dynamic";
@@ -13,6 +14,7 @@ export async function POST(request) {
     return Response.json({ blad: "Brak dostepu." }, { status: 401 });
   }
 
+  const wygasle = await zwolnijWygasle();
   const teraz = new Date();
   const zaDobe = new Date(teraz.getTime() + 24 * 60 * 60 * 1000);
   const zaDwieDoby = new Date(teraz.getTime() + 2 * 24 * 60 * 60 * 1000);
@@ -106,7 +108,7 @@ export async function POST(request) {
   });
 
   return Response.json(
-    { sprawdzone: kandydaci.length + dostarczenia.length, zakolejkowane, bledy, usunieteSkany: stareSkany.length },
+    { wygasle, sprawdzone: kandydaci.length + dostarczenia.length, zakolejkowane, bledy, usunieteSkany: stareSkany.length },
     { status: bledy > 0 ? 502 : 200 }
   );
 }

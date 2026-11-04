@@ -18,7 +18,7 @@ export const metadata = {
 
 const KROKI = [
   { nr: "01", tytul: "Wybierz list", opis: "Poznaj marzenie bez nazwiska, adresu, nazwy placówki ani wizerunku dziecka.", Ikona: MailOpen },
-  { nr: "02", tytul: "Zostań Mikołajem", opis: "Zaloguj się bez hasła i zarezerwuj list. Masz 3 dni na potwierdzenie.", Ikona: Star },
+  { nr: "02", tytul: "Zostań Mikołajem", opis: "Potwierdź e-mail i zarezerwuj list. W ciągu 48 godzin zadzwoń do Fundacji — administrator potwierdzi rozmowę.", Ikona: Star },
   { nr: "03", tytul: "Przygotuj prezent", opis: "Nie musisz kupować wszystkiego. Liczy się gest, uważność i bezpieczny podarunek.", Ikona: Gift },
   { nr: "04", tytul: "My go przekażemy", opis: "Sprawdzamy, pakujemy i dostarczamy prezenty do zweryfikowanych placówek.", Ikona: ShieldCheck },
 ];

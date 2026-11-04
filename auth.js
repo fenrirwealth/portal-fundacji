@@ -3,14 +3,16 @@ import Nodemailer from "next-auth/providers/nodemailer";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { db } from "./lib/db";
 import { konfiguracjaSmtp, nadawca } from "./lib/poczta";
+import { cookies } from "next/headers";
+import { COOKIE_ZAPAMIETAJ, dlugoscSesji } from "./lib/zasady-akcji.mjs";
 
 // ------------------------------------------------------------
 //  Logowanie linkiem jednorazowym
 //
 //  Brak hasel jest decyzja, nie uproszczeniem: nie ma czego wykrasc
-//  i nie ma czego resetowac w grudniu. Darczynca i tak musi podac
-//  dzialajacy adres, bo na niego ida przypomnienia o 3-dniowym
-//  terminie rezerwacji.
+//  i nie ma czego resetowac w grudniu. Darczynca podaje dzialajacy
+//  adres: na niego trafiaja przypomnienia o kontakcie telefonicznym
+//  i 48-godzinnym terminie potwierdzenia rozmowy przez Fundacje.
 // ------------------------------------------------------------
 
 // Adres e-mail jest tozsamoscia konta. Normalizujemy i sprawdzamy go
@@ -66,11 +68,25 @@ const adapter = {
   async getUserByEmail(email) {
     return bazowy.getUserByEmail(normalizujEmail(email));
   },
+  async createSession(dane) {
+    const zapamietana = (await cookies()).get(COOKIE_ZAPAMIETAJ)?.value === "1";
+    return db.session.create({ data: {
+      ...dane,
+      expires: new Date(Date.now() + dlugoscSesji(zapamietana) * 1000),
+      zapamietana,
+      zgodaZapamietania: zapamietana ? new Date() : null,
+    } });
+  },
 };
 
-export const { handlers, auth, signIn, signOut } = NextAuth({
+export const { handlers, auth, signIn, signOut } = NextAuth(async () => ({
   adapter,
-  session: { strategy: "database" },
+  session: {
+    strategy: "database",
+    maxAge: dlugoscSesji((await cookies()).get(COOKIE_ZAPAMIETAJ)?.value === "1"),
+    // Stałe 30 dni od potwierdzenia, bez przesuwania terminu przy wizytach.
+    updateAge: 31 * 24 * 60 * 60,
+  },
   trustHost: true,
   pages: {
     signIn: "/zaloguj",
@@ -107,4 +123,4 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return session;
     },
   },
-});
+}));

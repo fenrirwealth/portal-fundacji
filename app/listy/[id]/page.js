@@ -93,8 +93,9 @@ export default async function Szczegol({ params }) {
             </div>
 
             <p className="drobny cichy" style={{ marginTop: "var(--o-5)", paddingTop: "var(--o-4)", borderTop: "1px solid var(--linia)" }}>
-              Po wybraniu listu masz 3 dni na potwierdzenie — po tym czasie list wraca
-              do puli. Prezent dostarczasz do siedziby Fundacji
+              Po rezerwacji zadzwoń do Fundacji: <a href="tel:+48570747779">+48 570 747 779</a>.
+              Administrator musi potwierdzić rozmowę w ciągu 48 godzin od rezerwacji —
+              bez tego list wróci do puli. Prezent dostarczasz do siedziby Fundacji
               {termin ? ` do ${termin}` : " w terminie podanym w regulaminie"},
               nieowinięty: sprawdzamy zawartość i pakujemy sami.
             </p>

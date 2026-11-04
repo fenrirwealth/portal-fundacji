@@ -70,7 +70,7 @@ export default function OAkcji() {
           </div>
           <ul>
             <li><span aria-hidden="true"><Check /></span>jedna osoba może mieć jeden aktywny list naraz,</li>
-            <li><span aria-hidden="true"><Check /></span>na potwierdzenie rezerwacji są 3 dni,</li>
+            <li><span aria-hidden="true"><Check /></span>w ciągu 48 godzin zadzwoń do Fundacji — administrator musi potwierdzić rozmowę w portalu,</li>
             <li><span aria-hidden="true"><Check /></span>prezent trafia najpierw do Fundacji, gdzie jest sprawdzany i pakowany,</li>
             <li><span aria-hidden="true"><Check /></span>nie trzeba kupować wszystkich rzeczy wymienionych w liście,</li>
             <li><span aria-hidden="true"><Check /></span>liczy się bezpieczeństwo, adekwatność prezentu i dotrzymanie terminu.</li>

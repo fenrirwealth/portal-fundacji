@@ -34,26 +34,7 @@ export async function PATCH(request, { params }) {
   }
 
   if (akcja === "potwierdz") {
-    // Warunek na terminie jest w zapytaniu, nie w kodzie nad nim.
-    // Inaczej rezerwacja wygasla o sekunde wczesniej dalaby sie
-    // potwierdzic, a list zostalby zajety mimo zwolnienia.
-    const wynik = await db.rezerwacja.updateMany({
-      where: {
-        id: rezerwacja.id,
-        userId: sesja.user.id,
-        status: "OCZEKUJE",
-        wygasa: { gt: new Date() },
-      },
-      data: { status: "POTWIERDZONA", potwierdzona: new Date() },
-    });
-
-    if (wynik.count === 0) {
-      return Response.json(
-        { blad: "Tej rezerwacji nie można już potwierdzić — termin minął albo została zmieniona." },
-        { status: 409 }
-      );
-    }
-    return Response.json({ ok: true });
+    return Response.json({ blad: "Rezerwację potwierdza Fundacja po rozmowie telefonicznej. Zadzwoń pod +48 570 747 779." }, { status: 403 });
   }
 
   if (akcja === "anuluj") {

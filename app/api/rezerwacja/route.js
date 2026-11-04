@@ -4,7 +4,8 @@ import { jsonZLimitem, odpowiedzBleduHttp } from "../../../lib/http.mjs";
 import { KLUCZ_LICZNIKA, usunCache } from "../../../lib/cache";
 import { kolejkujEmail } from "../../../lib/kolejka-email";
 
-const DNI_NA_POTWIERDZENIE = 3;
+import { terminKontaktu } from "../../../lib/zasady-akcji.mjs";
+import { wygasRezerwacje } from "../../../lib/rezerwacje.mjs";
 
 // ------------------------------------------------------------
 //  Zwalnianie wygaslych rezerwacji
@@ -17,31 +18,9 @@ const DNI_NA_POTWIERDZENIE = 3;
 //  faktycznie zmienila status.
 // ------------------------------------------------------------
 export async function zwolnijWygasle() {
-  const teraz = new Date();
-
-  const kandydaci = await db.rezerwacja.findMany({
-    where: { status: "OCZEKUJE", wygasa: { lt: teraz } },
-    select: { id: true, listId: true },
-  });
-  if (!kandydaci.length) return 0;
-
-  const doZwolnienia = [];
-  for (const r of kandydaci) {
-    const wynik = await db.rezerwacja.updateMany({
-      where: { id: r.id, status: "OCZEKUJE", wygasa: { lt: teraz } },
-      data: { status: "WYGASLA" },
-    });
-    if (wynik.count === 1) doZwolnienia.push(r.listId);
-  }
-
-  if (doZwolnienia.length) {
-    await db.list.updateMany({
-      where: { id: { in: doZwolnienia }, status: "ZAREZERWOWANY" },
-      data: { status: "OPUBLIKOWANY" },
-    });
-    await usunCache(KLUCZ_LICZNIKA);
-  }
-  return doZwolnienia.length;
+  const zwolnione = await wygasRezerwacje(db);
+  if (zwolnione.length) await usunCache(KLUCZ_LICZNIKA);
+  return zwolnione.length;
 }
 
 export async function POST(request) {
@@ -102,8 +81,7 @@ export async function POST(request) {
     return Response.json({ blad: "Akcja nie jest teraz prowadzona." }, { status: 409 });
   }
 
-  const wygasa = new Date();
-  wygasa.setDate(wygasa.getDate() + DNI_NA_POTWIERDZENIE);
+  const wygasa = terminKontaktu();
 
   try {
     // Zajecie listu warunkiem na statusie zamiast blokady jawnej:

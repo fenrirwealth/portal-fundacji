@@ -1,7 +1,10 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
+import { bezpiecznaSciezka } from "../../../lib/db";
 export const metadata = { title: "Sprawdź pocztę", robots: { index: false, follow: false } };
 
-export default function SprawdzPoczte() {
+export default async function SprawdzPoczte() {
+  const wroc = bezpiecznaSciezka((await cookies()).get("portal-powrot-logowania")?.value);
   return (
     <div className="wrap sekcja">
       <div className="waski" style={{ marginInline: "auto" }}>
@@ -10,18 +13,18 @@ export default function SprawdzPoczte() {
           <span><b>Link wysłany.</b> Sprawdź skrzynkę.</span>
         </div>
 
-        <h1 style={{ fontSize: "var(--t-2xl)" }}>Sprawdź pocztę</h1>
+        <h1 style={{ fontSize: "var(--t-2xl)" }}>Otwórz wiadomość i kliknij link</h1>
         <p className="cichy" style={{ marginTop: "var(--o-3)" }}>
-          Kliknij link w ciągu 30 minut — po tym czasie przestanie działać
-          i trzeba będzie poprosić o nowy.
+          Link zaloguje Cię lub utworzy Twoje konto i przeniesie z powrotem do portalu.
+          Jest ważny 30 minut i działa tylko raz.
         </p>
         <p className="cichy">
           Jeśli wiadomość nie dotarła w ciągu kilku minut, zajrzyj do folderu
           ze spamem. Pierwsza wiadomość z nowej domeny czasem tam trafia.
         </p>
 
-        <Link className="btn btn-cichy" href="/zaloguj" style={{ marginTop: "var(--o-4)" }}>
-          Wyślij link jeszcze raz
+        <Link className="btn btn-cichy" href={"/zaloguj?wroc=" + encodeURIComponent(wroc)} style={{ marginTop: "var(--o-4)" }}>
+          Popraw e-mail lub poproś o nowy link
         </Link>
       </div>
     </div>
