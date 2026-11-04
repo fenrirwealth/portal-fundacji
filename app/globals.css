@@ -1915,3 +1915,8 @@ main { min-width: 0; }
 .szybka-operacja { padding: 16px; border: 1px solid var(--linia); border-radius: 12px; background: var(--papier-50); max-width: 340px; min-width: 220px; }
 .szybka-operacja p, .szybka-operacja label { display: block; margin: 0 0 12px; }
 .szybka-operacja textarea { margin-top: 8px; }
+.miniatura-listu { display: inline-flex; flex-direction: column; align-items: center; gap: 5px; text-decoration: none; font-size: 11px; color: var(--tekst-cichy); }
+.miniatura-listu img { display: block; width: 72px; height: 96px; object-fit: contain; background: #fff; border: 1px solid var(--linia); border-radius: 6px; box-shadow: 0 3px 10px #0000000d; transition: transform .2s; }
+.miniatura-listu:hover img { transform: scale(1.06); }
+.miniatura-listu:focus-visible { outline: 2px solid var(--bursztyn-400); outline-offset: 4px; border-radius: 6px; }
+.miniatura-listu-brak { display: grid; place-items: center; width: 72px; height: 96px; border: 1px dashed var(--linia); border-radius: 6px; color: var(--tekst-cichy); font-size: 11px; text-align: center; }
