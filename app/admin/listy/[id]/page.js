@@ -7,6 +7,7 @@ import { WOJEWODZTWA, KATEGORIE } from "../../../../lib/slowniki";
 import { aktualizujPrezent, zapiszList, zwolnijRezerwacjeListu, potwierdzKontaktTelefoniczny } from "../../actions";
 import { terminPL } from "../../../../lib/zasady-akcji.mjs";
 import { zwolnijWygasle } from "../../../api/rezerwacja/route";
+import SzybkieAkcje from "../../ui/SzybkieAkcje";
 import Status from "../../ui/Status";
 import FormularzListu from "../../ui/FormularzListu";
 
@@ -92,6 +93,12 @@ export default async function EdycjaListu({ params, searchParams }) {
         </p>
       )}
 
+      <section className="kontakt-rezerwacji">
+        <h2>Zarządzanie listem</h2>
+        <SzybkieAkcje list={list} pokazEdycje={false} />
+        {list.rezerwacjaReczna && <><p>Ręczna rezerwacja Fundacji od {terminPL(list.rezerwacjaReczna)}. Nie wygasa automatycznie po 48 godzinach.</p>{list.rezerwacjaRecznaNotatka && <p className="maly">Notatka wewnętrzna: {list.rezerwacjaRecznaNotatka}</p>}</>}
+      </section>
+
       {rezerwacja && (
         <section className="realizacja">
           <h2>Realizacja prezentu</h2>
@@ -123,7 +130,7 @@ export default async function EdycjaListu({ params, searchParams }) {
             <details style={{ marginTop: "var(--o-4)" }}>
               <summary className="btn drugorzedny">Opcje awaryjne</summary>
               <form action={zwolnijRezerwacjeListu} style={{ marginTop: "var(--o-3)" }}>
-                <input type="hidden" name="id" value={list.id} />
+                <input type="hidden" name="id" value={list.id} /><input type="hidden" name="wersja" value={list.zaktualizowany.toISOString()} />
                 <p className="drobny cichy">Użyj tylko po kontakcie z darczyńcą. List natychmiast wróci do publicznej puli.</p>
                 <button className="btn niebezpieczny" type="submit" style={{ marginTop: "var(--o-2)" }}>Potwierdzam — zwolnij rezerwację</button>
               </form>

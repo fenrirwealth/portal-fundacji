@@ -6,8 +6,8 @@ import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
 import { wyloguj } from "../akcje-sesji";
 
-/** @param {{email?: string | null}} props */
-export default function Naglowek({ email }) {
+/** @param {{email?: string | null, administrator?: boolean}} props */
+export default function Naglowek({ email, administrator = false }) {
   const sciezka = usePathname();
   const [przewiniety, setPrzewiniety] = useState(false);
   const [menuOtwarte, setMenuOtwarte] = useState(false);
@@ -68,7 +68,7 @@ export default function Naglowek({ email }) {
           <Link href="/fundusz-ostatniej-gwiazdki" onClick={() => setMenuOtwarte(false)} aria-current={sciezka === "/fundusz-ostatniej-gwiazdki" ? "page" : undefined}>Fundusz</Link>
           {email ? (
             <>
-              <Link href="/moje-rezerwacje" onClick={() => setMenuOtwarte(false)}>Moje listy</Link>
+              {administrator ? <Link className="menu-panel-admin" href="/admin#zarzadzanie-listami" onClick={() => setMenuOtwarte(false)}>Panel zarządzania</Link> : <Link href="/moje-rezerwacje" onClick={() => setMenuOtwarte(false)}>Moje listy</Link>}
               <span className="konto" title={email}>{email}</span>
               <form action={wyloguj}>
                 <button type="submit" className="btn btn-tekstowy">Wyloguj</button>

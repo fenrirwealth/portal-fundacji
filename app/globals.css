@@ -1905,3 +1905,13 @@ main { min-width: 0; }
 .logowanie-zgoda small { display: block; margin-top: 6px; color: var(--tekst-cichy); font-size: var(--t-xs); }
 .kontakt-rezerwacji { padding: 20px; border: 1px solid var(--linia); border-radius: 16px; margin-top: 24px; background: rgba(213,174,98,.1); }
 .kontakt-rezerwacji p { margin-top: 8px; }
+.menu .menu-panel-admin { color: #982c35; font-weight: 700; }
+.naglowek-na-hero:not(.naglowek-przewiniety) .menu .menu-panel-admin { color: #e4c079; }
+.zarzadzanie-listami { scroll-margin-top: 110px; }
+.szybkie-akcje-listu { display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-start; margin-top: 8px; }
+.szybkie-akcje-listu details { min-width: 0; }
+.szybkie-akcje-listu summary { list-style: none; cursor: pointer; }
+.szybkie-akcje-listu summary::-webkit-details-marker { display: none; }
+.szybka-operacja { padding: 16px; border: 1px solid var(--linia); border-radius: 12px; background: var(--papier-50); max-width: 340px; min-width: 220px; }
+.szybka-operacja p, .szybka-operacja label { display: block; margin: 0 0 12px; }
+.szybka-operacja textarea { margin-top: 8px; }

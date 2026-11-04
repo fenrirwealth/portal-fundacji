@@ -2,7 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { db } from "../../lib/db";
+import { db, WARUNKI_PUBLIKACJI } from "../../lib/db";
+import { rezerwujRecznie, archiwizujList } from "../../lib/listy-admin.mjs";
 import { wymagajRedakcji } from "../../lib/admin";
 import { KATEGORIE, WOJEWODZTWA } from "../../lib/slowniki";
 import { KLUCZ_LICZNIKA, usunCache } from "../../lib/cache";
@@ -414,27 +415,31 @@ export async function zapiszList(_poprzedni, formData) {
 export async function zwolnijRezerwacjeListu(formData) {
   await wymagajRedakcji();
   const id = tekst(formData, "id", 80);
+  const wersja = new Date(tekst(formData, "wersja", 40));
+  if (Number.isNaN(wersja.getTime())) wrocZBledem("/admin", "Odśwież panel i spróbuj ponownie.");
   const list = await db.list.findUnique({
     where: { id }, select: { status: true, edycja: { select: { aktywna: true } } },
   });
-  if (!list || list.status !== "ZAREZERWOWANY") {
-    wrocZBledem("/admin/listy/" + id, "List nie ma aktywnej rezerwacji do zwolnienia.");
-  }
-  await db.$transaction(async (tx) => {
+  if (!list || list.status !== "ZAREZERWOWANY") wrocZBledem("/admin", "List nie ma aktywnej rezerwacji do zwolnienia.");
+  const zwolniony = await db.$transaction(async (tx) => {
+    const wynik = await tx.list.updateMany({
+      where: { id, status: "ZAREZERWOWANY", zaktualizowany: wersja },
+      data: {
+        status: list.edycja.aktywna ? "OPUBLIKOWANY" : "WYCOFANY",
+        rezerwacjaReczna: null, rezerwacjaRecznaPrzezId: null, rezerwacjaRecznaNotatka: null,
+      },
+    });
+    if (wynik.count !== 1) return false;
     await tx.rezerwacja.updateMany({
       where: { listId: id, status: { in: ["OCZEKUJE", "POTWIERDZONA"] } },
       data: { status: "ANULOWANA", anulowana: new Date() },
     });
-    await tx.list.updateMany({
-      where: { id, status: "ZAREZERWOWANY" },
-      data: { status: list.edycja.aktywna ? "OPUBLIKOWANY" : "WYCOFANY" },
-    });
+    return true;
   });
+  if (!zwolniony) wrocZBledem("/admin", "List został zmieniony. Odśwież panel.");
   await usunCache(KLUCZ_LICZNIKA);
-  revalidatePath("/");
-  revalidatePath("/listy");
-  revalidatePath("/admin");
-  redirect("/admin/listy/" + id + "?sukces=zwolniony");
+  revalidatePath("/"); revalidatePath("/listy"); revalidatePath("/admin"); revalidatePath("/moje-rezerwacje");
+  redirect("/admin#zarzadzanie-listami");
 }
 
 export async function aktualizujPrezent(formData) {
@@ -541,4 +546,31 @@ export async function potwierdzKontaktTelefoniczny(formData) {
   revalidatePath("/admin/listy");
   revalidatePath("/moje-rezerwacje");
   redirect("/admin?sukces=kontakt");
+}
+
+export async function rezerwujListRecznie(formData) {
+  const administrator = await wymagajRedakcji();
+  const id = tekst(formData, "id", 80);
+  const wersja = new Date(tekst(formData, "wersja", 40));
+  if (Number.isNaN(wersja.getTime())) wrocZBledem("/admin", "Odśwież panel i spróbuj ponownie.");
+  const teraz = new Date();
+  const wynik = await rezerwujRecznie(db, { id, wersja, administratorId: administrator.id, notatka: tekst(formData, "notatka", 500), warunkiPublikacji: WARUNKI_PUBLIKACJI }, teraz);
+  if (wynik.count !== 1) wrocZBledem("/admin", "Nie można zarezerwować listu: został zmieniony, jest już zajęty albo nie jest opublikowany w aktywnej edycji.");
+  await usunCache(KLUCZ_LICZNIKA);
+  await kolejkujEmail("REZERWACJA_RECZNA", { listId: id, administratorEmail: administrator.email, data: teraz.toISOString() }, `reczna-${id}-${teraz.getTime()}`)
+    .catch((blad) => console.error("[rezerwacja-reczna] E-mail:", blad.message));
+  revalidatePath("/"); revalidatePath("/listy"); revalidatePath("/admin"); revalidatePath("/admin/listy/" + id);
+  redirect("/admin?sukces=reczna#zarzadzanie-listami");
+}
+
+export async function usunListZPanelu(formData) {
+  await wymagajRedakcji();
+  const id = tekst(formData, "id", 80);
+  const wersja = new Date(tekst(formData, "wersja", 40));
+  if (Number.isNaN(wersja.getTime())) wrocZBledem("/admin", "Odśwież panel i spróbuj ponownie.");
+  const wynik = await archiwizujList(db, { id, wersja });
+  if (wynik.count !== 1) wrocZBledem("/admin", "Nie można usunąć listu w realizacji. Najpierw zwolnij rezerwację lub odśwież panel.");
+  await usunCache(KLUCZ_LICZNIKA);
+  revalidatePath("/"); revalidatePath("/listy"); revalidatePath("/admin"); revalidatePath("/admin/listy/" + id);
+  redirect("/admin?sukces=usuniety#zarzadzanie-listami");
 }

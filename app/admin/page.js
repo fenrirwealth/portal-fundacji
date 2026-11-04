@@ -4,10 +4,11 @@ import { wymagajRedakcji } from "../../lib/admin";
 import { moderujSkan, odnowLinkPlacowki, rozpatrzZgloszenie, utworzEdycje, potwierdzKontaktTelefoniczny } from "./actions";
 import { zwolnijWygasle } from "../api/rezerwacja/route";
 import { terminPL } from "../../lib/zasady-akcji.mjs";
+import SzybkieAkcje from "./ui/SzybkieAkcje";
 import Status, { ETYKIETY } from "./ui/Status";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Panel redakcji", robots: { index: false, follow: false } };
+export const metadata = { title: "Panel zarządzania listami", robots: { index: false, follow: false } };
 
 // Filtry jako odnosniki z parametrami, nie stan w przegladarce: kazdy
 // widok ma wlasny adres, wiec da sie go wyslac wspolpracownikowi
@@ -87,14 +88,14 @@ export default async function Admin({ searchParams }) {
     <div className="wrap sekcja"><Link className="btn btn-tekstowy" href="/admin/haslo">Ustaw hasło do panelu</Link>
       <div className="naglowek-rzad">
         <div>
-          <h1 className="tytul">Panel redakcji</h1>
+          <h1 className="tytul">Panel zarządzania listami</h1>
           <p className="wstep">Zalogowano jako {konto.email} ({konto.rola}).</p>
         </div>
         <Link className="btn" href="/admin/listy/nowy">Dodaj list</Link>
       </div>
 
       {p.blad && <p className="blad" role="alert">{p.blad}</p>}
-      {p.sukces && <p className="info" role="status">Operacja zakończona poprawnie.</p>}
+      {p.sukces && <p className="info" role="status">{p.sukces === "reczna" ? "List oznaczony jako zarezerwowany przez Fundację." : p.sukces === "usuniety" ? "List usunięty ze strony i przeniesiony do archiwum." : "Operacja zakończona poprawnie."}</p>}
 
       <section className="kontakt-rezerwacji">
         <h2>Rezerwacje czekające na kontakt telefoniczny ({kontakty.length})</h2>
@@ -199,9 +200,10 @@ export default async function Admin({ searchParams }) {
         )}
       </section>
 
-      <section style={{ marginTop: "var(--o-8)" }}>
+      <section id="zarzadzanie-listami" className="zarzadzanie-listami" style={{ marginTop: "var(--o-8)" }}>
         <div className="naglowek-rzad">
-          <h2 style={{ fontSize: "var(--t-xl)" }}>Listy</h2>
+          <h2 style={{ fontSize: "var(--t-xl)" }}>Zarządzanie listami</h2>
+          <Link className="btn" href="/admin/listy/nowy">+ Dodaj list</Link>
           <span className="drobny cichy">
             {wszystkich} w bazie · pokazujemy {listy.length}
           </span>
@@ -250,9 +252,9 @@ export default async function Admin({ searchParams }) {
                 <td className="cichy">{l.numer}</td>
                 <td><b>{l.imie}</b>, {l.wiek} lat<br /><span className="drobny cichy">{l.marzenie.slice(0, 48)}{l.marzenie.length > 48 ? "…" : ""}</span></td>
                 <td className="maly">{(l.placowka?.nazwa || "Bez placówki · Fundacja")}</td>
-                <td><Status status={l.status} /></td>
+                <td><Status status={l.status} />{l.rezerwacjaReczna && <p className="drobny cichy">Rezerwacja ręczna Fundacji</p>}</td>
                 <td className="drobny">{l.weryfikacja?.zakonczona ? "zakończona" : <span className="cichy">w toku</span>}</td>
-                <td><Link className="btn drugorzedny" href={"/admin/listy/" + l.id}>Otwórz</Link></td>
+                <td><SzybkieAkcje list={l} /></td>
               </tr>
             ))}</tbody>
           </table></div>

@@ -304,6 +304,9 @@ model List {
   zgodaCofnieta  DateTime?
 
   status StatusListu @default(SZKIC)
+  rezerwacjaReczna DateTime?
+  rezerwacjaRecznaPrzezId String?
+  rezerwacjaRecznaNotatka String?
 
   rezerwacje  Rezerwacja[]
   weryfikacja Weryfikacja?

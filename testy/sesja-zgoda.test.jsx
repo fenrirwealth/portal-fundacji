@@ -4,7 +4,7 @@ const { configFactory, cookie, createSession } = vi.hoisted(() => ({
 }));
 vi.mock('next-auth', () => ({ default: (fn) => { configFactory.value=fn; return {}; } }));
 vi.mock('next/headers', () => ({ cookies: async () => ({ get: () => cookie.value ? {value:cookie.value} : undefined }) }));
-vi.mock('../lib/db', () => ({ db: { session: { create: createSession } } }));
+vi.mock('../lib/db', () => ({ db: { session: { create: createSession, findUnique: async () => null, deleteMany: async () => ({count:0}) } } }));
 vi.mock('../lib/poczta', () => ({ konfiguracjaSmtp: () => ({}), nadawca: () => 'test@example.invalid' }));
 await import('../auth');
 beforeEach(() => { vi.clearAllMocks(); cookie.value=undefined; });
@@ -27,4 +27,9 @@ it('jawna zgoda daje stałe 30 dni i datę zgody w sesji', async () => {
   expect(s.zapamietana).toBe(true); expect(s.zgodaZapamietania).toBeInstanceOf(Date);
   expect(s.expires.getTime()-przed).toBeGreaterThanOrEqual(2592000000);
   expect(s.expires.getTime()-przed).toBeLessThan(2592001000);
+});
+
+it('brak starej sesji nie blokuje ponownego logowania', async () => {
+  const config=await configFactory.value();
+  await expect(config.adapter.deleteSession('nieistniejąca-sesja')).resolves.toBe(null);
 });
