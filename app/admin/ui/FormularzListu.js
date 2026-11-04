@@ -69,6 +69,7 @@ export default function FormularzListu({
 
             <PoleAdmin nazwa="wojewodztwo" etykieta="Województwo" blad={b.wojewodztwo}>
               <select name="wojewodztwo" defaultValue={v("wojewodztwo", list.wojewodztwo)}>
+                <option value="">Nie podajemy województwa</option>
                 {wojewodztwa.map((x) => <option key={x}>{x}</option>)}
               </select>
             </PoleAdmin>

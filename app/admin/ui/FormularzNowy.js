@@ -59,7 +59,7 @@ export default function FormularzNowy({ akcja, bezPlacowki = false, udzialy, ska
 
         <PoleAdmin nazwa="wojewodztwo" etykieta="Województwo" blad={b.wojewodztwo}>
           <select name="wojewodztwo" defaultValue={w.wojewodztwo || ""}>
-            <option value="" disabled>wybierz</option>
+            <option value="">Nie podajemy województwa</option>
             {wojewodztwa.map((x) => <option key={x}>{x}</option>)}
           </select>
         </PoleAdmin>

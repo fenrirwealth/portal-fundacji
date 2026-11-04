@@ -67,7 +67,7 @@ export default async function Szczegol({ params }) {
               {list.imie}, {list.wiek} {list.wiek === 1 ? "rok" : "lat"}
             </h1>
             <p className="drobny cichy" style={{ marginTop: "var(--o-2)" }}>
-              woj. {list.wojewodztwo.toLowerCase()} · {list.kategoria.toLowerCase()}
+              {list.wojewodztwo ? `woj. ${list.wojewodztwo.toLowerCase()} · ` : ""}{list.kategoria.toLowerCase()}
             </p>
 
             <dl style={{ margin: "var(--o-5) 0 0", display: "grid", gap: "var(--o-4)" }}>

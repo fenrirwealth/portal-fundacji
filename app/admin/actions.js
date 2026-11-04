@@ -79,7 +79,7 @@ function sprawdzPolaListu(w) {
   if (!Number.isInteger(wiek) || wiek < 1 || wiek > 25) {
     mapa.wiek = "Wiek musi być liczbą od 1 do 25.";
   }
-  if (!WOJEWODZTWA.includes(w.wojewodztwo)) mapa.wojewodztwo = "Wybierz województwo z listy.";
+  if (w.wojewodztwo && !WOJEWODZTWA.includes(w.wojewodztwo)) mapa.wojewodztwo = "Wybierz województwo z listy.";
   if (!KATEGORIE.includes(w.kategoria)) mapa.kategoria = "Wybierz kategorię z listy.";
   if (w.marzenie.length < 3) mapa.marzenie = "Opisz marzenie — co najmniej 3 znaki.";
   if (w.zdjecieUrl && !/^https:\/\//i.test(w.zdjecieUrl)) {

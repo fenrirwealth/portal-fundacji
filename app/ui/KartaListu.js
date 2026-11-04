@@ -48,7 +48,7 @@ export default function KartaListu({ list }) {
           <p>Wiek: {list.wiek} {list.wiek === 1 ? "rok" : "lat"}</p>
         </div>
         <p className="karta-listu-szczegoly">
-          woj. {list.wojewodztwo.toLowerCase()} · {list.kategoria.toLowerCase()}
+          {list.wojewodztwo ? `woj. ${list.wojewodztwo.toLowerCase()} · ` : ""}{list.kategoria.toLowerCase()}
           {list.rozmiar ? ` · rozmiar ${list.rozmiar}` : ""}
         </p>
         <p className="karta-listu-marzenie">„{list.marzenie}”</p>
