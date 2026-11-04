@@ -11,18 +11,7 @@ import { kolejkujEmail } from "../../lib/kolejka-email";
 import { nowyTokenPrzesylania } from "../../lib/skany";
 import { potwierdzRozmowe } from "../../lib/rezerwacje.mjs";
 
-const POLA_WERYFIKACJI = [
-  "zgodaDolaczona",
-  "brakNazwiska",
-  "brakPlacowki",
-  "brakMiejscowosci",
-  "brakInnychOsob",
-  "brakDanychWrazliwych",
-  "brakWizerunku",
-  "metadaneUsuniete",
-  "nazwaPlikuPoprawna",
-  "opisPoprawny",
-];
+import { POLA_WERYFIKACJI, ZGODY_SZCZEGOLOWE, brakujacePozycje } from "../../lib/weryfikacja-listu.mjs";
 
 function tekst(formData, nazwa, limit = 500) {
   return String(formData.get(nazwa) || "").trim().slice(0, limit);
@@ -347,9 +336,9 @@ export async function zapiszList(_poprzedni, formData) {
   const w = wartosciListu(formData);
   const zgoda = formData.get("zgoda") === "on";
   const weryfikacja = Object.fromEntries(
-    POLA_WERYFIKACJI.map((pole) => [pole, formData.get(pole) === "on"])
+    [...POLA_WERYFIKACJI, ...Object.values(ZGODY_SZCZEGOLOWE)].map((pole) => [pole, formData.get(pole) === "on"])
   );
-  const kompletna = POLA_WERYFIKACJI.every((pole) => weryfikacja[pole]);
+  const kompletna = brakujacePozycje(weryfikacja).length === 0;
   const publikuj = operacja === "publikuj";
 
   const mapa = sprawdzPolaListu(w);
@@ -357,7 +346,7 @@ export async function zapiszList(_poprzedni, formData) {
     mapa.zgoda = "Publikacja wymaga przyjętej zgody dyrektora.";
   }
   if (publikuj && !kompletna) {
-    const brakuje = POLA_WERYFIKACJI.filter((pole) => !weryfikacja[pole]).length;
+    const brakuje = brakujacePozycje(weryfikacja).length;
     mapa.weryfikacja = `Do publikacji brakuje jeszcze ${brakuje} z ${POLA_WERYFIKACJI.length} pozycji listy kontrolnej.`;
   }
   if (Object.keys(mapa).length) {

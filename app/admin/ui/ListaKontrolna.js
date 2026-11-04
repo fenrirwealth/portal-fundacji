@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ZGODY_SZCZEGOLOWE, pozycjaSpelniona } from "../../../lib/weryfikacja-listu.mjs";
 
 // Lista kontrolna z licznikiem postepu.
 //
@@ -12,11 +13,11 @@ import { useState } from "react";
 // sprawdzenie po stronie serwera w actions.js, ktorego nie dotykamy.
 export default function ListaKontrolna({ pozycje, wartosci, zgodaPoczatkowa, zablokowany, bladZgody, bladListy }) {
   const [zaznaczone, setZaznaczone] = useState(
-    () => Object.fromEntries(pozycje.map(([pole]) => [pole, Boolean(wartosci?.[pole])]))
+    () => Object.fromEntries([...pozycje.map(([pole]) => pole), ...Object.values(ZGODY_SZCZEGOLOWE)].map(pole => [pole, Boolean(wartosci?.[pole])]))
   );
   const [zgoda, setZgoda] = useState(Boolean(zgodaPoczatkowa));
 
-  const ile = pozycje.filter(([pole]) => zaznaczone[pole]).length;
+  const ile = pozycje.filter(([pole]) => pozycjaSpelniona(zaznaczone, pole)).length;
   const komplet = ile === pozycje.length && zgoda;
 
   return (
@@ -60,6 +61,15 @@ export default function ListaKontrolna({ pozycje, wartosci, zgodaPoczatkowa, zab
             onChange={(e) => setZaznaczone((s) => ({ ...s, [pole]: e.target.checked }))}
           />
           <span>{opis}</span>
+        </label>
+      ))}
+      {Object.entries(ZGODY_SZCZEGOLOWE).map(([pole, zgodaPole]) => (
+        <label className="checkbox" key={zgodaPole}>
+          <input name={zgodaPole} type="checkbox" checked={Boolean(zaznaczone[zgodaPole])}
+            onChange={(e) => setZaznaczone((s) => ({ ...s, [zgodaPole]: e.target.checked }))} />
+          <span>{pole === "brakNazwiska"
+            ? "Odrębna zgoda na publiczną publikację nazwiska w pełnym skanie jest w dokumentacji Fundacji"
+            : "Wyraźna zgoda na publiczną publikację informacji o zdrowiu w pełnym skanie jest w dokumentacji Fundacji"}</span>
         </label>
       ))}
     </fieldset>

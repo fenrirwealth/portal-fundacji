@@ -359,10 +359,12 @@ model Weryfikacja {
 
   zgodaDolaczona       Boolean @default(false)
   brakNazwiska         Boolean @default(false)
+  zgodaNaNazwisko      Boolean @default(false)
   brakPlacowki         Boolean @default(false)
   brakMiejscowosci     Boolean @default(false)
   brakInnychOsob       Boolean @default(false)
   brakDanychWrazliwych Boolean @default(false)
+  zgodaNaDaneZdrowotne Boolean @default(false)
   brakWizerunku        Boolean @default(false)
   metadaneUsuniete     Boolean @default(false)
   nazwaPlikuPoprawna   Boolean @default(false)
