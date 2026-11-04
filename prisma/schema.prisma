@@ -59,6 +59,7 @@ model User {
   sessions    Session[]
   rezerwacje  Rezerwacja[]
   weryfikacje Weryfikacja[]
+  potwierdzoneKontakty Rezerwacja[] @relation("KontaktTelefoniczny")
 
   utworzony      DateTime @default(now())
   zaktualizowany DateTime @updatedAt
@@ -92,6 +93,8 @@ model Session {
   sessionToken String   @unique
   userId       String
   expires      DateTime
+  zapamietana  Boolean @default(false)
+  zgodaZapamietania DateTime?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -394,6 +397,9 @@ model Rezerwacja {
   status                           StatusRezerwacji @default(OCZEKUJE)
   wygasa                           DateTime
   potwierdzona                     DateTime?
+  kontaktTelefoniczny              DateTime?
+  kontaktPotwierdzilId              String?
+  kontaktPotwierdzil                User? @relation("KontaktTelefoniczny", fields: [kontaktPotwierdzilId], references: [id], onDelete: SetNull)
   anulowana                        DateTime?
   przypomnienieWyslane             DateTime?
   przypomnienieDostarczeniaWyslane DateTime?

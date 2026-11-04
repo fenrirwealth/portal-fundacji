@@ -1900,3 +1900,8 @@ main { min-width: 0; }
 .logowanie-admin form { margin-top: 20px; }
 .logowanie-admin p { margin-top: 16px; }
 @media (max-width: 600px) { .logowanie-karta { padding: 24px 20px; border-radius: 18px; } }
+.logowanie-zgoda { display: flex; gap: 12px; align-items: flex-start; font-size: var(--t-sm); margin: 18px 0 24px; cursor: pointer; }
+.logowanie-zgoda input { width: 20px; height: 20px; margin-top: 2px; flex-shrink: 0; accent-color: #982c35; }
+.logowanie-zgoda small { display: block; margin-top: 6px; color: var(--tekst-cichy); font-size: var(--t-xs); }
+.kontakt-rezerwacji { padding: 20px; border: 1px solid var(--linia); border-radius: 16px; margin-top: 24px; background: rgba(213,174,98,.1); }
+.kontakt-rezerwacji p { margin-top: 8px; }

@@ -80,3 +80,11 @@ curl --fail --silent --show-error \
 `CRON_SECRET` musi byc innym losowym sekretem niz `AUTH_SECRET`. Zadanie
 wysyla jedno przypomnienie, gdy do wygaśnięcia niepotwierdzonej rezerwacji
 pozostalo najwyzej 24 godziny.
+
+## Kontakt telefoniczny i logowanie (listopad 2026)
+
+Darczyńca potwierdza e-mail linkiem jednorazowym. Osobna, niezaznaczona domyślnie zgoda pozwala zachować sesję na tym urządzeniu przez stałe 30 dni; bez zgody sesja trwa 8 godzin. Data zgody i wybór są zapisane w rekordzie sesji.
+
+Nowa rezerwacja czeka maksymalnie 48 godzin na potwierdzenie odbytej rozmowy przez redakcję/Zarząd. Darczyńca nie ma endpointu pozwalającego potwierdzić ją samemu. Panel pokazuje termin, osobę potwierdzającą i datę rozmowy. Worker co minutę uruchamia chronioną kontrolę terminów, więc wygaśnięcie działa również bez odwiedzin strony; wymagane są REDIS_URL i CRON_SECRET. Dotychczasowy cron może pozostać jako zabezpieczenie.
+
+Każda rezerwacja, przypomnienie o rozmowie, przypomnienie o dostarczeniu i potwierdzenie kontaktu tworzą niezależne zadania e-mail dla darczyńcy i kontakt@fundacjalepszydomlepszejutro.pl. Linki logowania nie są kopiowane do Fundacji.

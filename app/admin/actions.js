@@ -8,6 +8,7 @@ import { KATEGORIE, WOJEWODZTWA } from "../../lib/slowniki";
 import { KLUCZ_LICZNIKA, usunCache } from "../../lib/cache";
 import { kolejkujEmail } from "../../lib/kolejka-email";
 import { nowyTokenPrzesylania } from "../../lib/skany";
+import { potwierdzRozmowe } from "../../lib/rezerwacje.mjs";
 
 const POLA_WERYFIKACJI = [
   "zgodaDolaczona",
@@ -527,4 +528,17 @@ export async function aktualizujPrezent(formData) {
       .catch((blad) => console.error("[prezent] E-mail:", blad.message));
   }
   redirect("/admin/listy/" + id + "?sukces=prezent");
+}
+
+export async function potwierdzKontaktTelefoniczny(formData) {
+  const administrator = await wymagajRedakcji("/admin");
+  const id = tekst(formData, "rezerwacjaId", 100);
+  const wynik = await potwierdzRozmowe(db, id, administrator.id);
+  if (wynik.count !== 1) wrocZBledem("/admin", "Nie można potwierdzić rozmowy: rezerwacja wygasła lub została zmieniona.");
+  await kolejkujEmail("KONTAKT_POTWIERDZONY", { rezerwacjaId: id }, `kontakt-${id}`)
+    .catch((blad) => console.error("[kontakt] E-mail:", blad.message));
+  revalidatePath("/admin");
+  revalidatePath("/admin/listy");
+  revalidatePath("/moje-rezerwacje");
+  redirect("/admin?sukces=kontakt");
 }

@@ -29,10 +29,22 @@ describe('wejście darczyńcy', () => {
   it('przekazuje ten sam wybrany list do logowania i ponowienia', async () => {
     await wyslijLink({}, formularz(' ANNA@EXAMPLE.COM ', '/listy/abc'));
     expect(signIn).toHaveBeenCalledWith('nodemailer', { email: 'anna@example.com', redirectTo: '/listy/abc' });
-    expect(zapiszCookie).toHaveBeenCalledWith('portal-powrot-logowania', '/listy/abc', expect.objectContaining({ httpOnly: true, sameSite: 'lax', maxAge: 1800 }));
+    expect(zapiszCookie).toHaveBeenCalledWith('portal-powrot-logowania', '/listy/abc', expect.objectContaining({ httpOnly: true, sameSite: 'lax', maxAge: 86400 }));
   });
   it('odrzuca obcą domenę jako cel powrotu', async () => {
     await wyslijLink({}, formularz('anna@example.com', 'https://obca.example'));
+    expect(signIn).toHaveBeenCalledWith('nodemailer', expect.objectContaining({ redirectTo: '/listy' }));
+  });
+  it('zapamiętanie 30 dni jest domyślnie wyłączone i wymaga zaznaczenia', async () => {
+    await wyslijLink({}, formularz('anna@example.com', '/listy'));
+    expect(zapiszCookie).toHaveBeenCalledWith('portal-zapamietaj', '0', expect.any(Object));
+    vi.clearAllMocks();
+    const f = formularz('anna@example.com', '/listy'); f.set('zapamietaj', 'tak');
+    await wyslijLink({}, f);
+    expect(zapiszCookie).toHaveBeenCalledWith('portal-zapamietaj', '1', expect.objectContaining({ maxAge: 2592000, httpOnly: true }));
+  });
+  it('nie kieruje zalogowanego darczyńcy w pętlę logowania', async () => {
+    await wyslijLink({}, formularz('anna@example.com', '/zaloguj'));
     expect(signIn).toHaveBeenCalledWith('nodemailer', expect.objectContaining({ redirectTo: '/listy' }));
   });
   it('przepuszcza przekierowanie Next.js zamiast pokazać fałszywy błąd', async () => {

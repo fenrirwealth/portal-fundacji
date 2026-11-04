@@ -12,7 +12,8 @@ export const metadata = { title: "Dołącz lub zaloguj się", robots: { index: f
 
 export default async function Zaloguj({ searchParams }) {
   const p = (await searchParams) || {};
-  const wroc = bezpiecznaSciezka(p.wroc ?? (await cookies()).get("portal-powrot-logowania")?.value);
+  const cel = bezpiecznaSciezka(p.wroc ?? (await cookies()).get("portal-powrot-logowania")?.value);
+  const wroc = cel.startsWith("/zaloguj") ? "/listy" : cel;
   const sesja = await auth();
   if (sesja?.user?.id) redirect(wroc);
   const wybranyList = /^\/listy\/[^/?#]+$/.test(wroc);

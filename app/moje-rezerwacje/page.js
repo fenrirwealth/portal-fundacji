@@ -4,6 +4,7 @@ import { db, aktywnaEdycja, formatujTermin } from "../../lib/db";
 import { zwolnijWygasle } from "../api/rezerwacja/route";
 import Akcje from "./Akcje";
 import Link from "next/link";
+import { TELEFON_FUNDACJI, TELEFON_HREF, terminPL } from "../../lib/zasady-akcji.mjs";
 import UdostepnijMarzenie from "../listy/[id]/UdostepnijMarzenie";
 
 export const dynamic = "force-dynamic";
@@ -14,10 +15,10 @@ export const metadata = {
 };
 
 const OPISY = {
-  OCZEKUJE: "Wymaga potwierdzenia",
-  POTWIERDZONA: "Potwierdzona",
+  OCZEKUJE: "Czeka na kontakt telefoniczny",
+  POTWIERDZONA: "Potwierdzona przez Fundację",
   DOSTARCZONA: "Prezent dostarczony",
-  WYGASLA: "Wygasla",
+  WYGASLA: "Wygasła",
   ANULOWANA: "Anulowana",
 };
 
@@ -56,7 +57,7 @@ export default async function MojeRezerwacje({ searchParams }) {
           <span className="karta-mikolaja-gwiazda" aria-hidden="true">✦</span>
           <div>
             <h2>Ten list ma już Mikołaja. Ciebie.</h2>
-            <p>Potwierdź wybór w ciągu 3 dni, a potem zaproś innych do Łańcucha Dobra.</p>
+            <p>Zadzwoń do Fundacji w ciągu 48 godzin, aby umówić szczegóły. Administrator potwierdzi rozmowę w portalu.</p>
             {aktywne[0] && (
               <div style={{ maxWidth: 340, marginTop: "var(--o-4)" }}>
                 <UdostepnijMarzenie listId={aktywne[0].list.id} imie={aktywne[0].list.imie} wolny={false} />
@@ -71,6 +72,13 @@ export default async function MojeRezerwacje({ searchParams }) {
         {termin ? " do " + termin : ""} na dostarczenie prezentu do siedziby
         fundacji.
       </p>
+
+      {aktywne.filter((r) => r.status === "OCZEKUJE").map((r) => <section className="kontakt-rezerwacji" key={r.id}>
+        <h2>Teraz zadzwoń do Fundacji</h2>
+        <p>W sprawie listu od {r.list.imie} zadzwoń pod <a href={TELEFON_HREF}><b>{TELEFON_FUNDACJI}</b></a>.</p>
+        <p>Uzgodnij szczegóły do <b>{terminPL(r.wygasa)}</b>. Fundacja musi potwierdzić rozmowę w tym terminie — inaczej rezerwacja wygaśnie, a list wróci do puli.</p>
+        <a className="btn" href={TELEFON_HREF}>Zadzwoń do Fundacji</a>
+      </section>)}
 
       {rezerwacje.length === 0 && (
         <div className="pusto" style={{ marginTop: "var(--o-6)" }}>
@@ -104,7 +112,7 @@ export default async function MojeRezerwacje({ searchParams }) {
                 </td>
                 <td data-etykieta="Termin">
                   {r.status === "OCZEKUJE"
-                    ? "potwierdz do " + new Date(r.wygasa).toLocaleDateString("pl-PL")
+                    ? "kontakt do " + terminPL(r.wygasa)
                     : r.status === "POTWIERDZONA"
                       ? (termin ? "prezent do " + termin : "prezent w terminie akcji")
                       : "—"}

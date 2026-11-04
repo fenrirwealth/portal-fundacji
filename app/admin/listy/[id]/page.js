@@ -4,7 +4,9 @@ import { notFound } from "next/navigation";
 import { db } from "../../../../lib/db";
 import { wymagajRedakcji } from "../../../../lib/admin";
 import { WOJEWODZTWA, KATEGORIE } from "../../../../lib/slowniki";
-import { aktualizujPrezent, zapiszList, zwolnijRezerwacjeListu } from "../../actions";
+import { aktualizujPrezent, zapiszList, zwolnijRezerwacjeListu, potwierdzKontaktTelefoniczny } from "../../actions";
+import { terminPL } from "../../../../lib/zasady-akcji.mjs";
+import { zwolnijWygasle } from "../../../api/rezerwacja/route";
 import Status from "../../ui/Status";
 import FormularzListu from "../../ui/FormularzListu";
 
@@ -38,6 +40,7 @@ export default async function EdycjaListu({ params, searchParams }) {
   const { id } = await params;
   await wymagajRedakcji("/admin/listy/" + id);
   const p = (await searchParams) || {};
+  await zwolnijWygasle();
 
   const list = await db.list.findUnique({
     where: { id },
@@ -51,7 +54,8 @@ export default async function EdycjaListu({ params, searchParams }) {
         orderBy: { utworzona: "desc" },
         take: 1,
         select: {
-          id: true, status: true, wygasa: true,
+          id: true, status: true, wygasa: true, kontaktTelefoniczny: true,
+          kontaktPotwierdzil: { select: { email: true } },
           user: { select: { email: true } },
           prezent: { select: { stan: true, dataPrzyjecia: true } },
         },
@@ -95,6 +99,11 @@ export default async function EdycjaListu({ params, searchParams }) {
             Darczyńca: <b>{rezerwacja.user.email}</b> · rezerwacja: {rezerwacja.status}
             {rezerwacja.prezent ? ` · prezent: ${rezerwacja.prezent.stan}` : ""}
           </p>
+          {rezerwacja.status === "OCZEKUJE" && <div className="kontakt-rezerwacji">
+            <p>Kontakt musi zostać potwierdzony do <b>{terminPL(rezerwacja.wygasa)}</b>. Po tym terminie list automatycznie wróci do puli.</p>
+            <form action={potwierdzKontaktTelefoniczny}><input type="hidden" name="rezerwacjaId" value={rezerwacja.id} /><button className="btn" type="submit">Kontakt telefoniczny odbył się</button></form>
+          </div>}
+          {rezerwacja.kontaktTelefoniczny && <p className="info">Rozmowa potwierdzona: {terminPL(rezerwacja.kontaktTelefoniczny)} · {rezerwacja.kontaktPotwierdzil?.email || "administrator Fundacji"}</p>}
           <form action={aktualizujPrezent} className="naglowek-rzad" style={{ marginTop: "var(--o-4)" }}>
             <input type="hidden" name="id" value={list.id} />
             {rezerwacja.status === "POTWIERDZONA" && list.status === "ZAREZERWOWANY" && (
