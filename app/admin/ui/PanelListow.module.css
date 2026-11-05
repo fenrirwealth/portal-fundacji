@@ -11,6 +11,52 @@
   }
 }
 
+.lista td,
+.lista th {
+  overflow-wrap: anywhere;
+}
+
+.status :global(.plakietka) {
+  white-space: normal;
+}
+
+.status :global(.plakietka)::before {
+  flex-shrink: 0;
+}
+
+.akcje :global(.szybkie-akcje-listu) > * {
+  max-width: 100%;
+}
+
+.akcje :global(.szybka-operacja) {
+  min-width: 0;
+}
+
+.akcje :global(.btn) {
+  max-width: 100%;
+  padding-inline: var(--o-2);
+  text-align: center;
+}
+
+@media (min-width: 721px) {
+  .lista table {
+    table-layout: fixed;
+  }
+
+  .lista td,
+  .lista th {
+    padding-inline: var(--o-3);
+  }
+
+  .zdjecie {
+    width: 6rem;
+  }
+
+  .akcje {
+    width: clamp(9rem, 17%, 12rem);
+  }
+}
+
 .darczynca {
   overflow-wrap: anywhere;
 }

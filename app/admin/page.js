@@ -270,14 +270,30 @@ export default async function Admin({ searchParams }) {
           </div>
         ) : (
           <div className={stylListow.lista}><table className="tabela">
-            <thead><tr><th>Zdjęcie</th>{pokazUwagi && <th scope="col">Uwagi wewnętrzne</th>}<th>List</th><th>Placówka</th><th>Status</th><th>Zarezerwował(a)</th><th>Weryfikacja</th><th><span className="tylko-dla-czytnika">Akcje</span></th></tr></thead>
+            <thead>
+              <tr>
+                <th scope="col" className={stylListow.zdjecie}>Zdjęcie</th>
+                {pokazUwagi && <th scope="col">Uwagi wewnętrzne</th>}
+                <th scope="col">List</th>
+                <th scope="col">Status</th>
+                <th scope="col">Zarezerwował(a)</th>
+                <th scope="col" className={stylListow.akcje}>Akcje</th>
+              </tr>
+            </thead>
             <tbody>{listy.map((l) => (
               <tr key={l.id}>
                 <td><MiniaturaListu id={l.id} numer={l.numer} imie={l.imie} zdjecieUrl={l.zdjecieUrl} /></td>
                 {pokazUwagi && <td data-etykieta="Uwagi wewnętrzne"><UwagiListu id={l.id} numer={l.numer} notatka={l.notatka} /></td>}
-                <td><Link className="drobny" href={`/admin/listy/${l.id}`}>List nr {l.numer}</Link><br /><b>{l.imie}</b>, {wiekPL(l.wiek)}<br /><span className="drobny cichy">{l.marzenie.slice(0, 48)}{l.marzenie.length > 48 ? "…" : ""}</span></td>
-                <td className="maly" data-etykieta="Placówka">{(l.placowka?.nazwa || "Bez placówki · Fundacja")}</td>
-                <td data-etykieta="Status"><Status status={l.status} />{l.rezerwacjaReczna && <p className="drobny cichy">Rezerwacja ręczna Fundacji</p>}</td>
+                <td>
+                  <Link className="drobny" href={`/admin/listy/${l.id}`}>List nr {l.numer}</Link>
+                  <p><b>{l.imie}</b>, {wiekPL(l.wiek)}</p>
+                  <p className="drobny cichy">{l.marzenie.slice(0, 48)}{l.marzenie.length > 48 ? "…" : ""}</p>
+                  <p className="drobny cichy">{l.placowka?.nazwa || "Bez placówki · Fundacja"}</p>
+                </td>
+                <td className={stylListow.status} data-etykieta="Status">
+                  <Status status={l.status} />
+                  <p className="drobny cichy">Weryfikacja {l.weryfikacja?.zakonczona ? "zakończona" : "w toku"}</p>
+                </td>
                 <td data-etykieta="Zarezerwował(a)">
                   {(l.rezerwacje[0] || l.rezerwacjaReczna) ? (
                     <DarczyncaListu
@@ -290,8 +306,7 @@ export default async function Admin({ searchParams }) {
                     />
                   ) : <span className="cichy">—</span>}
                 </td>
-                <td className="drobny" data-etykieta="Weryfikacja">{l.weryfikacja?.zakonczona ? "zakończona" : <span className="cichy">w toku</span>}</td>
-                <td><SzybkieAkcje list={l} /></td>
+                <td className={stylListow.akcje}><SzybkieAkcje list={l} /></td>
               </tr>
             ))}</tbody>
           </table></div>
