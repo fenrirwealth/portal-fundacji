@@ -9,6 +9,7 @@ import SzybkieAkcje from "./ui/SzybkieAkcje";
 import MiniaturaListu from "./ui/MiniaturaListu";
 import UwagiListu from "./ui/UwagiListu";
 import DarczyncaListu from "./ui/DarczyncaListu";
+import stylListow from "./ui/PanelListow.module.css";
 import Status, { ETYKIETY } from "./ui/Status";
 
 export const dynamic = "force-dynamic";
@@ -268,16 +269,16 @@ export default async function Admin({ searchParams }) {
             <p>{szukaj ? "Spróbuj innego słowa albo wyczyść filtry." : "Dodaj pierwszy list albo zmień filtr statusu."}</p>
           </div>
         ) : (
-          <div className="tabela-przewijana"><table className="tabela">
+          <div className={stylListow.lista}><table className="tabela">
             <thead><tr><th>Zdjęcie</th>{pokazUwagi && <th scope="col">Uwagi wewnętrzne</th>}<th>List</th><th>Placówka</th><th>Status</th><th>Zarezerwował(a)</th><th>Weryfikacja</th><th><span className="tylko-dla-czytnika">Akcje</span></th></tr></thead>
             <tbody>{listy.map((l) => (
               <tr key={l.id}>
                 <td><MiniaturaListu id={l.id} numer={l.numer} imie={l.imie} zdjecieUrl={l.zdjecieUrl} /></td>
-                {pokazUwagi && <td><UwagiListu id={l.id} numer={l.numer} notatka={l.notatka} /></td>}
+                {pokazUwagi && <td data-etykieta="Uwagi wewnętrzne"><UwagiListu id={l.id} numer={l.numer} notatka={l.notatka} /></td>}
                 <td><Link className="drobny" href={`/admin/listy/${l.id}`}>List nr {l.numer}</Link><br /><b>{l.imie}</b>, {wiekPL(l.wiek)}<br /><span className="drobny cichy">{l.marzenie.slice(0, 48)}{l.marzenie.length > 48 ? "…" : ""}</span></td>
-                <td className="maly">{(l.placowka?.nazwa || "Bez placówki · Fundacja")}</td>
-                <td><Status status={l.status} />{l.rezerwacjaReczna && <p className="drobny cichy">Rezerwacja ręczna Fundacji</p>}</td>
-                <td>
+                <td className="maly" data-etykieta="Placówka">{(l.placowka?.nazwa || "Bez placówki · Fundacja")}</td>
+                <td data-etykieta="Status"><Status status={l.status} />{l.rezerwacjaReczna && <p className="drobny cichy">Rezerwacja ręczna Fundacji</p>}</td>
+                <td data-etykieta="Zarezerwował(a)">
                   {(l.rezerwacje[0] || l.rezerwacjaReczna) ? (
                     <DarczyncaListu
                       key={l.rezerwacje[0]?.id || l.rezerwacjaReczna?.toISOString()}
@@ -289,7 +290,7 @@ export default async function Admin({ searchParams }) {
                     />
                   ) : <span className="cichy">—</span>}
                 </td>
-                <td className="drobny">{l.weryfikacja?.zakonczona ? "zakończona" : <span className="cichy">w toku</span>}</td>
+                <td className="drobny" data-etykieta="Weryfikacja">{l.weryfikacja?.zakonczona ? "zakończona" : <span className="cichy">w toku</span>}</td>
                 <td><SzybkieAkcje list={l} /></td>
               </tr>
             ))}</tbody>
