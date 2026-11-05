@@ -310,6 +310,7 @@ model List {
 
   rezerwacje  Rezerwacja[]
   weryfikacja Weryfikacja?
+  notatka     NotatkaListu?
 
   utworzony      DateTime @default(now())
   zaktualizowany DateTime @updatedAt
@@ -317,6 +318,13 @@ model List {
   @@index([status])
   @@index([edycjaId, status])
   @@index([kategoria, wiek])
+}
+
+model NotatkaListu {
+  listId String @id
+  list   List   @relation(fields: [listId], references: [id], onDelete: Cascade)
+  tresc  String
+  wersja Int    @default(1)
 }
 
 enum StatusSkanu {

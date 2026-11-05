@@ -7,6 +7,7 @@ import { zwolnijWygasle } from "../api/rezerwacja/route";
 import { terminPL } from "../../lib/zasady-akcji.mjs";
 import SzybkieAkcje from "./ui/SzybkieAkcje";
 import MiniaturaListu from "./ui/MiniaturaListu";
+import UwagiListu from "./ui/UwagiListu";
 import Status, { ETYKIETY } from "./ui/Status";
 
 export const dynamic = "force-dynamic";
@@ -28,6 +29,7 @@ function link(params, zmiana) {
 
 export default async function Admin({ searchParams }) {
   const konto = await wymagajRedakcji();
+  const pokazUwagi = konto.rola === "ZARZAD";
   await zwolnijWygasle();
   const p = (await searchParams) || {};
 
@@ -70,7 +72,11 @@ export default async function Admin({ searchParams }) {
             }
           : {}),
       },
-      include: { placowka: { select: { nazwa: true } }, weryfikacja: { select: { zakonczona: true } } },
+      include: {
+        placowka: { select: { nazwa: true } },
+        weryfikacja: { select: { zakonczona: true } },
+        notatka: pokazUwagi ? { select: { tresc: true, wersja: true } } : false,
+      },
       orderBy: { zaktualizowany: "desc" },
       take: 100,
     }),
@@ -254,10 +260,11 @@ export default async function Admin({ searchParams }) {
           </div>
         ) : (
           <div className="tabela-przewijana"><table className="tabela">
-            <thead><tr><th>Zdjęcie</th><th>Nr</th><th>Dziecko</th><th>Placówka</th><th>Status</th><th>Weryfikacja</th><th><span className="tylko-dla-czytnika">Akcje</span></th></tr></thead>
+            <thead><tr><th>Zdjęcie</th>{pokazUwagi && <th scope="col">Uwagi wewnętrzne</th>}<th>Nr</th><th>Dziecko</th><th>Placówka</th><th>Status</th><th>Weryfikacja</th><th><span className="tylko-dla-czytnika">Akcje</span></th></tr></thead>
             <tbody>{listy.map((l) => (
               <tr key={l.id}>
                 <td><MiniaturaListu id={l.id} numer={l.numer} imie={l.imie} zdjecieUrl={l.zdjecieUrl} /></td>
+                {pokazUwagi && <td><UwagiListu id={l.id} numer={l.numer} notatka={l.notatka} /></td>}
                 <td className="cichy">{l.numer}</td>
                 <td><b>{l.imie}</b>, {wiekPL(l.wiek)}<br /><span className="drobny cichy">{l.marzenie.slice(0, 48)}{l.marzenie.length > 48 ? "…" : ""}</span></td>
                 <td className="maly">{(l.placowka?.nazwa || "Bez placówki · Fundacja")}</td>

@@ -1,0 +1,25 @@
+.uwagi {
+  min-width: 12rem;
+  max-width: 19rem;
+}
+.uwagi summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+.podglad {
+  margin: 0 0 var(--o-2);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+}
+.formularz {
+  display: grid;
+  gap: var(--o-2);
+  margin-top: var(--o-2);
+}
+.formularz textarea {
+  min-height: 5rem;
+}
