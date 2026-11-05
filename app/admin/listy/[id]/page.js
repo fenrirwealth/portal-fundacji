@@ -8,6 +8,7 @@ import { aktualizujPrezent, zapiszList, zwolnijRezerwacjeListu, potwierdzKontakt
 import { terminPL } from "../../../../lib/zasady-akcji.mjs";
 import { zwolnijWygasle } from "../../../api/rezerwacja/route";
 import SzybkieAkcje from "../../ui/SzybkieAkcje";
+import DarczyncaListu from "../../ui/DarczyncaListu";
 import Status from "../../ui/Status";
 import FormularzListu from "../../ui/FormularzListu";
 
@@ -55,9 +56,9 @@ export default async function EdycjaListu({ params, searchParams }) {
         orderBy: { utworzona: "desc" },
         take: 1,
         select: {
-          id: true, status: true, wygasa: true, kontaktTelefoniczny: true, telefonKontaktowy: true,
+          id: true, status: true, wygasa: true, kontaktTelefoniczny: true, telefonKontaktowy: true, darczyncaEtykieta: true,
           kontaktPotwierdzil: { select: { email: true } },
-          user: { select: { email: true } },
+          user: { select: { name: true, email: true } },
           prezent: { select: { stan: true, dataPrzyjecia: true } },
         },
       },
@@ -99,11 +100,25 @@ export default async function EdycjaListu({ params, searchParams }) {
         {list.rezerwacjaReczna && <><p>Ręczna rezerwacja Fundacji od {terminPL(list.rezerwacjaReczna)}. Nie wygasa automatycznie po 48 godzinach.</p>{list.rezerwacjaRecznaNotatka && <p className="maly">Notatka wewnętrzna: {list.rezerwacjaRecznaNotatka}</p>}</>}
       </section>
 
+      {(rezerwacja || list.rezerwacjaReczna) && (
+        <section className="kontakt-rezerwacji">
+          <h2>Zarezerwował(a)</h2>
+          <DarczyncaListu
+            key={rezerwacja?.id || list.rezerwacjaReczna?.toISOString()}
+            listId={list.id}
+            numer={list.numer}
+            rezerwacja={rezerwacja ? { id: rezerwacja.id, darczyncaEtykieta: rezerwacja.darczyncaEtykieta, user: rezerwacja.user } : undefined}
+            recznaOd={list.rezerwacjaReczna?.toISOString()}
+            recznyDarczynca={list.rezerwacjaRecznaDarczynca}
+          />
+        </section>
+      )}
+
       {rezerwacja && (
         <section className="realizacja">
           <h2>Realizacja prezentu</h2>
           <p className="maly">
-            Darczyńca: <b>{rezerwacja.user.email}</b> · rezerwacja: {rezerwacja.status}
+            E-mail konta: <b>{rezerwacja.user.email}</b> · rezerwacja: {rezerwacja.status}
             {rezerwacja.prezent ? ` · prezent: ${rezerwacja.prezent.stan}` : ""}
           </p>
           <p className="maly">

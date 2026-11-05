@@ -11,6 +11,9 @@ export default function SzybkieAkcje({ list, pokazEdycje = true }) {
       <form action={rezerwujListRecznie} className="szybka-operacja">
         <input type="hidden" name="id" value={list.id} /><input type="hidden" name="wersja" value={wersja} />
         <p className="drobny">Oznaczysz list jako zarezerwowany przez Fundację. Taka rezerwacja nie wygasa po 48 godzinach.</p>
+        <label className="drobny">Zarezerwował(a) (opcjonalnie)
+          <input name="darczynca" className="pole-kontrolka" maxLength={120} placeholder="Imię, nazwisko lub firma" />
+        </label>
         <label className="drobny">Notatka wewnętrzna (opcjonalna)<textarea name="notatka" className="pole-kontrolka" rows={2} maxLength={500} placeholder="Np. prezent przygotowuje firma — szczegóły uzgodnione telefonicznie" /></label>
         <PrzyciskOperacji>Oznacz jako zarezerwowany</PrzyciskOperacji>
       </form>

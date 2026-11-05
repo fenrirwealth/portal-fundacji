@@ -307,6 +307,7 @@ model List {
   rezerwacjaReczna DateTime?
   rezerwacjaRecznaPrzezId String?
   rezerwacjaRecznaNotatka String?
+  rezerwacjaRecznaDarczynca String?
 
   rezerwacje  Rezerwacja[]
   weryfikacja Weryfikacja?
@@ -411,6 +412,7 @@ model Rezerwacja {
   wygasa                           DateTime
   potwierdzona                     DateTime?
   telefonKontaktowy                String?
+  darczyncaEtykieta                 String?
   kontaktTelefoniczny              DateTime?
   kontaktPotwierdzilId              String?
   kontaktPotwierdzil                User? @relation("KontaktTelefoniczny", fields: [kontaktPotwierdzilId], references: [id], onDelete: SetNull)

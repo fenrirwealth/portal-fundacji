@@ -415,7 +415,7 @@ export async function zwolnijRezerwacjeListu(formData) {
       where: { id, status: "ZAREZERWOWANY", zaktualizowany: wersja },
       data: {
         status: list.edycja.aktywna ? "OPUBLIKOWANY" : "WYCOFANY",
-        rezerwacjaReczna: null, rezerwacjaRecznaPrzezId: null, rezerwacjaRecznaNotatka: null,
+        rezerwacjaReczna: null, rezerwacjaRecznaPrzezId: null, rezerwacjaRecznaNotatka: null, rezerwacjaRecznaDarczynca: null,
       },
     });
     if (wynik.count !== 1) return false;
@@ -543,7 +543,7 @@ export async function rezerwujListRecznie(formData) {
   const wersja = new Date(tekst(formData, "wersja", 40));
   if (Number.isNaN(wersja.getTime())) wrocZBledem("/admin", "Odśwież panel i spróbuj ponownie.");
   const teraz = new Date();
-  const wynik = await rezerwujRecznie(db, { id, wersja, administratorId: administrator.id, notatka: tekst(formData, "notatka", 500), warunkiPublikacji: WARUNKI_PUBLIKACJI }, teraz);
+  const wynik = await rezerwujRecznie(db, { id, wersja, administratorId: administrator.id, notatka: tekst(formData, "notatka", 500), darczynca: tekst(formData, "darczynca", 120), warunkiPublikacji: WARUNKI_PUBLIKACJI }, teraz);
   if (wynik.count !== 1) wrocZBledem("/admin", "Nie można zarezerwować listu: został zmieniony, jest już zajęty albo nie jest opublikowany w aktywnej edycji.");
   await usunCache(KLUCZ_LICZNIKA);
   await kolejkujEmail("REZERWACJA_RECZNA", { listId: id, administratorEmail: administrator.email, data: teraz.toISOString() }, `reczna-${id}-${teraz.getTime()}`)

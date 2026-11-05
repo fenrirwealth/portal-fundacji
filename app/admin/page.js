@@ -8,6 +8,7 @@ import { terminPL } from "../../lib/zasady-akcji.mjs";
 import SzybkieAkcje from "./ui/SzybkieAkcje";
 import MiniaturaListu from "./ui/MiniaturaListu";
 import UwagiListu from "./ui/UwagiListu";
+import DarczyncaListu from "./ui/DarczyncaListu";
 import Status, { ETYKIETY } from "./ui/Status";
 
 export const dynamic = "force-dynamic";
@@ -36,6 +37,7 @@ export default async function Admin({ searchParams }) {
   const filtrStatus = STATUSY.includes(p.status) || p.status === "WYCOFANY" ? p.status : "";
   const szukaj = String(p.szukaj || "").trim().slice(0, 60);
   const archiwum = p.archiwum === "1";
+  const numer = szukaj.match(/^(?:list\s+)?(?:nr\.?\s*|#\s*)?(\d+)$/i)?.[1];
 
   const [edycja, zgloszenia, placowkiAkcji, skany, listy, liczby] = await Promise.all([
     db.edycjaAkcji.findFirst({ where: { aktywna: true } }),
@@ -62,7 +64,7 @@ export default async function Admin({ searchParams }) {
         // Archiwum ukryte domyslnie. Wycofane listy zostaja w bazie —
         // to zapis decyzji, nie smiec — ale nie zasmiecaja biezacej pracy.
         ...(filtrStatus ? { status: filtrStatus } : archiwum ? {} : { status: { not: "WYCOFANY" } }),
-        ...(szukaj
+        ...(numer ? { numer: Number(numer) <= 2147483647 ? Number(numer) : -1 } : szukaj
           ? {
               OR: [
                 { imie: { contains: szukaj, mode: "insensitive" } },
@@ -76,6 +78,12 @@ export default async function Admin({ searchParams }) {
         placowka: { select: { nazwa: true } },
         weryfikacja: { select: { zakonczona: true } },
         notatka: pokazUwagi ? { select: { tresc: true, wersja: true } } : false,
+        rezerwacje: {
+          where: { status: { in: ["OCZEKUJE", "POTWIERDZONA", "DOSTARCZONA"] } },
+          orderBy: { utworzona: "desc" },
+          take: 1,
+          select: { id: true, darczyncaEtykieta: true, user: { select: { name: true, email: true } } },
+        },
       },
       orderBy: { zaktualizowany: "desc" },
       take: 100,
@@ -85,7 +93,7 @@ export default async function Admin({ searchParams }) {
 
   const kontakty = await db.rezerwacja.findMany({
     where: { status: "OCZEKUJE", wygasa: { gt: new Date() }, list: { edycja: { aktywna: true } } },
-    select: { id: true, wygasa: true, telefonKontaktowy: true, user: { select: { email: true } }, list: { select: { id: true, numer: true, imie: true } } },
+    select: { id: true, wygasa: true, telefonKontaktowy: true, darczyncaEtykieta: true, user: { select: { name: true, email: true } }, list: { select: { id: true, numer: true, imie: true } } },
     orderBy: { wygasa: "asc" }, take: 100,
   });
 
@@ -113,7 +121,8 @@ export default async function Admin({ searchParams }) {
           <tbody>{kontakty.map((r) => <tr key={r.id}>
             <td><Link href={`/admin/listy/${r.list.id}`}>Nr {r.list.numer} · {r.list.imie}</Link></td>
             <td>
-              {r.user.email}<br />
+              <strong>{r.darczyncaEtykieta || r.user.name || r.user.email}</strong><br />
+              {(r.darczyncaEtykieta || r.user.name) && <>{r.user.email}<br /></>}
               {r.telefonKontaktowy
                 ? <a href={`tel:${r.telefonKontaktowy}`}>{r.telefonKontaktowy}</a>
                 : <span className="drobny cichy">Brak numeru telefonu</span>}
@@ -228,7 +237,7 @@ export default async function Admin({ searchParams }) {
           {archiwum && <input type="hidden" name="archiwum" value="1" />}
           <label htmlFor="szukaj" className="tylko-dla-czytnika">Szukaj listów</label>
           <input id="szukaj" name="szukaj" type="search" className="pole-kontrolka" defaultValue={szukaj}
-                 placeholder="Imię dziecka, marzenie albo nazwa placówki" maxLength={60} />
+                 placeholder="Numer listu, imię, marzenie lub placówka" maxLength={60} />
           <button className="btn drugorzedny" type="submit">Szukaj</button>
           {(szukaj || filtrStatus || archiwum) && (
             <Link className="btn btn-tekstowy" href="/admin">Wyczyść</Link>
@@ -260,15 +269,26 @@ export default async function Admin({ searchParams }) {
           </div>
         ) : (
           <div className="tabela-przewijana"><table className="tabela">
-            <thead><tr><th>Zdjęcie</th>{pokazUwagi && <th scope="col">Uwagi wewnętrzne</th>}<th>Nr</th><th>Dziecko</th><th>Placówka</th><th>Status</th><th>Weryfikacja</th><th><span className="tylko-dla-czytnika">Akcje</span></th></tr></thead>
+            <thead><tr><th>Zdjęcie</th>{pokazUwagi && <th scope="col">Uwagi wewnętrzne</th>}<th>List</th><th>Placówka</th><th>Status</th><th>Zarezerwował(a)</th><th>Weryfikacja</th><th><span className="tylko-dla-czytnika">Akcje</span></th></tr></thead>
             <tbody>{listy.map((l) => (
               <tr key={l.id}>
                 <td><MiniaturaListu id={l.id} numer={l.numer} imie={l.imie} zdjecieUrl={l.zdjecieUrl} /></td>
                 {pokazUwagi && <td><UwagiListu id={l.id} numer={l.numer} notatka={l.notatka} /></td>}
-                <td className="cichy">{l.numer}</td>
-                <td><b>{l.imie}</b>, {wiekPL(l.wiek)}<br /><span className="drobny cichy">{l.marzenie.slice(0, 48)}{l.marzenie.length > 48 ? "…" : ""}</span></td>
+                <td><Link className="drobny" href={`/admin/listy/${l.id}`}>List nr {l.numer}</Link><br /><b>{l.imie}</b>, {wiekPL(l.wiek)}<br /><span className="drobny cichy">{l.marzenie.slice(0, 48)}{l.marzenie.length > 48 ? "…" : ""}</span></td>
                 <td className="maly">{(l.placowka?.nazwa || "Bez placówki · Fundacja")}</td>
                 <td><Status status={l.status} />{l.rezerwacjaReczna && <p className="drobny cichy">Rezerwacja ręczna Fundacji</p>}</td>
+                <td>
+                  {(l.rezerwacje[0] || l.rezerwacjaReczna) ? (
+                    <DarczyncaListu
+                      key={l.rezerwacje[0]?.id || l.rezerwacjaReczna?.toISOString()}
+                      listId={l.id}
+                      numer={l.numer}
+                      rezerwacja={l.rezerwacje[0]}
+                      recznaOd={l.rezerwacjaReczna?.toISOString()}
+                      recznyDarczynca={l.rezerwacjaRecznaDarczynca}
+                    />
+                  ) : <span className="cichy">—</span>}
+                </td>
                 <td className="drobny">{l.weryfikacja?.zakonczona ? "zakończona" : <span className="cichy">w toku</span>}</td>
                 <td><SzybkieAkcje list={l} /></td>
               </tr>
