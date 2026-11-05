@@ -22,6 +22,15 @@ export default function DarczyncaListu({ listId, numer, rezerwacja, recznaOd, re
       <details>
         <summary>Edytuj darczyńcę</summary>
         <form action={zapisz} className={styl.formularz}>
+          <div className="drobny" style={{ overflowWrap: "anywhere" }}>
+            <p><strong>E-mail:</strong> {rezerwacja?.user.email || "Brak w rezerwacji"}</p>
+            <p>
+              <strong>Telefon:</strong>{" "}
+              {rezerwacja?.telefonKontaktowy
+                ? <a href={`tel:${rezerwacja.telefonKontaktowy}`}>{rezerwacja.telefonKontaktowy}</a>
+                : "Brak w rezerwacji"}
+            </p>
+          </div>
           <label htmlFor={pole} className="drobny">Zarezerwował(a) list nr {numer}</label>
           <input
             id={pole}

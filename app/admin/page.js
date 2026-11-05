@@ -82,7 +82,7 @@ export default async function Admin({ searchParams }) {
           where: { status: { in: ["OCZEKUJE", "POTWIERDZONA", "DOSTARCZONA"] } },
           orderBy: { utworzona: "desc" },
           take: 1,
-          select: { id: true, darczyncaEtykieta: true, user: { select: { name: true, email: true } } },
+          select: { id: true, darczyncaEtykieta: true, telefonKontaktowy: true, user: { select: { name: true, email: true } } },
         },
       },
       orderBy: { zaktualizowany: "desc" },

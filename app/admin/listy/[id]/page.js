@@ -107,7 +107,12 @@ export default async function EdycjaListu({ params, searchParams }) {
             key={rezerwacja?.id || list.rezerwacjaReczna?.toISOString()}
             listId={list.id}
             numer={list.numer}
-            rezerwacja={rezerwacja ? { id: rezerwacja.id, darczyncaEtykieta: rezerwacja.darczyncaEtykieta, user: rezerwacja.user } : undefined}
+            rezerwacja={rezerwacja ? {
+              id: rezerwacja.id,
+              darczyncaEtykieta: rezerwacja.darczyncaEtykieta,
+              telefonKontaktowy: rezerwacja.telefonKontaktowy,
+              user: rezerwacja.user,
+            } : undefined}
             recznaOd={list.rezerwacjaReczna?.toISOString()}
             recznyDarczynca={list.rezerwacjaRecznaDarczynca}
           />
