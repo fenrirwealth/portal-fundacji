@@ -1,6 +1,8 @@
 import { wiekPL } from "../../lib/wiek.mjs";
 import Link from "next/link";
 import { ArrowUpRight, Mail } from "lucide-react";
+import IskraListu from "./IskraListu";
+import styl from "./KartaListu.module.css";
 // Karta listu — komponent wspoldzielony przez liste i wyniki wyszukiwania.
 //
 // Obszar zdjecia ma STALE proporcje 4:3 niezaleznie od tego, czy zdjecie
@@ -26,8 +28,9 @@ const OPISY_STATUSU = {
  */
 export default function KartaListu({ list }) {
   const [opis, klasa] = OPISY_STATUSU[list.status] || ["", "plakietka-zajety"];
+  const wolny = list.status === "OPUBLIKOWANY";
   return (
-    <article className="karta-listu">
+    <article className={wolny ? `karta-listu ${styl.wolny}` : "karta-listu"}>
       <div className="karta-listu-poswiata" aria-hidden="true" />
       <div className="karta-listu-zdjecie">
         {list.zdjecieUrl ? (
@@ -38,6 +41,7 @@ export default function KartaListu({ list }) {
           </div>
         )}
         <span className={"plakietka " + klasa} style={{ position: "absolute", top: "var(--o-3)", left: "var(--o-3)" }}>
+          {wolny && <IskraListu />}
           {opis}
         </span>
       </div>
