@@ -55,7 +55,7 @@ export default async function EdycjaListu({ params, searchParams }) {
         orderBy: { utworzona: "desc" },
         take: 1,
         select: {
-          id: true, status: true, wygasa: true, kontaktTelefoniczny: true,
+          id: true, status: true, wygasa: true, kontaktTelefoniczny: true, telefonKontaktowy: true,
           kontaktPotwierdzil: { select: { email: true } },
           user: { select: { email: true } },
           prezent: { select: { stan: true, dataPrzyjecia: true } },
@@ -105,6 +105,12 @@ export default async function EdycjaListu({ params, searchParams }) {
           <p className="maly">
             Darczyńca: <b>{rezerwacja.user.email}</b> · rezerwacja: {rezerwacja.status}
             {rezerwacja.prezent ? ` · prezent: ${rezerwacja.prezent.stan}` : ""}
+          </p>
+          <p className="maly">
+            Telefon darczyńcy{" "}
+            {rezerwacja.telefonKontaktowy
+              ? <a href={`tel:${rezerwacja.telefonKontaktowy}`}>{rezerwacja.telefonKontaktowy}</a>
+              : <span className="cichy">Brak numeru telefonu</span>}
           </p>
           {rezerwacja.status === "OCZEKUJE" && <div className="kontakt-rezerwacji">
             <p>Kontakt musi zostać potwierdzony do <b>{terminPL(rezerwacja.wygasa)}</b>. Po tym terminie list automatycznie wróci do puli.</p>

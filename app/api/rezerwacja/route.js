@@ -4,6 +4,7 @@ import { jsonZLimitem, odpowiedzBleduHttp } from "../../../lib/http.mjs";
 import { KLUCZ_LICZNIKA, usunCache } from "../../../lib/cache";
 import { kolejkujEmail } from "../../../lib/kolejka-email";
 
+import { normalizujTelefonRezerwacji } from "../../../lib/telefon-rezerwacji.mjs";
 import { terminKontaktu } from "../../../lib/zasady-akcji.mjs";
 import { wygasRezerwacje } from "../../../lib/rezerwacje.mjs";
 
@@ -63,8 +64,16 @@ export async function POST(request) {
     throw e;
   }
   const { listId } = dane;
-  if (!listId) {
+  if (typeof listId !== "string" || !listId) {
     return Response.json({ blad: "Brak identyfikatora listu." }, { status: 400 });
+  }
+
+  const telefonKontaktowy = normalizujTelefonRezerwacji(dane.telefon);
+  if (!telefonKontaktowy) {
+    return Response.json(
+      { blad: "Podaj poprawny numer telefonu. Przy numerze zagranicznym dodaj kierunkowy kraju, np. +49." },
+      { status: 400 }
+    );
   }
 
   await zwolnijWygasle();
@@ -108,7 +117,8 @@ export async function POST(request) {
       if (zajety.count === 0) throw new Error("NIEDOSTEPNY");
 
       return tx.rezerwacja.create({
-        data: { listId, userId: sesja.user.id, wygasa, status: "OCZEKUJE" },
+        data: { listId, userId: sesja.user.id, telefonKontaktowy, wygasa, status: "OCZEKUJE" },
+        select: { id: true },
       });
     });
 

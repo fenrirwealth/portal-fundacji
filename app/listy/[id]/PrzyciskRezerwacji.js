@@ -1,73 +1,123 @@
 "use client";
 
-import { useState } from "react";
+import Link from "next/link";
+import { useId, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useToast } from "../../ui/Toast";
+import style from "./Rezerwacja.module.css";
 
 /**
  * @param {object} p
  * @param {string} p.listId
+ * @param {number} p.numer
  * @param {boolean} p.wolny
  * @param {string} p.status
+ * @param {string} [p.przedRezerwacja]
  * @param {boolean} [p.zwiezly] wariant do paska mobilnego
  */
-export default function PrzyciskRezerwacji({ listId, wolny, status, zwiezly = false }) {
-  const [stan, setStan] = useState("gotowy");
+export default function PrzyciskRezerwacji({ listId, numer, wolny, status, przedRezerwacja, zwiezly = false }) {
+  const dialog = useRef(null);
+  const identyfikator = useId();
+  const [czekam, setCzekam] = useState(false);
+  const [blad, setBlad] = useState("");
   const router = useRouter();
-  const toast = useToast();
+  const etykieta = zwiezly ? "Wybieram" : "Zostań Mikołajem tego listu";
+  const klasa = "btn" + (zwiezly ? "" : " btn-pelny btn-duzy");
 
   if (!wolny) {
     return (
-      <button className={"btn" + (zwiezly ? "" : " btn-pelny")} disabled aria-disabled="true">
+      <button className={"btn" + (zwiezly ? "" : " btn-pelny")} disabled>
         {status === "ZAREZERWOWANY" ? "Ten list ma już Mikołaja" : "Prezent przekazany"}
       </button>
     );
   }
 
-  async function rezerwuj() {
-    setStan("czekam");
+  if (przedRezerwacja) {
+    return <Link className={klasa} href={przedRezerwacja}>{etykieta}</Link>;
+  }
+
+  async function rezerwuj(e) {
+    e.preventDefault();
+    if (czekam) return;
+
+    const telefon = new FormData(e.currentTarget).get("telefon");
+    setCzekam(true);
+    setBlad("");
+
     try {
       const odp = await fetch("/api/rezerwacja", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ listId }),
+        body: JSON.stringify({ listId, telefon }),
       });
       const dane = await odp.json();
 
+      const wroc = encodeURIComponent("/listy/" + listId);
       if (odp.status === 403 && dane.wymagaZgody) {
-        router.push("/regulamin?wroc=/listy/" + listId);
+        dialog.current.close();
+        router.push("/regulamin?wroc=" + wroc);
         return;
       }
       if (odp.status === 401) {
-        // Po zalogowaniu wracamy dokładnie na ten list, żeby nie trzeba
-        // go było szukać od nowa.
-        router.push("/zaloguj?wroc=/listy/" + listId);
+        dialog.current.close();
+        router.push("/zaloguj?wroc=" + wroc);
         return;
       }
       if (!odp.ok) {
-        toast(dane.blad || "Nie udało się zarezerwować listu.", "blad");
-        setStan("gotowy");
-        // Konflikt oznacza, że ktoś był pierwszy — odświeżamy widok,
-        // żeby użytkownik zobaczył aktualny stan zamiast klikać w pustkę.
+        setBlad(dane.blad || "Nie udało się zarezerwować listu.");
+        setCzekam(false);
         if (odp.status === 409) router.refresh();
         return;
       }
 
+      dialog.current.close();
       router.push("/moje-rezerwacje?nowa=1");
     } catch {
-      toast("Brak połączenia. Spróbuj jeszcze raz.", "blad");
-      setStan("gotowy");
+      setBlad("Brak połączenia. Spróbuj jeszcze raz.");
+      setCzekam(false);
     }
   }
 
   return (
-    <button
-      className={"btn" + (zwiezly ? "" : " btn-pelny btn-duzy")}
-      onClick={rezerwuj}
-      disabled={stan === "czekam"}
-      aria-busy={stan === "czekam"}
-    >
-      {stan === "czekam" ? "Rezerwuję…" : zwiezly ? "Wybieram" : "Zostań Mikołajem tego listu"}
-    </button>
+    <>
+      <button type="button" className={klasa} onClick={() => {
+        setBlad("");
+        dialog.current.showModal();
+      }} aria-haspopup="dialog" disabled={czekam}>
+        {etykieta}
+      </button>
+      <dialog
+        ref={dialog}
+        className={style.dialog + " karta"}
+        aria-labelledby={identyfikator + "-tytul"}
+        onCancel={(e) => { if (czekam) e.preventDefault(); }}
+      >
+        <form onSubmit={rezerwuj} aria-busy={czekam}>
+          <h2 id={identyfikator + "-tytul"}>Zarezerwuj list nr {numer}</h2>
+          <p className="maly cichy" id={identyfikator + "-opis"}>
+            Fundacja użyje numeru do kontaktu w sprawie prezentu. Jeśli nie zadzwonisz, możemy do Ciebie oddzwonić.
+          </p>
+          <label htmlFor={identyfikator + "-telefon"}>Twój numer telefonu (wymagany)</label>
+          <input
+            className="pole-kontrolka"
+            id={identyfikator + "-telefon"}
+            name="telefon"
+            type="tel"
+            autoComplete="tel"
+            maxLength={32}
+            placeholder="np. +48 123 456 789"
+            aria-describedby={identyfikator + "-opis"}
+            required
+            disabled={czekam}
+          />
+          {blad && <p className="pole-blad" role="alert">{blad}</p>}
+          <button className="btn btn-pelny" type="submit" disabled={czekam}>
+            {czekam ? "Rezerwuję…" : "Potwierdź rezerwację"}
+          </button>
+          <button className="btn btn-tekstowy btn-pelny" type="button" onClick={() => dialog.current.close()} disabled={czekam}>
+            Wróć do listu
+          </button>
+        </form>
+      </dialog>
+    </>
   );
 }

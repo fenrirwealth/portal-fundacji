@@ -79,7 +79,7 @@ export default async function Admin({ searchParams }) {
 
   const kontakty = await db.rezerwacja.findMany({
     where: { status: "OCZEKUJE", wygasa: { gt: new Date() }, list: { edycja: { aktywna: true } } },
-    select: { id: true, wygasa: true, user: { select: { email: true } }, list: { select: { id: true, numer: true, imie: true } } },
+    select: { id: true, wygasa: true, telefonKontaktowy: true, user: { select: { email: true } }, list: { select: { id: true, numer: true, imie: true } } },
     orderBy: { wygasa: "asc" }, take: 100,
   });
 
@@ -106,7 +106,13 @@ export default async function Admin({ searchParams }) {
           <thead><tr><th>List</th><th>Darczyńca</th><th>Potwierdź do</th><th>Kontakt</th></tr></thead>
           <tbody>{kontakty.map((r) => <tr key={r.id}>
             <td><Link href={`/admin/listy/${r.list.id}`}>Nr {r.list.numer} · {r.list.imie}</Link></td>
-            <td>{r.user.email}</td><td>{terminPL(r.wygasa)}</td>
+            <td>
+              {r.user.email}<br />
+              {r.telefonKontaktowy
+                ? <a href={`tel:${r.telefonKontaktowy}`}>{r.telefonKontaktowy}</a>
+                : <span className="drobny cichy">Brak numeru telefonu</span>}
+            </td>
+            <td>{terminPL(r.wygasa)}</td>
             <td><form action={potwierdzKontaktTelefoniczny}><input type="hidden" name="rezerwacjaId" value={r.id} /><button className="btn" type="submit">Kontakt telefoniczny odbył się</button></form></td>
           </tr>)}</tbody>
         </table></div>}

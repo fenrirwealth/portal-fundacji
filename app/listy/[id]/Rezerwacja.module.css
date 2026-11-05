@@ -1,0 +1,9 @@
+.dialog {
+  width: min(440px, calc(100% - 32px));
+  max-height: calc(100dvh - 32px);
+  margin: auto;
+  padding: var(--o-5);
+}
+.dialog::backdrop { background: #020712cc; }
+.dialog form { display: grid; gap: var(--o-3); }
+.dialog label { font-weight: 600; }

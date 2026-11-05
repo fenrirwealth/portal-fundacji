@@ -402,11 +402,13 @@ model Rezerwacja {
   status                           StatusRezerwacji @default(OCZEKUJE)
   wygasa                           DateTime
   potwierdzona                     DateTime?
+  telefonKontaktowy                String?
   kontaktTelefoniczny              DateTime?
   kontaktPotwierdzilId              String?
   kontaktPotwierdzil                User? @relation("KontaktTelefoniczny", fields: [kontaktPotwierdzilId], references: [id], onDelete: SetNull)
   anulowana                        DateTime?
   przypomnienieWyslane             DateTime?
+  przypomnienieKoncoweWyslane      DateTime?
   przypomnienieDostarczeniaWyslane DateTime?
 
   prezent   Prezent?

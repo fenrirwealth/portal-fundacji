@@ -1,6 +1,7 @@
 import { wiekPL } from "../../../lib/wiek.mjs";
 import { notFound } from "next/navigation";
-import { listPubliczny, aktywnaEdycja, formatujTermin } from "../../../lib/db";
+import { auth } from "../../../auth";
+import { db, listPubliczny, aktywnaEdycja, formatujTermin, WERSJA_REGULAMINU } from "../../../lib/db";
 import { zwolnijWygasle } from "../../api/rezerwacja/route";
 import PrzyciskRezerwacji from "./PrzyciskRezerwacji";
 import Link from "next/link";
@@ -37,6 +38,21 @@ export default async function Szczegol({ params }) {
 
   const termin = formatujTermin(edycja?.terminDostarczenia);
   const wolny = list.status === "OPUBLIKOWANY";
+  let przedRezerwacja;
+  if (wolny) {
+    const sesja = await auth();
+    const wroc = encodeURIComponent("/listy/" + list.id);
+    const konto = sesja?.user?.id && await db.user.findUnique({
+      where: { id: sesja.user.id },
+      select: { zgodaRegulamin: true, wersjaRegulaminu: true },
+    });
+    if (!konto) przedRezerwacja = "/zaloguj?wroc=" + wroc;
+    else if (!konto.zgodaRegulamin || konto.wersjaRegulaminu !== WERSJA_REGULAMINU) {
+      przedRezerwacja = "/regulamin?wroc=" + wroc;
+    }
+  }
+
+  const rezerwacjaProps = { listId: list.id, numer: list.numer, wolny, status: list.status, przedRezerwacja };
 
   return (
     <div className="wrap sekcja ma-pasek-mobilny">
@@ -89,7 +105,7 @@ export default async function Szczegol({ params }) {
               Nie musisz kupować wszystkiego z listu. Liczy się gest, nie kwota.
             </p>
 
-            <PrzyciskRezerwacji listId={list.id} wolny={wolny} status={list.status} />
+            <PrzyciskRezerwacji {...rezerwacjaProps} />
             <div style={{ marginTop: "var(--o-3)" }}>
               <UdostepnijMarzenie listId={list.id} imie={list.imie} wolny={wolny} />
             </div>
@@ -112,7 +128,7 @@ export default async function Szczegol({ params }) {
         <span className="opis">
           List nr {list.numer} · {list.imie}, {wiekPL(list.wiek)}<br />{list.marzenie}
         </span>
-        <PrzyciskRezerwacji listId={list.id} wolny={wolny} status={list.status} zwiezly />
+        <PrzyciskRezerwacji {...rezerwacjaProps} zwiezly />
       </div>
     </div>
   );

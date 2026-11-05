@@ -16,58 +16,76 @@ export async function POST(request) {
 
   const wygasle = await zwolnijWygasle();
   const teraz = new Date();
-  const zaDobe = new Date(teraz.getTime() + 24 * 60 * 60 * 1000);
-  const zaDwieDoby = new Date(teraz.getTime() + 2 * 24 * 60 * 60 * 1000);
-  const [kandydaci, dostarczenia] = await Promise.all([db.rezerwacja.findMany({
-    where: {
-      status: "OCZEKUJE",
-      przypomnienieWyslane: null,
-      wygasa: { gt: teraz, lte: zaDobe },
+  const godzina = 60 * 60 * 1000;
+  const zaTrzyGodziny = new Date(teraz.getTime() + 3 * godzina);
+  const zaDobe = new Date(teraz.getTime() + 24 * godzina);
+  const zaDwieDoby = new Date(teraz.getTime() + 48 * godzina);
+
+  // Jeśli kontrola ruszy dopiero w ostatnich trzech godzinach, darczyńca
+  // bez telefonu dostanie tylko ostatnie przypomnienie.
+  const przypomnienia = [
+    {
+      pole: "przypomnienieWyslane",
+      prefiks: "przypomnienie",
+      ostatnie: false,
+      warunki: {
+        wygasa: { gt: teraz, lte: zaDobe },
+        OR: [{ telefonKontaktowy: { not: null } }, { wygasa: { gt: zaTrzyGodziny } }],
+      },
     },
-    select: {
-      id: true,
-      wygasa: true,
-      user: { select: { email: true } },
-      list: { select: { id: true, imie: true, numer: true } },
+    {
+      pole: "przypomnienieKoncoweWyslane",
+      prefiks: "przypomnienie-koncowe",
+      ostatnie: true,
+      warunki: { telefonKontaktowy: null, wygasa: { gt: teraz, lte: zaTrzyGodziny } },
     },
-    orderBy: { wygasa: "asc" },
-    take: 100,
-  }), db.rezerwacja.findMany({
-    where: {
-      status: "POTWIERDZONA", przypomnienieDostarczeniaWyslane: null,
-      list: { edycja: { aktywna: true, terminDostarczenia: { gt: teraz, lte: zaDwieDoby } } },
-    },
-    select: { id: true }, orderBy: { utworzona: "asc" }, take: 300,
-  })]);
+  ];
+
+  const [pierwsze, koncowe, dostarczenia] = await Promise.all([
+    ...przypomnienia.map(({ pole, warunki }) => db.rezerwacja.findMany({
+      where: { status: "OCZEKUJE", [pole]: null, ...warunki },
+      select: { id: true },
+      orderBy: { wygasa: "asc" },
+      take: 100,
+    })),
+    db.rezerwacja.findMany({
+      where: {
+        status: "POTWIERDZONA", przypomnienieDostarczeniaWyslane: null,
+        list: { edycja: { aktywna: true, terminDostarczenia: { gt: teraz, lte: zaDwieDoby } } },
+      },
+      select: { id: true }, orderBy: { utworzona: "asc" }, take: 300,
+    }),
+  ]);
 
   let zakolejkowane = 0;
   let bledy = 0;
 
-  for (const rezerwacja of kandydaci) {
-    // Atomowe zajecie rekordu chroni przed podwojnym mailem, gdy dwa
-    // wywolania harmonogramu na siebie nachodza. Przy bledzie wysylki
-    // cofamy znacznik, aby nastepna proba mogla ponowic wiadomosc.
-    const znacznik = new Date();
-    const zajeta = await db.rezerwacja.updateMany({
-      where: {
-        id: rezerwacja.id,
-        status: "OCZEKUJE",
-        przypomnienieWyslane: null,
-        wygasa: { gt: new Date() },
-      },
-      data: { przypomnienieWyslane: znacznik },
-    });
-    if (zajeta.count !== 1) continue;
-
-    try {
-      if (!(await kolejkujEmail("PRZYPOMNIENIE", { rezerwacjaId: rezerwacja.id }, `przypomnienie-${rezerwacja.id}`))) throw new Error("KOLEJKA_NIEDOSTEPNA");
-      zakolejkowane += 1;
-    } catch {
-      bledy += 1;
-      await db.rezerwacja.updateMany({
-        where: { id: rezerwacja.id, przypomnienieWyslane: znacznik },
-        data: { przypomnienieWyslane: null },
+  for (const [i, kandydaci] of [pierwsze, koncowe].entries()) {
+    const { pole, prefiks, ostatnie, warunki } = przypomnienia[i];
+    for (const { id } of kandydaci) {
+      // Każdy etap ma osobny znacznik i identyfikator zadania. Warunkowy
+      // zapis zapobiega powtórzeniu, gdy harmonogram uruchomi się równolegle.
+      const znacznik = new Date();
+      const zajeta = await db.rezerwacja.updateMany({
+        where: {
+          id, status: "OCZEKUJE", [pole]: null, ...warunki,
+          wygasa: { ...warunki.wygasa, gt: znacznik },
+        },
+        data: { [pole]: znacznik },
       });
+      if (zajeta.count !== 1) continue;
+
+      try {
+        const dodano = await kolejkujEmail("PRZYPOMNIENIE", { rezerwacjaId: id, ostatnie }, `${prefiks}-${id}`);
+        if (!dodano) throw new Error("KOLEJKA_NIEDOSTEPNA");
+        zakolejkowane += 1;
+      } catch {
+        bledy += 1;
+        await db.rezerwacja.updateMany({
+          where: { id, [pole]: znacznik },
+          data: { [pole]: null },
+        });
+      }
     }
   }
 
@@ -108,7 +126,7 @@ export async function POST(request) {
   });
 
   return Response.json(
-    { wygasle, sprawdzone: kandydaci.length + dostarczenia.length, zakolejkowane, bledy, usunieteSkany: stareSkany.length },
+    { wygasle, sprawdzone: pierwsze.length + koncowe.length + dostarczenia.length, zakolejkowane, bledy, usunieteSkany: stareSkany.length },
     { status: bledy > 0 ? 502 : 200 }
   );
 }
