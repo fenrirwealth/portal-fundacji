@@ -41,6 +41,7 @@ async function Wyniki({ params }) {
   const wiek = params.wiek || "";
   const wolne = params.wolne === "1";
   const szukaj = (params.szukaj || "").trim().toLowerCase().slice(0, 60);
+  const numer = szukaj.match(/^(?:list\s+)?(?:nr\.?\s*|#\s*)?(\d+)$/)?.[1];
 
   // Przy każdym wejściu zwalniamy listy, których nikt nie potwierdził
   // w terminie — pula jest aktualna bez osobnego zadania cyklicznego.
@@ -55,11 +56,9 @@ async function Wyniki({ params }) {
     tylkoWolne: wolne,
   });
 
-  // Wyszukiwanie po danych, które i tak są publiczne: imię, marzenie,
-  // opis. Świadomie po stronie serwera na już pobranym zbiorze — przy
-  // skali kilkuset listów to szybsze niż zapytanie z LIKE, a nie
-  // wymaga rozszerzeń pełnotekstowych w bazie.
-  if (szukaj) {
+  if (numer) {
+    listy = listy.filter((l) => l.numer === Number(numer));
+  } else if (szukaj) {
     listy = listy.filter((l) =>
       [l.imie, l.marzenie, l.opis].filter(Boolean).join(" ").toLowerCase().includes(szukaj)
     );
@@ -100,7 +99,10 @@ async function Wyniki({ params }) {
 }
 
 export default async function Listy({ searchParams }) {
-  const params = (await searchParams) || {};
+  const parametry = (await searchParams) || {};
+  const params = Object.fromEntries(
+    Object.entries(parametry).filter(([, value]) => typeof value === "string")
+  );
   const kategoria = params.kategoria || "";
   const wiek = params.wiek || "";
   const wolne = params.wolne === "1";

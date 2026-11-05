@@ -46,7 +46,7 @@ export default function KartaListu({ list }) {
         <span className="karta-listu-ikona" aria-hidden="true"><Mail /></span>
         <div className="karta-listu-meta">
           <h3>{list.imie}</h3>
-          <p>Wiek: {wiekPL(list.wiek)}</p>
+          <p><strong>List nr {list.numer}</strong> · Wiek: {wiekPL(list.wiek)}</p>
         </div>
         <p className="karta-listu-szczegoly">
           {list.wojewodztwo ? `woj. ${list.wojewodztwo.toLowerCase()} · ` : ""}{list.kategoria.toLowerCase()}
@@ -56,7 +56,7 @@ export default function KartaListu({ list }) {
         <Link
           className="karta-listu-akcja"
           href={`/listy/${list.id}`}
-          aria-label={`Otwórz list od ${list.imie}, ${wiekPL(list.wiek)}. ${opis}.`}
+          aria-label={`Otwórz list nr ${list.numer}, ${list.imie}, ${wiekPL(list.wiek)}. ${opis}.`}
         >
           <span>Otwórz ten list</span><ArrowUpRight aria-hidden="true" />
         </Link>

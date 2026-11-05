@@ -42,7 +42,7 @@ export default async function MojeRezerwacje({ searchParams }) {
       potwierdzona: true,
       // Z listu bierzemy wylacznie pola jawne — ta strona nie moze byc
       // furtka do danych, ktorych nie pokazujemy publicznie.
-      list: { select: { id: true, imie: true, wiek: true, marzenie: true } },
+      list: { select: { id: true, numer: true, imie: true, wiek: true, marzenie: true } },
     },
   });
 
@@ -75,7 +75,7 @@ export default async function MojeRezerwacje({ searchParams }) {
 
       {aktywne.filter((r) => r.status === "OCZEKUJE").map((r) => <section className="kontakt-rezerwacji" key={r.id}>
         <h2>Teraz zadzwoń do Fundacji</h2>
-        <p>W sprawie listu od {r.list.imie} zadzwoń pod <a href={TELEFON_HREF}><b>{TELEFON_FUNDACJI}</b></a>.</p>
+        <p>W sprawie listu nr {r.list.numer} zadzwoń pod <a href={TELEFON_HREF}><b>{TELEFON_FUNDACJI}</b></a>.</p>
         <p>Uzgodnij szczegóły do <b>{terminPL(r.wygasa)}</b>. Fundacja musi potwierdzić rozmowę w tym terminie — inaczej rezerwacja wygaśnie, a list wróci do puli.</p>
         <a className="btn" href={TELEFON_HREF}>Zadzwoń do Fundacji</a>
       </section>)}
@@ -103,7 +103,7 @@ export default async function MojeRezerwacje({ searchParams }) {
           <tbody>
             {rezerwacje.map((r) => (
               <tr key={r.id}>
-                <td data-etykieta="Dziecko"><b>{r.list.imie}</b>, {r.list.wiek} lat</td>
+                <td data-etykieta="Dziecko"><b>{r.list.imie}</b>, {r.list.wiek} lat<br /><span className="drobny">List nr {r.list.numer}</span></td>
                 <td data-etykieta="Marzenie">{r.list.marzenie}</td>
                 <td data-etykieta="Status">
                   <span className={"plakietka " + (r.status === "POTWIERDZONA" ? "plakietka-wolny" : r.status === "OCZEKUJE" ? "plakietka-gotowy" : "plakietka-zajety")}>

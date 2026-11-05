@@ -5,7 +5,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Search, X } from "lucide-react";
 
-// Wyszukiwarka po prawdziwych danych: imię, marzenie, opis.
+// Wyszukiwarka po prawdziwych danych: numer listu, imię, marzenie, opis.
 // Jako formularz, nie filtrowanie w locie — wynik ma własny adres,
 // więc da się go wysłać znajomemu i działa przycisk „wstecz".
 export default function Szukajka({ poczatkowa }) {
@@ -24,7 +24,7 @@ export default function Szukajka({ poczatkowa }) {
 
   return (
     <form onSubmit={wyslij} role="search" className="listy-szukajka">
-      <label htmlFor="szukaj" className="tylko-dla-czytnika">Szukaj w listach</label>
+      <label htmlFor="szukaj" className="tylko-dla-czytnika">Szukaj po numerze listu, imieniu lub marzeniu</label>
       <div className="listy-szukajka-pole">
         <Search aria-hidden="true" />
         <input
@@ -32,7 +32,7 @@ export default function Szukajka({ poczatkowa }) {
           type="search"
           value={wartosc}
           onChange={(e) => setWartosc(e.target.value)}
-          placeholder="Szukaj: imię, marzenie, np. rower"
+          placeholder="Wpisz numer listu, imię lub marzenie"
           maxLength={60}
         />
       </div>

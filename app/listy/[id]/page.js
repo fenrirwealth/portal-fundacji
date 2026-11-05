@@ -13,7 +13,7 @@ export async function generateMetadata({ params }) {
   const list = await listPubliczny(p.id);
   if (!list) return { title: "Nie znaleziono listu" };
   return {
-    title: `List od ${list.imie}, ${wiekPL(list.wiek)}`,
+    title: `List nr ${list.numer} — ${list.imie}, ${wiekPL(list.wiek)}`,
     description: `Marzenie: ${list.marzenie}. Sprawdź, jak przekazać prezent.`,
     openGraph: {
       title: list.status === "OPUBLIKOWANY" ? `Ten list nadal czeka na Mikołaja` : `Ten list ma już swojego Mikołaja`,
@@ -64,6 +64,7 @@ export default async function Szczegol({ params }) {
 
         <div className="panel-rezerwacji">
           <div className="karta karta-tresc">
+            <p className="drobny"><strong>List nr {list.numer}</strong></p>
             <h1 style={{ fontSize: "var(--t-2xl)" }}>
               {list.imie}, {wiekPL(list.wiek)}
             </h1>
@@ -109,7 +110,7 @@ export default async function Szczegol({ params }) {
           pierwszym ekranem. Pasek trzyma go zawsze w zasięgu kciuka. */}
       <div className="pasek-mobilny">
         <span className="opis">
-          {list.imie}, {wiekPL(list.wiek)}<br />{list.marzenie}
+          List nr {list.numer} · {list.imie}, {wiekPL(list.wiek)}<br />{list.marzenie}
         </span>
         <PrzyciskRezerwacji listId={list.id} wolny={wolny} status={list.status} zwiezly />
       </div>
