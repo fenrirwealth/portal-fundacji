@@ -1,9 +1,11 @@
-import { Worker } from "bullmq";
+import { Queue, Worker } from "bullmq";
 import Redis from "ioredis";
 import sharp from "sharp";
 import nodemailer from "nodemailer";
 import { PrismaClient } from "@prisma/client";
 import { EMAIL_FUNDACJI, TELEFON_FUNDACJI, terminPL } from "./lib/zasady-akcji.mjs";
+
+import { ID_HARMONOGRAMU_KOPII, TYP_KOPII, wyslijKopieListow, zaplanujKopieListow } from "./lib/kopia-listow-pdf.mjs";
 
 const NAZWA = "portal-email-v1";
 const db = new PrismaClient();
@@ -48,6 +50,11 @@ async function kartkaPodziekowania(imie) {
 }
 
 const worker = new Worker(NAZWA, async (zadanie) => {
+  if (zadanie.name === TYP_KOPII) {
+    if (zadanie.repeatJobKey !== ID_HARMONOGRAMU_KOPII) throw new Error("Nieprawidłowe źródło zadania kopii.");
+    await wyslijKopieListow({ db, transport, od: nadawca(), planowanaData: new Date(zadanie.opts.prevMillis) });
+    return;
+  }
   const typ = zadanie.name.replace(/^FUNDACJA_/, "");
   const dlaFundacji = zadanie.name.startsWith("FUNDACJA_");
   if (["REZERWACJA", "PRZYPOMNIENIE", "PRZYPOMNIENIE_DOSTARCZENIA", "KONTAKT_POTWIERDZONY", "PODZIEKOWANIE"].includes(typ)) {
@@ -150,12 +157,25 @@ async function sprawdzTerminy() {
   } catch (blad) { console.error("[terminy]", blad.message); }
   finally { kontrolaTrwa = false; }
 }
-const kontrolaTerminow = setInterval(sprawdzTerminy, 60_000);
+const kolejkaKopii = new Queue(NAZWA, { connection: polaczenie });
+let kontrolaKopii;
+function upewnijSieZeKopiaZaplanowana() {
+  kontrolaKopii ??= zaplanujKopieListow(kolejkaKopii).catch((blad) => {
+    console.error("[kopia-pdf] Harmonogram:", blad.message);
+    kontrolaKopii = undefined;
+  });
+}
+upewnijSieZeKopiaZaplanowana();
+const kontrolaTerminow = setInterval(() => {
+  upewnijSieZeKopiaZaplanowana();
+  void sprawdzTerminy();
+}, 60_000);
 kontrolaTerminow.unref();
 
 async function zakoncz() {
   clearInterval(kontrolaTerminow);
   await worker.close();
+  await kolejkaKopii.close();
   await db.$disconnect();
   await polaczenie.quit();
   process.exit(0);
