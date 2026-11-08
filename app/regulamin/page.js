@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { auth } from "../../auth";
 import { db, WERSJA_REGULAMINU, bezpiecznaSciezka } from "../../lib/db";
 import Link from "next/link";
+import { LIMIT_AKTYWNYCH_LISTOW } from "../../lib/zasady-akcji.mjs";
 
 export const dynamic = "force-dynamic";
 
@@ -34,7 +35,7 @@ export default async function Regulamin({ searchParams }) {
       <div className="czytanie" style={{ marginTop: "var(--o-6)" }}>
         <p><b>1.</b> Organizatorem akcji jest Fundacja Lepszy Dom Lepsze Jutro,
         KRS 0000971976.</p>
-        <p><b>2.</b> Darczyńca rezerwuje jeden list naraz. W ciągu 48 godzin od rezerwacji należy
+        <p><b>2.</b> Darczyńca może mieć do {LIMIT_AKTYWNYCH_LISTOW} aktywnych rezerwacji jednocześnie. W ciągu 48 godzin od rezerwacji należy
         skontaktować się telefonicznie z Fundacją pod numerem +48 570 747 779
         w celu ustalenia szczegółów. Administrator Fundacji potwierdza odbytą rozmowę
         w portalu. Jeżeli nie potwierdzi kontaktu przed upływem 48 godzin,

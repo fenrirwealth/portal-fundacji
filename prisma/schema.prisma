@@ -388,7 +388,7 @@ model Weryfikacja {
 //  REZERWACJE
 //
 //  Dwa CZESCIOWE INDEKSY UNIKALNE dopisane ręcznie w migracjach pilnują:
-//  - jednego aktywnego listu na konto,
+//  - najwyżej 20 aktywnych listów na konto (miejsca 1–20),
 //  - jednej aktywnej rezerwacji na list.
 //  Sprawdzanie tego wyłącznie w kodzie przepuszczałoby równoległe żądania.
 // ------------------------------------------------------------
@@ -407,6 +407,8 @@ model Rezerwacja {
   list   List   @relation(fields: [listId], references: [id])
   userId String
   user   User   @relation(fields: [userId], references: [id])
+
+  miejsceNaKoncie Int @default(1)
 
   status                           StatusRezerwacji @default(OCZEKUJE)
   wygasa                           DateTime

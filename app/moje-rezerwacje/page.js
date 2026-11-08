@@ -4,7 +4,7 @@ import { db, aktywnaEdycja, formatujTermin } from "../../lib/db";
 import { zwolnijWygasle } from "../api/rezerwacja/route";
 import Akcje from "./Akcje";
 import Link from "next/link";
-import { TELEFON_FUNDACJI, TELEFON_HREF, terminPL } from "../../lib/zasady-akcji.mjs";
+import { TELEFON_FUNDACJI, TELEFON_HREF, terminPL, LIMIT_AKTYWNYCH_LISTOW } from "../../lib/zasady-akcji.mjs";
 import UdostepnijMarzenie from "../listy/[id]/UdostepnijMarzenie";
 
 export const dynamic = "force-dynamic";
@@ -68,7 +68,7 @@ export default async function MojeRezerwacje({ searchParams }) {
       )}
 
       <p className="czytanie cichy" style={{ marginTop: "var(--o-3)" }}>
-        Możesz wybrać jeden list naraz. Po potwierdzeniu masz czas
+        Możesz mieć do {LIMIT_AKTYWNYCH_LISTOW} aktywnych rezerwacji jednocześnie. Obecnie: {aktywne.length}/{LIMIT_AKTYWNYCH_LISTOW}. Po potwierdzeniu masz czas
         {termin ? " do " + termin : ""} na dostarczenie prezentu do siedziby
         fundacji.
       </p>

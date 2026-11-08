@@ -1,6 +1,6 @@
 import { beforeEach, expect, it, vi } from "vitest";
 
-const { auth, db, kolejkujEmail } = vi.hoisted(() => ({
+const { auth, db, kolejkujEmail, wolneMiejsceNaKoncie } = vi.hoisted(() => ({
   auth: vi.fn(),
   db: {
     user: { findUnique: vi.fn() },
@@ -11,13 +11,14 @@ const { auth, db, kolejkujEmail } = vi.hoisted(() => ({
     $transaction: vi.fn(),
   },
   kolejkujEmail: vi.fn(),
+  wolneMiejsceNaKoncie: vi.fn(),
 }));
 
 vi.mock("../auth", () => ({ auth }));
 vi.mock("../lib/db", () => ({ db, WARUNKI_PUBLIKACJI: {}, WERSJA_REGULAMINU: "test" }));
 vi.mock("../lib/cache", () => ({ KLUCZ_LICZNIKA: "licznik", usunCache: vi.fn() }));
 vi.mock("../lib/kolejka-email", () => ({ kolejkujEmail }));
-vi.mock("../lib/rezerwacje.mjs", () => ({ wygasRezerwacje: async () => [] }));
+vi.mock("../lib/rezerwacje.mjs", () => ({ wygasRezerwacje: async () => [], wolneMiejsceNaKoncie }));
 vi.mock("../lib/skany", () => ({ usunPrywatnySkan: vi.fn() }));
 
 import { POST as rezerwuj } from "../app/api/rezerwacja/route";
@@ -36,6 +37,7 @@ beforeEach(() => {
   auth.mockResolvedValue({ user: { id: "darczyńca" } });
   db.user.findUnique.mockResolvedValue({ zgodaRegulamin: new Date(), wersjaRegulaminu: "test" });
   kolejkujEmail.mockResolvedValue(true);
+  wolneMiejsceNaKoncie.mockResolvedValue(20);
 });
 
 it.each([undefined, "", "123", "+48 ABC", { numer: "123456789" }])(
@@ -57,7 +59,7 @@ it("zapisuje znormalizowany telefon przy rezerwacji bez ujawniania go w odpowied
   const odpowiedz = await rezerwuj(rezerwacja("123 456 789"));
   expect(odpowiedz.status).toBe(200);
   expect(create).toHaveBeenCalledWith(expect.objectContaining({
-    data: expect.objectContaining({ listId: "list-7", telefonKontaktowy: "+48123456789" }),
+    data: expect.objectContaining({ listId: "list-7", telefonKontaktowy: "+48123456789", miejsceNaKoncie: 20 }),
   }));
   expect(await odpowiedz.json()).not.toHaveProperty("telefonKontaktowy");
 });
@@ -94,4 +96,17 @@ it("ustawia oddzielne terminy przypomnień i nie kolejkuje ponownie zajętego re
     vi.useRealTimers();
     vi.unstubAllEnvs();
   }
+});
+
+
+it("przy limicie 20 zwraca czytelny błąd i nie zajmuje kolejnego listu", async () => {
+  const updateMany = vi.fn();
+  db.edycjaAkcji.findFirst.mockResolvedValue({ id: "edycja" });
+  wolneMiejsceNaKoncie.mockRejectedValue(new Error("LIMIT_REZERWACJI"));
+  db.$transaction.mockImplementation((akcja) => akcja({ list: { updateMany } }));
+  const odpowiedz = await rezerwuj(rezerwacja("123456789"));
+  expect(odpowiedz.status).toBe(429);
+  expect((await odpowiedz.json()).blad).toContain("20 aktywnych rezerwacji");
+  expect(updateMany).not.toHaveBeenCalled();
+  expect(kolejkujEmail).not.toHaveBeenCalled();
 });

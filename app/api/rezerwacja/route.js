@@ -5,8 +5,8 @@ import { KLUCZ_LICZNIKA, usunCache } from "../../../lib/cache";
 import { kolejkujEmail } from "../../../lib/kolejka-email";
 
 import { normalizujTelefonRezerwacji } from "../../../lib/telefon-rezerwacji.mjs";
-import { terminKontaktu } from "../../../lib/zasady-akcji.mjs";
-import { wygasRezerwacje } from "../../../lib/rezerwacje.mjs";
+import { terminKontaktu, LIMIT_AKTYWNYCH_LISTOW } from "../../../lib/zasady-akcji.mjs";
+import { wygasRezerwacje, wolneMiejsceNaKoncie } from "../../../lib/rezerwacje.mjs";
 
 // ------------------------------------------------------------
 //  Zwalnianie wygaslych rezerwacji
@@ -95,12 +95,10 @@ export async function POST(request) {
   try {
     // Zajecie listu warunkiem na statusie zamiast blokady jawnej:
     // gdy zmieniony wiersz to zero, ktos byl pierwszy.
-    //
-    // Limitu "jeden aktywny list na konto" NIE sprawdzamy licznikiem
-    // przed transakcja — dwa rownolegle zadania zobaczylyby zero
-    // aktywnych rezerwacji i oba przeszlyby dalej. Pilnuje tego
-    // czesciowy indeks unikalny w bazie, a my lapiemy P2002.
+    // Każda aktywna rezerwacja zajmuje jedno z 20 miejsc na koncie.
+    // Blokada konta i ograniczenia bazy chronią także równoległe żądania.
     const rezerwacja = await db.$transaction(async (tx) => {
+      const miejsceNaKoncie = await wolneMiejsceNaKoncie(tx, sesja.user.id);
       // Te same warunki publikacji co w widokach: zgoda dyrektora
       // wplynela, nie zostala cofnieta, karta weryfikacji zamknieta.
       // Gdyby administrator przestawil status na OPUBLIKOWANY bez
@@ -117,7 +115,7 @@ export async function POST(request) {
       if (zajety.count === 0) throw new Error("NIEDOSTEPNY");
 
       return tx.rezerwacja.create({
-        data: { listId, userId: sesja.user.id, telefonKontaktowy, wygasa, status: "OCZEKUJE" },
+        data: { listId, userId: sesja.user.id, miejsceNaKoncie, telefonKontaktowy, wygasa, status: "OCZEKUJE" },
         select: { id: true },
       });
     });
@@ -138,11 +136,14 @@ export async function POST(request) {
         { status: 409 }
       );
     }
-    if (e.code === "P2002") {
+    if (e.message === "LIMIT_REZERWACJI") {
       return Response.json(
-        { blad: "Masz już zarezerwowany jeden list. Dokończ go albo zrezygnuj, zanim wybierzesz kolejny." },
+        { blad: `Masz już ${LIMIT_AKTYWNYCH_LISTOW} aktywnych rezerwacji. Dokończ jedną z nich albo zrezygnuj, zanim wybierzesz kolejny list.` },
         { status: 429 }
       );
+    }
+    if (e.code === "P2002") {
+      return Response.json({ blad: "Rezerwacje zmieniły się w trakcie zapisu. Odśwież stronę i spróbuj ponownie." }, { status: 409 });
     }
     throw e;
   }
