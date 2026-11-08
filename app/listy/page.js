@@ -8,6 +8,7 @@ import { SzkieletListy } from "../ui/Szkielet";
 import Szukajka from "./Szukajka";
 import Link from "next/link";
 import { MailOpen, Sparkles } from "lucide-react";
+import { uporzadkujListy } from "../../lib/kolejnosc-listow.mjs";
 
 export const dynamic = "force-dynamic";
 
@@ -64,6 +65,7 @@ async function Wyniki({ params }) {
     );
   }
 
+  listy = uporzadkujListy(listy);
   const cos = listy.length > 0;
   const stan = await licznik();
 
