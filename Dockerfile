@@ -23,6 +23,7 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
+RUN node -e "require('node:fs').writeFileSync('.wersja-wdrozenia', require('node:crypto').randomUUID())"
 RUN npx prisma generate && npm run build
 
 FROM base AS runner
@@ -52,6 +53,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
 COPY --from=builder --chown=nextjs:nodejs /app/scripts ./scripts
 COPY --from=builder --chown=nextjs:nodejs /app/package.json ./package.json
+COPY --from=builder --chown=nextjs:nodejs /app/.wersja-wdrozenia ./.wersja-wdrozenia
 COPY --from=builder --chown=nextjs:nodejs /app/cluster-server.cjs ./cluster-server.cjs
 COPY --from=builder --chown=nextjs:nodejs /app/worker.mjs ./worker.mjs
 COPY --from=builder --chown=nextjs:nodejs /app/lib/zasady-akcji.mjs /app/lib/wiek.mjs /app/lib/kopia-listow-pdf.mjs ./lib/
