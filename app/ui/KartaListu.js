@@ -2,6 +2,7 @@ import { wiekPL } from "../../lib/wiek.mjs";
 import Link from "next/link";
 import { ArrowUpRight, Mail } from "lucide-react";
 import IskraListu from "./IskraListu";
+import { OPISY_STATUSU_LISTU } from "../../lib/statusy-listu.mjs";
 import styl from "./KartaListu.module.css";
 // Karta listu — komponent wspoldzielony przez liste i wyniki wyszukiwania.
 //
@@ -13,11 +14,11 @@ import styl from "./KartaListu.module.css";
 // pismo odreczne fontem — imitacja przy prawdziwych skanach obok
 // wygladalaby falszywie.
 
-const OPISY_STATUSU = {
-  OPUBLIKOWANY: ["Czeka na Mikołaja", "plakietka-wolny"],
-  ZAREZERWOWANY: ["Ma już Mikołaja", "plakietka-zajety"],
-  OPLACONY: ["Prezent dostarczony", "plakietka-gotowy"],
-  PRZEKAZANY: ["Prezent przekazany", "plakietka-gotowy"],
+const KLASY_STATUSU = {
+  OPUBLIKOWANY: "plakietka-wolny",
+  ZAREZERWOWANY: "plakietka-zajety",
+  OPLACONY: "plakietka-gotowy",
+  PRZEKAZANY: "plakietka-gotowy",
 };
 
 /**
@@ -27,7 +28,8 @@ const OPISY_STATUSU = {
  *          zdjecieUrl?: string|null, status: string}} p.list
  */
 export default function KartaListu({ list }) {
-  const [opis, klasa] = OPISY_STATUSU[list.status] || ["", "plakietka-zajety"];
+  const opis = OPISY_STATUSU_LISTU[list.status] || "";
+  const klasa = KLASY_STATUSU[list.status] || "plakietka-zajety";
   const wolny = list.status === "OPUBLIKOWANY";
   return (
     <article className={wolny ? `karta-listu ${styl.wolny}` : "karta-listu"}>

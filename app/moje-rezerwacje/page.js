@@ -15,9 +15,9 @@ export const metadata = {
 };
 
 const OPISY = {
-  OCZEKUJE: "Czeka na kontakt telefoniczny",
-  POTWIERDZONA: "Potwierdzona przez Fundację",
-  DOSTARCZONA: "Prezent dostarczony",
+  OCZEKUJE: "Zarezerwowany · czekamy na rozmowę",
+  POTWIERDZONA: "Zarezerwowany · czekamy na paczkę",
+  DOSTARCZONA: "Fundacja przyjęła paczkę",
   WYGASLA: "Wygasła",
   ANULOWANA: "Anulowana",
 };
@@ -39,10 +39,9 @@ export default async function MojeRezerwacje({ searchParams }) {
       id: true,
       status: true,
       wygasa: true,
-      potwierdzona: true,
       // Z listu bierzemy wylacznie pola jawne — ta strona nie moze byc
       // furtka do danych, ktorych nie pokazujemy publicznie.
-      list: { select: { id: true, numer: true, imie: true, wiek: true, marzenie: true } },
+      list: { select: { id: true, numer: true, imie: true, wiek: true, marzenie: true, status: true } },
     },
   });
 
@@ -52,12 +51,12 @@ export default async function MojeRezerwacje({ searchParams }) {
     <div className="wrap sekcja">
       <h1 style={{ fontSize: "var(--t-3xl)" }}>Moje listy</h1>
 
-      {p.nowa === "1" && (
+      {p.nowa === "1" && aktywne.length > 0 && (
         <div className="karta-mikolaja" role="status" style={{ margin: "var(--o-5) 0" }}>
           <span className="karta-mikolaja-gwiazda" aria-hidden="true">✦</span>
           <div>
-            <h2>Ten list ma już Mikołaja. Ciebie.</h2>
-            <p>Zadzwoń do Fundacji w ciągu 48 godzin, aby umówić szczegóły. Administrator potwierdzi rozmowę w portalu.</p>
+            <h2>Dziękujemy za rezerwację listu!</h2>
+            <p>To pierwszy krok do spełnienia dziecięcego marzenia. Poniżej znajdziesz informacje o tym, co zrobić dalej.</p>
             {aktywne[0] && (
               <div style={{ maxWidth: 340, marginTop: "var(--o-4)" }}>
                 <UdostepnijMarzenie listId={aktywne[0].list.id} imie={aktywne[0].list.imie} wolny={false} />
@@ -106,9 +105,14 @@ export default async function MojeRezerwacje({ searchParams }) {
                 <td data-etykieta="Dziecko"><b>{r.list.imie}</b>, {r.list.wiek} lat<br /><span className="drobny">List nr {r.list.numer}</span></td>
                 <td data-etykieta="Marzenie">{r.list.marzenie}</td>
                 <td data-etykieta="Status">
-                  <span className={"plakietka " + (r.status === "POTWIERDZONA" ? "plakietka-wolny" : r.status === "OCZEKUJE" ? "plakietka-gotowy" : "plakietka-zajety")}>
-                    {OPISY[r.status] || r.status}
+                  <span className={"plakietka " + (r.status === "DOSTARCZONA" ? "plakietka-wolny" : ["OCZEKUJE", "POTWIERDZONA"].includes(r.status) ? "plakietka-gotowy" : "plakietka-zajety")}>
+                    {r.status === "DOSTARCZONA" && r.list.status === "PRZEKAZANY"
+                      ? "Prezent przekazany placówce"
+                      : OPISY[r.status] || r.status}
                   </span>
+                  {r.status === "POTWIERDZONA" && (
+                    <p className="drobny cichy">Dziękujemy za rezerwację! Czekamy na dostarczenie paczki zgodnie z ustaleniami.</p>
+                  )}
                 </td>
                 <td data-etykieta="Termin">
                   {r.status === "OCZEKUJE"

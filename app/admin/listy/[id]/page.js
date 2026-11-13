@@ -121,7 +121,7 @@ export default async function EdycjaListu({ params, searchParams }) {
 
       {rezerwacja && (
         <section className="realizacja">
-          <h2>Realizacja prezentu</h2>
+          <h2>Rezerwacja i dostarczenie prezentu</h2>
           <p className="maly">
             E-mail konta: <b>{rezerwacja.user.email}</b> · rezerwacja: {rezerwacja.status}
             {rezerwacja.prezent ? ` · prezent: ${rezerwacja.prezent.stan}` : ""}
@@ -136,6 +136,7 @@ export default async function EdycjaListu({ params, searchParams }) {
             <p>Kontakt musi zostać potwierdzony do <b>{terminPL(rezerwacja.wygasa)}</b>. Po tym terminie list automatycznie wróci do puli.</p>
             <form action={potwierdzKontaktTelefoniczny}><input type="hidden" name="rezerwacjaId" value={rezerwacja.id} /><button className="btn" type="submit">Kontakt telefoniczny odbył się</button></form>
           </div>}
+          {rezerwacja.status === "POTWIERDZONA" && <p>Rezerwacja potwierdzona. Czekamy na dostarczenie paczki.</p>}
           {rezerwacja.kontaktTelefoniczny && <p className="info">Rozmowa potwierdzona: {terminPL(rezerwacja.kontaktTelefoniczny)} · {rezerwacja.kontaktPotwierdzil?.email || "administrator Fundacji"}</p>}
           <form action={aktualizujPrezent} className="naglowek-rzad" style={{ marginTop: "var(--o-4)" }}>
             <input type="hidden" name="id" value={list.id} />

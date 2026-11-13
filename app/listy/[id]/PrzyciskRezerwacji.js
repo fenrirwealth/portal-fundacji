@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useId, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import style from "./Rezerwacja.module.css";
+import { OPISY_STATUSU_LISTU } from "../../../lib/statusy-listu.mjs";
 
 /**
  * @param {object} p
@@ -26,7 +27,7 @@ export default function PrzyciskRezerwacji({ listId, numer, wolny, status, przed
   if (!wolny) {
     return (
       <button className={"btn" + (zwiezly ? "" : " btn-pelny")} disabled>
-        {status === "ZAREZERWOWANY" ? "Ten list ma już Mikołaja" : "Prezent przekazany"}
+        {OPISY_STATUSU_LISTU[status] || "Rezerwacja niedostępna"}
       </button>
     );
   }

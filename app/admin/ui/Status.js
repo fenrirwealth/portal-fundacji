@@ -6,7 +6,7 @@ export const ETYKIETY = {
   SZKIC: "Szkic",
   DO_POPRAWY: "Do poprawy",
   OPUBLIKOWANY: "Opublikowany",
-  ZAREZERWOWANY: "Zarezerwowany",
+  ZAREZERWOWANY: "Zarezerwowany · czekamy na paczkę",
   OPLACONY: "Prezent przyjęty",
   PRZEKAZANY: "Przekazany",
   WYCOFANY: "Wycofany",
