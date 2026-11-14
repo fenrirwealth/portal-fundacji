@@ -5,9 +5,10 @@ import { useRouter } from "next/navigation";
 
 export default function OdswiezStatusy() {
   const router = useRouter();
-  const ostatnie = useRef(Date.now());
+  const ostatnie = useRef(0);
 
   useEffect(() => {
+    ostatnie.current = Date.now();
     function odswiez() {
       if (document.hidden || Date.now() - ostatnie.current < 2000) return;
       ostatnie.current = Date.now();

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState } from "react";
 
 // Podglad tego, co zobaczy darczynca.
@@ -49,7 +50,7 @@ export default function Podglad({ pola }) {
             <div className="karta" style={{ maxWidth: 320 }}>
               <div className="karta-listu-zdjecie">
                 {dane.zdjecieUrl ? (
-                  <img src={dane.zdjecieUrl} alt={"Zdjęcie listu napisanego przez " + dane.imie} />
+                  <Image unoptimized fill src={dane.zdjecieUrl} alt={"Zdjęcie listu napisanego przez " + dane.imie} />
                 ) : (
                   <div className="karta-listu-zastepnik">
                     <span>{dane.numer ? "list nr " + dane.numer : "brak zdjęcia"}</span>

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import BastionReda from "../../ui/BastionReda";
 import OdswiezStatusy from "../../ui/OdswiezStatusy";
 import { imieZWiekem } from "../../../lib/wiek.mjs";
@@ -67,7 +68,7 @@ export default async function Szczegol({ params }) {
         <figure style={{ margin: 0 }}>
           <div className="list-zdjecie">
             {list.zdjecieUrl ? (
-              <img src={list.zdjecieUrl} alt={`Zdjęcie listu napisanego przez ${imieZWiekem(list.imie, list.wiek)}`} />
+              <Image unoptimized width={1200} height={1600} style={{ height: "auto" }} src={list.zdjecieUrl} alt={`Zdjęcie listu napisanego przez ${imieZWiekem(list.imie, list.wiek)}`} />
             ) : (
               <div className="karta-listu-zastepnik zastepnik" aria-hidden="true">
                 <span>zdjęcie listu nr {list.numer} w przygotowaniu</span>

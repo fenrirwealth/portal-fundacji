@@ -1,3 +1,4 @@
+import Image from "next/image";
 import BastionReda from "./BastionReda";
 import { wiekPL, imieZWiekem } from "../../lib/wiek.mjs";
 import Link from "next/link";
@@ -37,7 +38,7 @@ export default function KartaListu({ list }) {
       <div className="karta-listu-poswiata" aria-hidden="true" />
       <div className="karta-listu-zdjecie">
         {list.zdjecieUrl ? (
-          <img src={list.zdjecieUrl} alt={`Zdjęcie listu napisanego przez ${list.imie}`} loading="lazy" />
+          <Image unoptimized fill src={list.zdjecieUrl} alt={`Zdjęcie listu napisanego przez ${list.imie}`} loading="lazy" />
         ) : (
           <div className="karta-listu-zastepnik" aria-hidden="true">
             <span>list nr {list.numer}</span>
