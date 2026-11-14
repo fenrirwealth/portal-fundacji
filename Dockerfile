@@ -6,7 +6,7 @@
 #  build konczy sie bledem P1001. Migracje robimy przy starcie kontenera.
 # ------------------------------------------------------------
 
-FROM node:22-alpine AS base
+FROM node:26.13.1-alpine AS base
 RUN apk add --no-cache openssl libc6-compat
 
 FROM base AS deps
@@ -16,6 +16,7 @@ WORKDIR /app
 # next-auth w becie to realne ryzyko, nie teoria.
 COPY package.json package-lock.json ./
 COPY prisma ./prisma
+COPY prisma.config.ts ./prisma.config.ts
 RUN npm ci
 
 FROM base AS builder
@@ -51,12 +52,13 @@ COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 # nieosiagalna" — komunikat mylacy, bo baza dzialala.
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
+COPY --from=builder --chown=nextjs:nodejs /app/prisma.config.ts ./prisma.config.ts
 COPY --from=builder --chown=nextjs:nodejs /app/scripts ./scripts
 COPY --from=builder --chown=nextjs:nodejs /app/package.json ./package.json
 COPY --from=builder --chown=nextjs:nodejs /app/.wersja-wdrozenia ./.wersja-wdrozenia
 COPY --from=builder --chown=nextjs:nodejs /app/cluster-server.cjs ./cluster-server.cjs
 COPY --from=builder --chown=nextjs:nodejs /app/worker.mjs ./worker.mjs
-COPY --from=builder --chown=nextjs:nodejs /app/lib/zasady-akcji.mjs /app/lib/wiek.mjs /app/lib/kopia-listow-pdf.mjs ./lib/
+COPY --from=builder --chown=nextjs:nodejs /app/lib/prisma-client.mjs /app/lib/zasady-akcji.mjs /app/lib/wiek.mjs /app/lib/kopia-listow-pdf.mjs ./lib/
 
 COPY docker-entrypoint.sh ./
 RUN chmod +x docker-entrypoint.sh

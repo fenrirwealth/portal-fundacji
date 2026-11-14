@@ -2,13 +2,13 @@ import { Queue, Worker } from "bullmq";
 import Redis from "ioredis";
 import sharp from "sharp";
 import nodemailer from "nodemailer";
-import { PrismaClient } from "@prisma/client";
+import { utworzKlientaBazy } from "./lib/prisma-client.mjs";
 import { EMAIL_FUNDACJI, TELEFON_FUNDACJI, terminPL } from "./lib/zasady-akcji.mjs";
 
 import { ID_HARMONOGRAMU_KOPII, TYP_KOPII, wyslijKopieListow, zaplanujKopieListow } from "./lib/kopia-listow-pdf.mjs";
 
 const NAZWA = "portal-email-v1";
-const db = new PrismaClient();
+const db = utworzKlientaBazy();
 const redisUrl = process.env.REDIS_URL;
 
 if (!redisUrl) {

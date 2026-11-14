@@ -1,6 +1,6 @@
-import { PrismaClient } from "@prisma/client";
+import { utworzKlientaBazy } from "../lib/prisma-client.mjs";
 
-const db = new PrismaClient();
+const db = utworzKlientaBazy();
 const email = String(process.argv[2] || "").trim().toLowerCase();
 const rola = String(process.argv[3] || "ZARZAD").trim().toUpperCase();
 

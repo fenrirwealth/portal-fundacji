@@ -3,14 +3,14 @@
 // Testujemy przez interfejs, bo dopiero on pokazuje, czy bledy wracaja
 // do wlasciwych pol i czy wpisane dane nie znikaja.
 import { chromium } from "playwright";
-import { PrismaClient } from "@prisma/client";
+import { utworzKlientaBazy } from "../lib/prisma-client.mjs";
 
 const BAZA = process.env.BAZA || "http://127.0.0.1:3100";
 const TOKEN = "scenariusze-" + Date.now();
 
 // Test zaklada wlasne konto redakcji i wlasna sesje, zeby nie zalezec
 // od stanu zostawionego przez poprzednie uruchomienie.
-const db = new PrismaClient();
+const db = utworzKlientaBazy();
 const konto = await db.user.upsert({
   where: { email: "scenariusze@fundacja.test" },
   update: { rola: "ZARZAD" },
