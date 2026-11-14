@@ -14,7 +14,7 @@ const STAN_POCZATKOWY = { ok: true, bledy: {}, wartosci: {} };
  * co przyszlo z formularza — dzieki temu redaktor nie traci poprawek.
  */
 export default function FormularzListu({
-  akcja, list, weryfikacja, kontrola, wojewodztwa, kategorie, zablokowany, wycofany,
+  akcja, list, weryfikacja, kontrola, wojewodztwa, kategorie, status,
 }) {
   const [stan, wyslij, wTrakcie] = useActionState(akcja, STAN_POCZATKOWY);
   const b = stan?.bledy || {};
@@ -23,6 +23,8 @@ export default function FormularzListu({
   // Po bledzie pierwszenstwo maja wartosci z formularza, nie z bazy.
   const v = (pole, domyslna) => (z[pole] !== undefined ? z[pole] : domyslna);
   const poBledzie = Object.keys(b).length > 0;
+  const wRealizacji = ["ZAREZERWOWANY", "OPLACONY", "PRZEKAZANY"].includes(status);
+  const publiczny = wRealizacji || status === "OPUBLIKOWANY";
 
   return (
     <form action={wyslij} className="formularz-admin" noValidate>
@@ -37,7 +39,7 @@ export default function FormularzListu({
 
       {/* List wycofany jest w archiwum: pola sa tylko do odczytu, dopoki
           redaktor swiadomie nie przywroci go do szkicu. */}
-      {wycofany ? (
+      {status === "WYCOFANY" ? (
         <div className="realizacja">
           <h2>List jest w archiwum</h2>
           <p className="maly">
@@ -53,10 +55,10 @@ export default function FormularzListu({
         </div>
       ) : (
         <>
-          <fieldset disabled={zablokowany}>
+          <fieldset>
             <legend>Dane publiczne</legend>
             <p className="drobny cichy" style={{ margin: 0 }}>
-              Wszystko w tej sekcji zobaczy darczyńca. Nic poza nią nie opuszcza panelu.
+              Darczyńca zobaczy dane z tej sekcji.
             </p>
 
             <PoleAdmin nazwa="imie" etykieta="Imię dziecka" blad={b.imie}>
@@ -64,7 +66,7 @@ export default function FormularzListu({
             </PoleAdmin>
 
             <PoleAdmin nazwa="wiek" etykieta="Wiek w latach, opcjonalnie (0 — poniżej roku)" blad={b.wiek}>
-              <input name="wiek" type="number" min="0" max="25" defaultValue={v("wiek", list.wiek)} />
+              <input name="wiek" type="number" min="0" max="25" defaultValue={v("wiek", list.wiek ?? "")} />
             </PoleAdmin>
 
             <PoleAdmin nazwa="wojewodztwo" etykieta="Województwo" blad={b.wojewodztwo}>
@@ -97,30 +99,47 @@ export default function FormularzListu({
             </PoleAdmin>
           </fieldset>
 
+          <fieldset>
+            <legend>Dane wewnętrzne</legend>
+            <PoleAdmin nazwa="miejscowosc" etykieta="Miejscowość (opcjonalnie)"
+                       podpowiedz="Widoczna tylko w panelu administracyjnym.">
+              <input name="miejscowosc" maxLength={120} defaultValue={v("miejscowosc", list.miejscowosc ?? "")} />
+            </PoleAdmin>
+          </fieldset>
+
           <ListaKontrolna
             pozycje={kontrola}
             wartosci={poBledzie ? z : weryfikacja}
             zgodaPoczatkowa={poBledzie ? Boolean(z.zgoda) : list.zgodaPrzyjeta}
-            zablokowany={zablokowany}
             bladZgody={b.zgoda}
             bladListy={b.weryfikacja}
           />
 
-          {!zablokowany && (
-            <div className="pasek-akcji-admin">
-              <Podglad pola={{ numer: list.numer }} />
-              <span style={{ flex: 1 }} />
-              <button className="btn drugorzedny" name="operacja" value="zapisz" disabled={wTrakcie}>
-                Zapisz jako szkic
+          {wRealizacji && <p className="info">Zapis zmian zachowa rezerwację i dotychczasowy etap realizacji listu.</p>}
+          <div className="pasek-akcji-admin">
+            <Podglad pola={{ numer: list.numer }} />
+            <span style={{ flex: 1 }} />
+            {publiczny && (
+              <button className="btn" name="operacja" value="aktualizuj" disabled={wTrakcie} aria-busy={wTrakcie}>
+                {wTrakcie ? "Zapisuję…" : "Zapisz zmiany"}
               </button>
-              <button className="btn" name="operacja" value="publikuj" disabled={wTrakcie} aria-busy={wTrakcie}>
-                {wTrakcie ? "Zapisuję…" : "Sprawdź i opublikuj"}
-              </button>
-              <button className="btn niebezpieczny" name="operacja" value="wycofaj" disabled={wTrakcie}>
-                Wycofaj list
-              </button>
-            </div>
-          )}
+            )}
+            {!wRealizacji && (
+              <>
+                <button className="btn drugorzedny" name="operacja" value="zapisz" disabled={wTrakcie}>
+                  Zapisz jako szkic
+                </button>
+                {!publiczny && (
+                  <button className="btn" name="operacja" value="publikuj" disabled={wTrakcie} aria-busy={wTrakcie}>
+                    {wTrakcie ? "Zapisuję…" : "Sprawdź i opublikuj"}
+                  </button>
+                )}
+                <button className="btn niebezpieczny" name="operacja" value="wycofaj" disabled={wTrakcie}>
+                  Wycofaj list
+                </button>
+              </>
+            )}
+          </div>
         </>
       )}
     </form>

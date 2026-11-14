@@ -292,6 +292,7 @@ model List {
   skan   SkanListu? @relation(fields: [skanId], references: [id])
 
   // --- dane wewnetrzne ---
+  miejscowosc String?
   placowkaId String?
   placowka   Placowka? @relation(fields: [placowkaId], references: [id])
 

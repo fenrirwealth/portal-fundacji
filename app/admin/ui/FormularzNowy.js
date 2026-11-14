@@ -40,6 +40,10 @@ export default function FormularzNowy({ akcja, bezPlacowki = false, udzialy, ska
             {skany.map((s) => <option key={s.id} value={s.id}>{s.nazwa} · {s.data}</option>)}
           </select>
         </PoleAdmin>
+        <PoleAdmin nazwa="miejscowosc" etykieta="Miejscowość (opcjonalnie)"
+                   podpowiedz="Widoczna tylko w panelu administracyjnym.">
+          <input name="miejscowosc" maxLength={120} defaultValue={w.miejscowosc ?? ""} />
+        </PoleAdmin>
       </fieldset>
 
       <fieldset>

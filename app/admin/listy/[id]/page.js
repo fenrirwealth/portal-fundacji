@@ -32,6 +32,7 @@ const KOMUNIKATY = {
   utworzony: "Szkic listu został utworzony.",
   przywrocony: "List przywrócony do szkiców. Nie jest opublikowany — wymaga ponownego sprawdzenia.",
   zapisany: "Zmiany zapisane jako szkic.",
+  zaktualizowany: "Dane listu zaktualizowano.",
   opublikowany: "List opublikowany — jest już widoczny dla darczyńców.",
   wycofany: "List wycofany. Zniknął ze strony publicznej.",
   prezent: "Stan prezentu zaktualizowany.",
@@ -66,7 +67,6 @@ export default async function EdycjaListu({ params, searchParams }) {
   });
   if (!list) notFound();
 
-  const zablokowany = ["ZAREZERWOWANY", "OPLACONY", "PRZEKAZANY"].includes(list.status);
   const rezerwacja = list.rezerwacje[0];
 
   return (
@@ -87,12 +87,6 @@ export default async function EdycjaListu({ params, searchParams }) {
 
       {p.blad && <p className="blad" role="alert">{p.blad}</p>}
       {p.sukces && <p className="info" role="status">{KOMUNIKATY[p.sukces] || "Zmiany zapisano poprawnie."}</p>}
-      {zablokowany && (
-        <p className="blad">
-          List jest w realizacji. Dane są zablokowane przed przypadkową zmianą —
-          darczyńca podjął już zobowiązanie na podstawie tej treści.
-        </p>
-      )}
 
       <section className="kontakt-rezerwacji">
         <h2>Zarządzanie listem</h2>
@@ -184,6 +178,7 @@ export default async function EdycjaListu({ params, searchParams }) {
           wersja: list.zaktualizowany.toISOString(),
           imie: list.imie,
           wiek: list.wiek,
+          miejscowosc: list.miejscowosc,
           wojewodztwo: list.wojewodztwo,
           kategoria: list.kategoria,
           marzenie: list.marzenie,
@@ -196,8 +191,7 @@ export default async function EdycjaListu({ params, searchParams }) {
         kontrola={KONTROLA}
         wojewodztwa={WOJEWODZTWA}
         kategorie={KATEGORIE}
-        zablokowany={zablokowany}
-        wycofany={list.status === "WYCOFANY"}
+        status={list.status}
       />
 
     </div>

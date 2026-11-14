@@ -45,7 +45,8 @@ function bledy(mapa, wartosci) {
 function wartosciListu(formData) {
   return {
     imie: tekst(formData, "imie", 80),
-    wiek: tekst(formData, "wiek", 3),
+    wiek: tekst(formData, "wiek", 20),
+    miejscowosc: tekst(formData, "miejscowosc", 120),
     wojewodztwo: tekst(formData, "wojewodztwo", 40).toLowerCase(),
     kategoria: tekst(formData, "kategoria", 20),
     marzenie: tekst(formData, "marzenie", 300),
@@ -65,7 +66,7 @@ function sprawdzPolaListu(w) {
   else if (w.imie.length > 80) mapa.imie = "Imię jest za długie.";
 
   const wiek = Number(w.wiek);
-  if (w.wiek !== "" && (!Number.isInteger(wiek) || wiek < 0 || wiek > 25)) {
+  if (w.wiek !== "" && (!/^\d+$/.test(w.wiek) || !Number.isInteger(wiek) || wiek > 25)) {
     mapa.wiek = "Podaj wiek od 0 do 25 lat; 0 oznacza dziecko poniżej roku.";
   }
   if (w.wojewodztwo && !WOJEWODZTWA.includes(w.wojewodztwo)) mapa.wojewodztwo = "Wybierz województwo z listy.";
@@ -251,6 +252,7 @@ export async function utworzList(_poprzedni, formData) {
       placowkaId: udzial?.placowkaId || null,
       imie: w.imie,
       wiek: w.wiek === "" ? null : Number(w.wiek),
+      miejscowosc: w.miejscowosc || null,
       wojewodztwo: w.wojewodztwo,
       kategoria: w.kategoria,
       marzenie: w.marzenie,
@@ -303,7 +305,10 @@ export async function zapiszList(_poprzedni, formData) {
     if (wynik.count !== 1) {
       wrocZBledem("/admin/listy/" + id, "List został zmieniony przez inną osobę. Odśwież stronę.");
     }
+    await usunCache(KLUCZ_LICZNIKA);
+    revalidatePath("/");
     revalidatePath("/listy");
+    revalidatePath("/listy/" + id);
     revalidatePath("/admin");
     redirect("/admin/listy/" + id + "?sukces=wycofany");
   }
@@ -329,8 +334,15 @@ export async function zapiszList(_poprzedni, formData) {
     redirect("/admin/listy/" + id + "?sukces=przywrocony");
   }
 
-  if (wRealizacji) {
-    wrocZBledem("/admin/listy/" + id, "List w realizacji jest zablokowany do edycji.");
+  if (obecny.status === "WYCOFANY") {
+    wrocZBledem("/admin/listy/" + id, "Przywróć list do szkiców, aby go edytować.");
+  }
+  const zachowajStatus = operacja === "aktualizuj";
+  if (zachowajStatus && !wRealizacji && obecny.status !== "OPUBLIKOWANY") {
+    wrocZBledem("/admin/listy/" + id, "Ten list wymaga zapisania szkicu lub publikacji.");
+  }
+  if (wRealizacji && !zachowajStatus) {
+    wrocZBledem("/admin/listy/" + id, "Użyj opcji „Zapisz zmiany”, aby zachować bieżący status listu.");
   }
 
   const w = wartosciListu(formData);
@@ -340,12 +352,13 @@ export async function zapiszList(_poprzedni, formData) {
   );
   const kompletna = brakujacePozycje(weryfikacja).length === 0;
   const publikuj = operacja === "publikuj";
+  const pozostajePubliczny = publikuj || zachowajStatus;
 
   const mapa = sprawdzPolaListu(w);
-  if (publikuj && !zgoda) {
+  if (pozostajePubliczny && !zgoda) {
     mapa.zgoda = "Publikacja wymaga przyjętej zgody dyrektora.";
   }
-  if (publikuj && !kompletna) {
+  if (pozostajePubliczny && !kompletna) {
     const brakuje = brakujacePozycje(weryfikacja).length;
     mapa.weryfikacja = `Do publikacji brakuje jeszcze ${brakuje} z ${POLA_WERYFIKACJI.length} pozycji listy kontrolnej.`;
   }
@@ -361,6 +374,7 @@ export async function zapiszList(_poprzedni, formData) {
         data: {
           imie: w.imie,
           wiek: w.wiek === "" ? null : Number(w.wiek),
+          miejscowosc: w.miejscowosc || null,
           wojewodztwo: w.wojewodztwo,
           kategoria: w.kategoria,
           marzenie: w.marzenie,
@@ -372,7 +386,7 @@ export async function zapiszList(_poprzedni, formData) {
           zgodaData: zgoda ? (obecny.zgodaData || teraz) : obecny.zgodaData,
           zgodaPrzyjalId: zgoda ? (obecny.zgodaPrzyjalId || redaktor.id) : obecny.zgodaPrzyjalId,
           zgodaCofnieta: zgoda ? null : obecny.zgodaData ? (obecny.zgodaCofnieta || teraz) : null,
-          status: publikuj ? "OPUBLIKOWANY" : "SZKIC",
+          ...(zachowajStatus ? {} : { status: publikuj ? "OPUBLIKOWANY" : "SZKIC" }),
         },
       });
       if (wynik.count !== 1) throw new Error("STARA_WERSJA");
@@ -382,7 +396,7 @@ export async function zapiszList(_poprzedni, formData) {
         update: { ...weryfikacja, osobaId: redaktor.id, zakonczona: kompletna ? teraz : null },
         create: { listId: id, osobaId: redaktor.id, ...weryfikacja, zakonczona: kompletna ? teraz : null },
       });
-      if (publikuj && obecny.skanId) {
+      if (pozostajePubliczny && obecny.skanId) {
         await tx.skanListu.update({ where: { id: obecny.skanId }, data: { status: "ZATWIERDZONY" } });
       }
     });
@@ -393,12 +407,14 @@ export async function zapiszList(_poprzedni, formData) {
     throw e;
   }
 
+  await usunCache(KLUCZ_LICZNIKA);
   revalidatePath("/");
   revalidatePath("/listy");
   revalidatePath("/listy/" + id);
   revalidatePath("/admin");
   revalidatePath("/admin/listy/" + id);
-  redirect("/admin/listy/" + id + "?sukces=" + (publikuj ? "opublikowany" : "zapisany"));
+  const sukces = zachowajStatus ? "zaktualizowany" : publikuj ? "opublikowany" : "zapisany";
+  redirect("/admin/listy/" + id + "?sukces=" + sukces);
 }
 
 export async function zwolnijRezerwacjeListu(formData) {
