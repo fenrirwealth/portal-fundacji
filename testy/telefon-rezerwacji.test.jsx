@@ -4,6 +4,8 @@ const { auth, db, kolejkujEmail, kolejkujPowiadomienieRezerwacji, wolneMiejsceNa
   auth: vi.fn(),
   db: {
     user: { findUnique: vi.fn() },
+    list: { findFirst: vi.fn() },
+    powiadomienieListy: { findMany: vi.fn(), deleteMany: vi.fn() },
     rezerwacja: { findMany: vi.fn(), updateMany: vi.fn() },
     edycjaAkcji: { findFirst: vi.fn() },
     skanListu: { findMany: vi.fn() },
