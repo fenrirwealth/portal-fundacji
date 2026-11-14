@@ -47,6 +47,7 @@ export default function KartaListu({ list }) {
           {wolny && <IskraListu />}
           {opis}
         </span>
+        {list.bastionReda && <BastionReda />}
       </div>
 
       <div className="karta-tresc">
@@ -59,7 +60,6 @@ export default function KartaListu({ list }) {
           {list.wojewodztwo ? `woj. ${list.wojewodztwo.toLowerCase()} · ` : ""}{list.kategoria.toLowerCase()}
           {list.rozmiar ? ` · rozmiar ${list.rozmiar}` : ""}
         </p>
-        {list.bastionReda && <BastionReda />}
         <p className="karta-listu-marzenie">„{list.marzenie}”</p>
         <Link
           className="karta-listu-akcja"

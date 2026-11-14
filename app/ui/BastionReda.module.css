@@ -1,0 +1,30 @@
+.oznaczenie {
+  position: absolute;
+  inset-inline-end: clamp(8px, 2vw, 14px);
+  inset-block-end: clamp(8px, 2vw, 14px);
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  max-width: calc(100% - 28px);
+  padding: 7px 13px 7px 8px;
+  border: 1px solid #e8c858;
+  border-radius: 12px;
+  background: #0b2253;
+  color: #fff1a2;
+  box-shadow: 0 4px 14px rgb(0 0 0 / 40%);
+  font-size: clamp(0.9rem, 2vw, 1.05rem);
+  font-weight: 800;
+  line-height: 1.2;
+  pointer-events: none;
+}
+
+.oznaczenie img {
+  display: block;
+  flex: 0 0 auto;
+  width: 36px;
+  height: 45px;
+  object-fit: contain;
+  filter: none;
+  transform: none;
+}

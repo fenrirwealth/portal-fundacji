@@ -73,6 +73,7 @@ export default async function Szczegol({ params }) {
                 <span>zdjęcie listu nr {list.numer} w przygotowaniu</span>
               </div>
             )}
+            {list.bastionReda && <BastionReda />}
           </div>
           {list.opis && (
             <figcaption className="maly cichy czytanie" style={{ marginTop: "var(--o-4)" }}>
@@ -109,7 +110,6 @@ export default async function Szczegol({ params }) {
             </p>
 
             <PrzyciskRezerwacji {...rezerwacjaProps} />
-            {list.bastionReda && <BastionReda />}
             <div style={{ marginTop: "var(--o-3)" }}>
               <UdostepnijMarzenie listId={list.id} imie={list.imie} wolny={wolny} />
             </div>
