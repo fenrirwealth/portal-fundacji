@@ -1116,7 +1116,7 @@ select.pole-kontrolka {
 .o-akcji-znak { display:grid; width:54px; height:54px; place-items:center; margin-bottom:22px; border:1px solid rgba(213,174,98,.35); border-radius:50%; color:#d5ae62; background:rgba(255,255,255,.045); box-shadow:0 0 44px rgba(213,174,98,.13); }
 .o-akcji-znak svg { width:23px; }
 .o-akcji-nadtytul,.o-akcji-sekcja-etykieta { margin:0 0 18px; color:#d5ae62; font-size:.72rem; font-weight:650; letter-spacing:.18em; text-transform:uppercase; }
-.o-akcji-hero h1 { max-width:14ch; color:#f3e5cb; font-size:clamp(3.2rem,7vw,6.4rem); font-weight:500; line-height:.94; letter-spacing:-.04em; text-shadow:0 18px 55px rgba(0,0,0,.38); }
+.o-akcji-hero h1 { max-width:14ch; color:#f3e5cb; font-size:clamp(3.2rem,7vw,6.4rem); font-weight:500; line-height:1.2; letter-spacing:-.015em; overflow-wrap:anywhere; text-shadow:0 18px 55px rgba(0,0,0,.38); }
 .o-akcji-hero h1 em { display:block; margin-top:.12em; color:#d5ae62; font-style:italic; }
 .o-akcji-wstep { max-width:64ch; margin-top:32px; color:rgba(255,249,240,.74); font-size:clamp(1.05rem,1.7vw,1.23rem); font-weight:350; line-height:1.85; }
 .o-akcji-karty { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:28px; margin-top:clamp(70px,9vw,108px); }
