@@ -1,0 +1,40 @@
+name: Aktualizacja zaleznosci
+on:
+  push:
+    branches: [maintenance/updates-2026-11-14]
+permissions:
+  contents: write
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      DATABASE_URL: postgresql://test:test@localhost:5432/test
+      AUTH_SECRET: testowy-sekret-wylacznie-dla-ci-minimum-32-znaki
+      AUTH_URL: http://localhost:3000
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: maintenance/updates-2026-11-14
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Update compatible versions
+        run: |
+          npm install --save-exact next@16.4.6 react@19.3.1 react-dom@19.3.1
+          npm install --save-dev --save-exact eslint-config-next@16.4.6
+          npm update
+      - run: npm run check
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run test:components
+      - run: npm run build
+      - run: npm audit --omit=dev --audit-level=high
+      - name: Save validated dependency files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json package-lock.json
+          git diff --cached --quiet || git commit -m "Update compatible dependencies after validation"
+          git push origin HEAD:maintenance/updates-2026-11-14
