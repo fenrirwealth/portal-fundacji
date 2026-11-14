@@ -6,6 +6,7 @@ import HeroMagia from "./ui/HeroMagia";
 import LancuchDobra from "./ui/LancuchDobra";
 import Wejscie from "./ui/Wejscie";
 import ArchiwumListow from "./ui/ArchiwumListow";
+import BanerKolejneListy from "./listy/BanerKolejneListy";
 
 export const dynamic = "force-dynamic";
 
@@ -40,12 +41,19 @@ export default async function Start() {
 
   const tryb = trybAkcji(edycja);
   const saListy = Boolean(stan?.wszystkie);
+  const brakWolnychListow = tryb === "TRWA" && saListy && stan.wolne === 0;
   const termin = formatujTermin(edycja?.terminDostarczenia);
   const etykieta = tryb === "TRWA" ? "Akcja trwa" : tryb === "ODLICZANIE" ? "Już wkrótce" : tryb === "ZAKONCZENIE" ? "Edycja zakończona" : "Przygotowujemy kolejną edycję";
 
   return (
     <>
-      <HeroMagia etykieta={etykieta} saListy={saListy} termin={termin} />
+      <HeroMagia etykieta={etykieta} saListy={saListy} termin={termin}
+        brakWolnychListow={brakWolnychListow} />
+      {tryb === "TRWA" && (
+        <div className="wrap">
+          <BanerKolejneListy />
+        </div>
+      )}
       <PracowniaSwiateczna />
 
       <section className="sekcja-lancucha">

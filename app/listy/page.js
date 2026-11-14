@@ -132,11 +132,11 @@ export default async function Listy({ searchParams }) {
             nazwisk, nazwy placówki, miejscowości, adresu ani wizerunku dziecka.
           </p>
         </header>
+        {edycja && <BanerKolejneListy />}
+
         <PracowniaSwiateczna />
 
         <LicznikNaZywo poczatkowy={stan} termin={formatujTermin(edycja?.terminDostarczenia)} />
-
-        {edycja && <BanerKolejneListy />}
 
         <section className="listy-filtry-panel" aria-label="Filtry">
           <Szukajka poczatkowa={params.szukaj || ""} />
