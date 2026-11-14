@@ -20,7 +20,7 @@ const KROKI = [
   { nr: "01", tytul: "Wybierz list", opis: "Poznaj marzenie bez nazwiska, adresu, nazwy placówki ani wizerunku dziecka.", Ikona: MailOpen },
   { nr: "02", tytul: "Zostań Mikołajem", opis: "Potwierdź e-mail i zarezerwuj list. W ciągu 48 godzin zadzwoń do Fundacji — administrator potwierdzi rozmowę.", Ikona: Star },
   { nr: "03", tytul: "Przygotuj prezent", opis: "Nie musisz kupować wszystkiego. Liczy się gest, uważność i bezpieczny podarunek.", Ikona: Gift },
-  { nr: "04", tytul: "My go przekażemy", opis: "Sprawdzamy, pakujemy i dostarczamy prezenty do zweryfikowanych placówek.", Ikona: ShieldCheck },
+  { nr: "04", tytul: "Przekażemy Twój prezent", opis: "Prosimy, zapakuj prezent tak, by można go było łatwo otworzyć. Sprawdzimy zawartość i dostarczymy go do zweryfikowanej placówki.", Ikona: ShieldCheck },
 ];
 
 function trybAkcji(edycja) {

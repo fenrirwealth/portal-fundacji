@@ -116,8 +116,8 @@ export default async function Szczegol({ params }) {
               Po rezerwacji zadzwoń do Fundacji: <a href="tel:+48570747779">+48 570 747 779</a>.
               Administrator musi potwierdzić rozmowę w ciągu 48 godzin od rezerwacji —
               bez tego list wróci do puli. Prezent dostarczasz do siedziby Fundacji
-              {termin ? ` do ${termin}` : " w terminie podanym w regulaminie"},
-              nieowinięty: sprawdzamy zawartość i pakujemy sami.
+              {termin ? ` do ${termin}` : " w terminie podanym w regulaminie"}.
+              Prosimy, zapakuj go tak, by można go było łatwo otworzyć. Sprawdzimy zawartość przed przekazaniem prezentu placówce.
             </p>
           </div>
         </div>

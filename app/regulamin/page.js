@@ -42,8 +42,8 @@ export default async function Regulamin({ searchParams }) {
         rezerwacja wygasa i list wraca do puli. Darczyńca nie może samodzielnie
         potwierdzić rozmowy ani zatrzymać rezerwacji.</p>
         <p><b>3.</b> Prezent należy dostarczyć do siedziby Fundacji w terminie
-        podanym przy liście. Paczki nie należy owijać — Fundacja sprawdza
-        zawartość przed przekazaniem i pakuje ją samodzielnie.</p>
+        podanym przy liście. Prosimy o zapakowanie prezentu w sposób umożliwiający
+        łatwe otwarcie. Fundacja sprawdzi zawartość przed przekazaniem prezentu placówce.</p>
         <p><b>4.</b> Fundacja może odmówić przekazania przedmiotu niezgodnego
         z regulaminem placówki lub nieodpowiedniego dla wieku dziecka.</p>
         <p><b>5.</b> Darczyńca nie kontaktuje się z dzieckiem bezpośrednio.

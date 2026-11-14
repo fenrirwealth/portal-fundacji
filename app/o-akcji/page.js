@@ -72,7 +72,7 @@ export default function OAkcji() {
           <ul>
             <li><span aria-hidden="true"><Check /></span>jedna osoba może mieć do {LIMIT_AKTYWNYCH_LISTOW} aktywnych rezerwacji jednocześnie,</li>
             <li><span aria-hidden="true"><Check /></span>w ciągu 48 godzin zadzwoń do Fundacji — administrator musi potwierdzić rozmowę w portalu,</li>
-            <li><span aria-hidden="true"><Check /></span>prezent trafia najpierw do Fundacji, gdzie jest sprawdzany i pakowany,</li>
+            <li><span aria-hidden="true"><Check /></span>prosimy o zapakowanie prezentu tak, by można go było łatwo otworzyć. Fundacja sprawdzi zawartość i przekaże prezent placówce,</li>
             <li><span aria-hidden="true"><Check /></span>nie trzeba kupować wszystkich rzeczy wymienionych w liście,</li>
             <li><span aria-hidden="true"><Check /></span>liczy się bezpieczeństwo, adekwatność prezentu i dotrzymanie terminu.</li>
           </ul>
