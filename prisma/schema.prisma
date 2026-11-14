@@ -419,6 +419,8 @@ model Rezerwacja {
   kontaktPotwierdzilId              String?
   kontaktPotwierdzil                User? @relation("KontaktTelefoniczny", fields: [kontaktPotwierdzilId], references: [id], onDelete: SetNull)
   anulowana                        DateTime?
+  emailRezerwacjiZakolejkowany     DateTime?
+  emailPotwierdzeniaZakolejkowany   DateTime?
   przypomnienieWyslane             DateTime?
   przypomnienieKoncoweWyslane      DateTime?
   przypomnienieDostarczeniaWyslane DateTime?

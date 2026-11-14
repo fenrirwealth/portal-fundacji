@@ -1,6 +1,6 @@
 import { db } from "../../../../lib/db";
 import { poprawnyTokenCron } from "../../../../lib/cron.mjs";
-import { kolejkujEmail } from "../../../../lib/kolejka-email";
+import { kolejkujEmail, kolejkujPowiadomienieRezerwacji } from "../../../../lib/kolejka-email";
 import { zwolnijWygasle } from "../../rezerwacja/route";
 import { usunPrywatnySkan } from "../../../../lib/skany";
 
@@ -105,6 +105,32 @@ export async function POST(request) {
         where: { id: rezerwacja.id, przypomnienieDostarczeniaWyslane: znacznik },
         data: { przypomnienieDostarczeniaWyslane: null },
       });
+    }
+  }
+
+  const [noweRezerwacje, nowePotwierdzenia] = await Promise.all([
+    db.rezerwacja.findMany({
+      where: { status: { in: ["OCZEKUJE", "POTWIERDZONA"] }, emailRezerwacjiZakolejkowany: null, list: { edycja: { aktywna: true } } },
+      select: { id: true },
+      take: 100,
+    }),
+    db.rezerwacja.findMany({
+      where: { status: "POTWIERDZONA", kontaktTelefoniczny: { not: null }, emailPotwierdzeniaZakolejkowany: null, list: { edycja: { aktywna: true } } },
+      select: { id: true },
+      take: 100,
+    }),
+  ]);
+  for (const [typ, rezerwacje] of [
+    ["REZERWACJA", noweRezerwacje],
+    ["KONTAKT_POTWIERDZONY", nowePotwierdzenia],
+  ]) {
+    for (const { id } of rezerwacje) {
+      try {
+        await kolejkujPowiadomienieRezerwacji(db, typ, id);
+        zakolejkowane += 1;
+      } catch {
+        bledy += 1;
+      }
     }
   }
 

@@ -1,6 +1,6 @@
 import { beforeEach, expect, it, vi } from "vitest";
 
-const { auth, db, kolejkujEmail, wolneMiejsceNaKoncie } = vi.hoisted(() => ({
+const { auth, db, kolejkujEmail, kolejkujPowiadomienieRezerwacji, wolneMiejsceNaKoncie } = vi.hoisted(() => ({
   auth: vi.fn(),
   db: {
     user: { findUnique: vi.fn() },
@@ -11,13 +11,14 @@ const { auth, db, kolejkujEmail, wolneMiejsceNaKoncie } = vi.hoisted(() => ({
     $transaction: vi.fn(),
   },
   kolejkujEmail: vi.fn(),
+  kolejkujPowiadomienieRezerwacji: vi.fn(),
   wolneMiejsceNaKoncie: vi.fn(),
 }));
 
 vi.mock("../auth", () => ({ auth }));
 vi.mock("../lib/db", () => ({ db, WARUNKI_PUBLIKACJI: {}, WERSJA_REGULAMINU: "test" }));
 vi.mock("../lib/cache", () => ({ KLUCZ_LICZNIKA: "licznik", usunCache: vi.fn() }));
-vi.mock("../lib/kolejka-email", () => ({ kolejkujEmail }));
+vi.mock("../lib/kolejka-email", () => ({ kolejkujEmail, kolejkujPowiadomienieRezerwacji }));
 vi.mock("../lib/rezerwacje.mjs", () => ({ wygasRezerwacje: async () => [], wolneMiejsceNaKoncie }));
 vi.mock("../lib/skany", () => ({ usunPrywatnySkan: vi.fn() }));
 
@@ -37,6 +38,7 @@ beforeEach(() => {
   auth.mockResolvedValue({ user: { id: "darczyńca" } });
   db.user.findUnique.mockResolvedValue({ zgodaRegulamin: new Date(), wersjaRegulaminu: "test" });
   kolejkujEmail.mockResolvedValue(true);
+  kolejkujPowiadomienieRezerwacji.mockResolvedValue(undefined);
   wolneMiejsceNaKoncie.mockResolvedValue(20);
 });
 
@@ -61,6 +63,7 @@ it("zapisuje znormalizowany telefon przy rezerwacji bez ujawniania go w odpowied
   expect(create).toHaveBeenCalledWith(expect.objectContaining({
     data: expect.objectContaining({ listId: "list-7", telefonKontaktowy: "+48123456789", miejsceNaKoncie: 20 }),
   }));
+  expect(kolejkujPowiadomienieRezerwacji).toHaveBeenCalledWith(db, "REZERWACJA", "rezerwacja-7");
   expect(await odpowiedz.json()).not.toHaveProperty("telefonKontaktowy");
 });
 
@@ -71,7 +74,7 @@ it("ustawia oddzielne terminy przypomnień i nie kolejkuje ponownie zajętego re
   vi.stubEnv("CRON_SECRET", "testowy-token");
   try {
     db.rezerwacja.findMany.mockResolvedValueOnce([{ id: "pierwszy" }])
-      .mockResolvedValueOnce([{ id: "ostatni" }, { id: "zajety" }]).mockResolvedValueOnce([]);
+      .mockResolvedValueOnce([{ id: "ostatni" }, { id: "zajety" }]).mockResolvedValue([]);
     db.rezerwacja.updateMany.mockImplementation(async ({ where }) => ({ count: where.id === "zajety" ? 0 : 1 }));
     db.skanListu.findMany.mockResolvedValue([]);
 

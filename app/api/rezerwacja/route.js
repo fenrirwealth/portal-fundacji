@@ -2,7 +2,7 @@ import { auth } from "../../../auth";
 import { db, WARUNKI_PUBLIKACJI, WERSJA_REGULAMINU } from "../../../lib/db";
 import { jsonZLimitem, odpowiedzBleduHttp } from "../../../lib/http.mjs";
 import { KLUCZ_LICZNIKA, usunCache } from "../../../lib/cache";
-import { kolejkujEmail } from "../../../lib/kolejka-email";
+import { kolejkujPowiadomienieRezerwacji } from "../../../lib/kolejka-email";
 
 import { normalizujTelefonRezerwacji } from "../../../lib/telefon-rezerwacji.mjs";
 import { terminKontaktu, LIMIT_AKTYWNYCH_LISTOW } from "../../../lib/zasady-akcji.mjs";
@@ -121,7 +121,7 @@ export async function POST(request) {
     });
 
     await usunCache(KLUCZ_LICZNIKA);
-    await kolejkujEmail("REZERWACJA", { rezerwacjaId: rezerwacja.id }, `rezerwacja-${rezerwacja.id}`)
+    await kolejkujPowiadomienieRezerwacji(db, "REZERWACJA", rezerwacja.id)
       .catch((blad) => console.error("[rezerwacja] E-mail:", blad.message));
     return Response.json({
       ok: true,

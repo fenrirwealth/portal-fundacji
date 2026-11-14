@@ -7,7 +7,7 @@ import { rezerwujRecznie, archiwizujList } from "../../lib/listy-admin.mjs";
 import { wymagajRedakcji } from "../../lib/admin";
 import { KATEGORIE, WOJEWODZTWA } from "../../lib/slowniki";
 import { KLUCZ_LICZNIKA, usunCache } from "../../lib/cache";
-import { kolejkujEmail } from "../../lib/kolejka-email";
+import { kolejkujEmail, kolejkujPowiadomienieRezerwacji } from "../../lib/kolejka-email";
 import { nowyTokenPrzesylania } from "../../lib/skany";
 import { potwierdzRozmowe } from "../../lib/rezerwacje.mjs";
 
@@ -529,7 +529,7 @@ export async function potwierdzKontaktTelefoniczny(formData) {
   const id = tekst(formData, "rezerwacjaId", 100);
   const wynik = await potwierdzRozmowe(db, id, administrator.id);
   if (wynik.count !== 1) wrocZBledem("/admin", "Nie można potwierdzić rozmowy: rezerwacja wygasła lub została zmieniona.");
-  await kolejkujEmail("KONTAKT_POTWIERDZONY", { rezerwacjaId: id }, `kontakt-${id}`)
+  await kolejkujPowiadomienieRezerwacji(db, "KONTAKT_POTWIERDZONY", id)
     .catch((blad) => console.error("[kontakt] E-mail:", blad.message));
   revalidatePath("/admin");
   revalidatePath("/admin/listy");

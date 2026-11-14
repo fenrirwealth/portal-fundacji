@@ -15,3 +15,27 @@ it('każda rezerwacja i oba przypomnienia mają oddzielne zadanie dla Fundacji',
   }
   vi.unstubAllEnvs();
 });
+
+it('nie odnotowuje powiadomienia, dopóki oba zadania nie trafią do kolejki', async () => {
+  vi.stubEnv('REDIS_URL', 'redis://test.invalid');
+  const updateMany = vi.fn().mockResolvedValue({ count: 1 });
+  const db = { rezerwacja: { updateMany } };
+  const { kolejkujPowiadomienieRezerwacji } = await import('../lib/kolejka-email');
+  try {
+    addBulk.mockRejectedValueOnce(new Error('Redis niedostępny'));
+    await expect(kolejkujPowiadomienieRezerwacji(db, 'REZERWACJA', 'r2')).rejects.toThrow('Redis niedostępny');
+    expect(updateMany).not.toHaveBeenCalled();
+
+    await kolejkujPowiadomienieRezerwacji(db, 'REZERWACJA', 'r2');
+    expect(addBulk).toHaveBeenLastCalledWith([
+      { name: 'REZERWACJA', data: { rezerwacjaId: 'r2' }, opts: { jobId: 'rezerwacja-r2' } },
+      { name: 'FUNDACJA_REZERWACJA', data: { rezerwacjaId: 'r2' }, opts: { jobId: 'fundacja-rezerwacja-r2' } },
+    ]);
+    expect(updateMany).toHaveBeenCalledWith({
+      where: { id: 'r2', emailRezerwacjiZakolejkowany: null },
+      data: { emailRezerwacjiZakolejkowany: expect.any(Date) },
+    });
+  } finally {
+    vi.unstubAllEnvs();
+  }
+});

@@ -64,10 +64,15 @@ const worker = new Worker(NAZWA, async (zadanie) => {
     if (typ === "PRZYPOMNIENIE" && (r.status !== "OCZEKUJE" || new Date(r.wygasa) <= new Date())) return;
     if (typ === "PRZYPOMNIENIE_DOSTARCZENIA" && r.status !== "POTWIERDZONA") return;
     const terminKontaktu = terminPL(r.wygasa);
+    const terminPaczki = r.list.edycja.terminDostarczenia
+      ? new Date(r.list.edycja.terminDostarczenia).toLocaleDateString("pl-PL", { timeZone: "Europe/Warsaw", day: "numeric", month: "long", year: "numeric" })
+      : "termin uzgodniony z Fundacją";
+    const daneListu = `List nr ${r.list.numer} · ${r.list.imie}. Marzenie: ${r.list.marzenie}.`;
+    const dostarczenie = `Termin dostarczenia: ${terminPaczki}. Miejsce: siedziba Fundacji, ul. Złota 75A/7, 00-819 Warszawa. Sposób przekazania uzgodnij z Fundacją. Zapakuj prezent tak, by można go było łatwo otworzyć do sprawdzenia.`;
     const ostatnie = typ === "PRZYPOMNIENIE" && zadanie.data.ostatnie === true;
     if (dlaFundacji) {
       const tytuly = {
-        REZERWACJA: "Nowa rezerwacja — potrzebny kontakt telefoniczny",
+        REZERWACJA: "Nowa rezerwacja online — skontaktuj się z darczyńcą",
         PRZYPOMNIENIE: ostatnie ? "Ostatnie przypomnienie — rezerwacja wkrótce wygaśnie" : "Przypomnienie — rezerwacja czeka na rozmowę",
         PRZYPOMNIENIE_DOSTARCZENIA: "Przypomnienie — zbliża się termin dostarczenia prezentu",
         KONTAKT_POTWIERDZONY: "Kontakt telefoniczny został potwierdzony",
@@ -77,27 +82,31 @@ const worker = new Worker(NAZWA, async (zadanie) => {
         : typ === "KONTAKT_POTWIERDZONY"
           ? `Rozmowa została potwierdzona w panelu ${terminPL(r.kontaktTelefoniczny)}. Rezerwacja pozostaje aktywna.`
           : `Potwierdź w panelu odbytą rozmowę do ${terminKontaktu}. Bez potwierdzenia administratora rezerwacja automatycznie wygaśnie po 48 godzinach.`;
+      const daneDarczyncy = `E-mail darczyńcy: ${r.user.email}. Telefon: ${r.telefonKontaktowy || "Brak numeru"}.`;
       await transport.sendMail({ from: nadawca(), to: EMAIL_FUNDACJI,
+        replyTo: r.user.email,
         subject: `${tytuly[typ]} — list nr ${r.list.numer}`,
-        text: `List nr ${r.list.numer}, ${r.list.imie}. Darczyńca: ${r.user.email}. ${komunikat} Panel: ${portal}/admin/listy/${r.list.id}`,
-        html: htmlEmail(tytuly[typ], `<p>List nr <b>${r.list.numer}</b> · ${esc(r.list.imie)}</p><p>Darczyńca: <b>${esc(r.user.email)}</b></p><p>${esc(komunikat)}</p>`, "Otwórz rezerwację w panelu", `${portal}/admin/listy/${r.list.id}`) });
+        text: `${daneListu} ${daneDarczyncy} ${komunikat} Termin paczki: ${terminPaczki}. Panel: ${portal}/admin/listy/${r.list.id}`,
+        html: htmlEmail(tytuly[typ], `<p>${esc(daneListu)}</p><p>${esc(daneDarczyncy)}</p><p>${esc(komunikat)}</p><p>Termin paczki: <b>${esc(terminPaczki)}</b></p>`, "Otwórz rezerwację w panelu", `${portal}/admin/listy/${r.list.id}`) });
       return;
     }
     if (typ === "REZERWACJA") {
-      await transport.sendMail({ from: nadawca(), to: r.user.email,
+      const kontakt = `Zadzwoń pod ${TELEFON_FUNDACJI}, aby uzgodnić szczegóły. Fundacja musi potwierdzić rozmowę do ${terminKontaktu}. Po tym terminie niepotwierdzona rezerwacja wygaśnie.`;
+      await transport.sendMail({ from: nadawca(), to: r.user.email, replyTo: EMAIL_FUNDACJI,
         subject: `Potwierdzenie rezerwacji listu nr ${r.list.numer} — zadzwoń do Fundacji`,
-        text: `Dziękujemy za rezerwację listu od ${r.list.imie}! Zadzwoń do Fundacji: ${TELEFON_FUNDACJI}, aby ustalić szczegóły. Administrator musi potwierdzić rozmowę do ${terminKontaktu} (48 godzin od rezerwacji). Bez tego list wróci do puli. Szczegóły: ${panel}`,
-        html: htmlEmail("Dziękujemy za rezerwację listu!", `<p>List nr <b>${r.list.numer}</b> od <b>${esc(r.list.imie)}</b> został zarezerwowany dla Ciebie.</p><p>Zadzwoń pod <b>${TELEFON_FUNDACJI}</b> i umów szczegóły.</p><p>Fundacja musi potwierdzić rozmowę do <b>${terminKontaktu}</b> — w ciągu 48 godzin od rezerwacji. Bez potwierdzenia administratora list automatycznie wróci do puli.</p>`, "Sprawdź swoją rezerwację", panel) });
+        text: `Dziękujemy za rezerwację! ${daneListu} ${kontakt} ${dostarczenie} Moje listy: ${panel}`,
+        html: htmlEmail("Dziękujemy za rezerwację listu!", `<p>${esc(daneListu)}</p><p>${esc(kontakt)}</p><p>${esc(dostarczenie)}</p>`, "Sprawdź swoją rezerwację", panel) });
     } else if (typ === "PRZYPOMNIENIE") {
       await transport.sendMail({ from: nadawca(), to: r.user.email,
         subject: `${ostatnie ? "Ostatnie przypomnienie" : "Przypomnienie"}: zadzwoń w sprawie listu nr ${r.list.numer}`,
         text: `Rezerwacja listu od ${r.list.imie} czeka na potwierdzenie rozmowy przez Fundację do ${terminKontaktu}. Zadzwoń: ${TELEFON_FUNDACJI}. Bez potwierdzenia list wróci do puli. ${panel}`,
         html: htmlEmail(ostatnie ? "Twoja rezerwacja wkrótce wygaśnie" : "Twoja rezerwacja czeka na rozmowę", `<p>W sprawie listu nr <b>${r.list.numer}</b> od <b>${esc(r.list.imie)}</b> zadzwoń pod <b>${TELEFON_FUNDACJI}</b>.</p><p>Administrator musi potwierdzić kontakt do <b>${terminKontaktu}</b>. Bez tego rezerwacja wygaśnie.</p>`, "Sprawdź swoją rezerwację", panel) });
     } else if (typ === "KONTAKT_POTWIERDZONY") {
-      await transport.sendMail({ from: nadawca(), to: r.user.email,
-        subject: `Rezerwacja potwierdzona — czekamy na paczkę z prezentem z listu nr ${r.list.numer}`,
-        text: `Fundacja potwierdziła rozmowę w sprawie listu od ${r.list.imie}. Dziękujemy za rezerwację! Czekamy na dostarczenie paczki zgodnie z ustaleniami. Szczegóły: ${panel}`,
-        html: htmlEmail("Dziękujemy za rozmowę", `<p>Fundacja potwierdziła kontakt telefoniczny w sprawie listu nr <b>${r.list.numer}</b> od <b>${esc(r.list.imie)}</b>.</p><p>Dziękujemy za rezerwację! Czekamy na dostarczenie paczki zgodnie z ustaleniami.</p>`, "Otwórz moje listy", panel) });
+      const potwierdzenie = "Dziękujemy za rozmowę! Fundacja potwierdziła rezerwację i czeka na paczkę.";
+      await transport.sendMail({ from: nadawca(), to: r.user.email, replyTo: EMAIL_FUNDACJI,
+        subject: `List nr ${r.list.numer}: rozmowa potwierdzona, czekamy na paczkę`,
+        text: `${potwierdzenie} ${daneListu} ${dostarczenie} Kontakt: ${TELEFON_FUNDACJI}. Moje listy: ${panel}`,
+        html: htmlEmail("Rezerwacja potwierdzona", `<p>${esc(potwierdzenie)}</p><p>${esc(daneListu)}</p><p>${esc(dostarczenie)}</p><p>Kontakt z Fundacją: ${esc(TELEFON_FUNDACJI)}</p>`, "Otwórz moje listy", panel) });
     } else if (typ === "PRZYPOMNIENIE_DOSTARCZENIA") {
       const termin = new Date(r.list.edycja.terminDostarczenia).toLocaleDateString("pl-PL");
       await transport.sendMail({ from: nadawca(), to: r.user.email,
