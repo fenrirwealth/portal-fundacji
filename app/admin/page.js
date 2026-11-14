@@ -1,3 +1,4 @@
+import OdswiezStatusy from "../ui/OdswiezStatusy";
 import { wiekPL } from "../../lib/wiek.mjs";
 import Link from "next/link";
 import { db } from "../../lib/db";
@@ -102,7 +103,8 @@ export default async function Admin({ searchParams }) {
   const wszystkich = liczby.reduce((s, l) => s + l._count, 0);
 
   return (
-    <div className="wrap sekcja"><Link className="btn btn-tekstowy" href="/admin/haslo">Ustaw hasło do panelu</Link>
+    <div className="wrap sekcja">
+      <OdswiezStatusy /><Link className="btn btn-tekstowy" href="/admin/haslo">Ustaw hasło do panelu</Link>
       <div className="naglowek-rzad">
         <div>
           <h1 className="tytul">Panel zarządzania listami</h1>

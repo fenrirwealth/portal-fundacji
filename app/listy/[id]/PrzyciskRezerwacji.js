@@ -71,7 +71,7 @@ export default function PrzyciskRezerwacji({ listId, numer, wolny, status, przed
       }
 
       dialog.current.close();
-      router.push("/moje-rezerwacje?nowa=1");
+      window.location.replace("/moje-rezerwacje?nowa=1");
     } catch {
       setBlad("Brak połączenia. Spróbuj jeszcze raz.");
       setCzekam(false);

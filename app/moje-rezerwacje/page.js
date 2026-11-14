@@ -1,3 +1,4 @@
+import OdswiezStatusy from "../ui/OdswiezStatusy";
 import { redirect } from "next/navigation";
 import { auth } from "../../auth";
 import { db, aktywnaEdycja, formatujTermin } from "../../lib/db";
@@ -49,6 +50,7 @@ export default async function MojeRezerwacje({ searchParams }) {
 
   return (
     <div className="wrap sekcja">
+      <OdswiezStatusy />
       <h1 style={{ fontSize: "var(--t-3xl)" }}>Moje listy</h1>
 
       {p.nowa === "1" && aktywne.length > 0 && (

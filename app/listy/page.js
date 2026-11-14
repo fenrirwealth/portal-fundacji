@@ -1,3 +1,5 @@
+import BanerKolejneListy from "./BanerKolejneListy";
+import OdswiezStatusy from "../ui/OdswiezStatusy";
 import PracowniaSwiateczna from "../ui/PracowniaSwiateczna";
 import { Suspense } from "react";
 import { listyPubliczne, licznik, aktywnaEdycja, formatujTermin } from "../../lib/db";
@@ -114,6 +116,7 @@ export default async function Listy({ searchParams }) {
 
   return (
     <div className="listy-premium">
+      <OdswiezStatusy />
       <div className="listy-swiatlo" aria-hidden="true" />
       <div className="listy-gwiazdy" aria-hidden="true" />
 
@@ -132,6 +135,8 @@ export default async function Listy({ searchParams }) {
         <PracowniaSwiateczna />
 
         <LicznikNaZywo poczatkowy={stan} termin={formatujTermin(edycja?.terminDostarczenia)} />
+
+        {edycja && <BanerKolejneListy />}
 
         <section className="listy-filtry-panel" aria-label="Filtry">
           <Szukajka poczatkowa={params.szukaj || ""} />

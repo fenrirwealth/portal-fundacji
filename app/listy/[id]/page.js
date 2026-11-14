@@ -1,3 +1,4 @@
+import OdswiezStatusy from "../../ui/OdswiezStatusy";
 import { wiekPL } from "../../../lib/wiek.mjs";
 import { notFound } from "next/navigation";
 import { auth } from "../../../auth";
@@ -56,6 +57,7 @@ export default async function Szczegol({ params }) {
 
   return (
     <div className="wrap sekcja ma-pasek-mobilny">
+      <OdswiezStatusy />
       <Link className="btn btn-tekstowy" href="/listy" style={{ marginBottom: "var(--o-5)", marginLeft: "calc(var(--o-2) * -1)" }}>
         ← Wszystkie listy
       </Link>

@@ -1,0 +1,80 @@
+.baner {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: grid;
+  align-items: center;
+  min-height: 348px;
+  margin: 0 0 clamp(2rem, 4vw, 3.5rem);
+  border: 1px solid rgb(213 174 98 / 40%);
+  border-radius: clamp(18px, 3vw, 32px);
+  background: #0b1429;
+  box-shadow: 0 24px 60px rgb(0 0 0 / 26%), inset 0 1px rgb(255 221 155 / 12%);
+}
+
+.scena {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  background: url("/banery/kolejne-listy.webp") center right / cover no-repeat;
+  mask-image: linear-gradient(90deg, transparent 6%, #000 47%);
+}
+
+.blask {
+  position: absolute;
+  inset: 6% 4% 0 53%;
+  background: radial-gradient(ellipse at center, rgb(255 201 114 / 28%), transparent 68%);
+  mix-blend-mode: screen;
+  opacity: 0;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .blask {
+    animation: blysk 2.8s 350ms ease-out both;
+  }
+}
+
+@keyframes blysk {
+  0%, 100% { opacity: 0; transform: scale(.86); }
+  42% { opacity: .78; transform: scale(1.08); }
+}
+
+.tresc {
+  max-width: 64ch;
+  width: 55%;
+  padding: clamp(1.65rem, 4.4vw, 4rem);
+  color: #f3e5cb;
+}
+
+.tresc h2 {
+  margin: 0 0 .65rem;
+  font-size: clamp(2rem, 3.4vw, 3.65rem);
+  font-weight: 500;
+  line-height: 1.03;
+  text-wrap: balance;
+}
+
+.tresc p {
+  margin: .65rem 0 0;
+  color: #eee4d4;
+  line-height: 1.58;
+}
+
+.tresc strong { color: #ffda98; }
+
+@media (max-width: 720px) {
+  .baner { min-height: 0; display: flex; flex-direction: column; }
+  .scena {
+    position: relative;
+    inset: auto;
+    order: -1;
+    width: 100%;
+    height: clamp(155px, 35vw, 255px);
+    background-position: right center;
+    background-size: auto 116%;
+    mask-image: linear-gradient(#000 74%, transparent);
+  }
+  .tresc { width: 100%; max-width: none; padding-top: .55rem; }
+}

@@ -40,28 +40,31 @@ export async function PATCH(request, { params }) {
   if (akcja === "anuluj") {
     // Anulowac mozna wylacznie rezerwacje aktywna. Rezerwacji juz
     // rozliczonej (DOSTARCZONA) ani wygaslej nie ruszamy.
-    const wynik = await db.rezerwacja.updateMany({
-      where: {
-        id: rezerwacja.id,
-        userId: sesja.user.id,
-        status: { in: ["OCZEKUJE", "POTWIERDZONA"] },
-      },
-      data: { status: "ANULOWANA", anulowana: new Date() },
+    const anulowano = await db.$transaction(async (tx) => {
+      const wynik = await tx.rezerwacja.updateMany({
+        where: {
+          id: rezerwacja.id,
+          userId: sesja.user.id,
+          status: { in: ["OCZEKUJE", "POTWIERDZONA"] },
+        },
+        data: { status: "ANULOWANA", anulowana: new Date() },
+      });
+      if (wynik.count !== 1) return false;
+
+      await tx.list.updateMany({
+        where: { id: rezerwacja.listId, status: "ZAREZERWOWANY" },
+        data: { status: "OPUBLIKOWANY" },
+      });
+      return true;
     });
 
-    if (wynik.count === 0) {
+    if (!anulowano) {
       return Response.json(
         { blad: "Tej rezerwacji nie można już anulować." },
         { status: 409 }
       );
     }
 
-    // List zwalniamy tylko jesli nadal jest zarezerwowany. Gdy
-    // administrator zdazyl zmienic status, nie nadpisujemy go.
-    await db.list.updateMany({
-      where: { id: rezerwacja.listId, status: "ZAREZERWOWANY" },
-      data: { status: "OPUBLIKOWANY" },
-    });
     await usunCache(KLUCZ_LICZNIKA);
 
     return Response.json({ ok: true });
