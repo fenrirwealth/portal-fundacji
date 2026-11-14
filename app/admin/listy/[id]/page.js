@@ -11,6 +11,7 @@ import SzybkieAkcje from "../../ui/SzybkieAkcje";
 import DarczyncaListu from "../../ui/DarczyncaListu";
 import Status from "../../ui/Status";
 import FormularzListu from "../../ui/FormularzListu";
+import ZdjecieListu from "../../ui/ZdjecieListu";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Edycja listu", robots: { index: false, follow: false } };
@@ -170,7 +171,10 @@ export default async function EdycjaListu({ params, searchParams }) {
         </section>
       )}
 
+      {list.status !== "WYCOFANY" && <ZdjecieListu id={list.id} wersja={list.zaktualizowany.toISOString()} />}
+
       <FormularzListu
+        key={list.zaktualizowany.toISOString()}
         akcja={zapiszList}
         list={{
           id: list.id,
