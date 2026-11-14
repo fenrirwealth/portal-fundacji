@@ -1,5 +1,5 @@
 import OdswiezStatusy from "../ui/OdswiezStatusy";
-import { wiekPL } from "../../lib/wiek.mjs";
+import { imieZWiekem } from "../../lib/wiek.mjs";
 import Link from "next/link";
 import { db } from "../../lib/db";
 import { wymagajRedakcji } from "../../lib/admin";
@@ -288,7 +288,7 @@ export default async function Admin({ searchParams }) {
                 {pokazUwagi && <td data-etykieta="Uwagi wewnętrzne"><UwagiListu id={l.id} numer={l.numer} notatka={l.notatka} /></td>}
                 <td>
                   <Link className="drobny" href={`/admin/listy/${l.id}`}>List nr {l.numer}</Link>
-                  <p><b>{l.imie}</b>, {wiekPL(l.wiek)}</p>
+                  <p>{imieZWiekem(l.imie, l.wiek)}</p>
                   <p className="drobny cichy">{l.marzenie.slice(0, 48)}{l.marzenie.length > 48 ? "…" : ""}</p>
                   <p className="drobny cichy">{l.placowka?.nazwa || "Bez placówki · Fundacja"}</p>
                 </td>

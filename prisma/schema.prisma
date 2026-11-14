@@ -270,7 +270,7 @@ model List {
 
   // --- dane publiczne ---
   imie        String
-  wiek        Int
+  wiek        Int?
   wojewodztwo String
   kategoria   Kategoria
   marzenie    String

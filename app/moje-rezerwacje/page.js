@@ -1,3 +1,4 @@
+import { wiekPL } from "../../lib/wiek.mjs";
 import OdswiezStatusy from "../ui/OdswiezStatusy";
 import { redirect } from "next/navigation";
 import { auth } from "../../auth";
@@ -103,7 +104,7 @@ export default async function MojeRezerwacje({ searchParams }) {
           <tbody>
             {rezerwacje.map((r) => (
               <tr key={r.id}>
-                <td data-etykieta="Dziecko"><b>{r.list.imie}</b>, {r.list.wiek} lat<br /><span className="drobny">List nr {r.list.numer}</span></td>
+                <td data-etykieta="Dziecko"><b>{r.list.imie}</b>{r.list.wiek == null ? "" : ", " + wiekPL(r.list.wiek)}<br /><span className="drobny">List nr {r.list.numer}</span></td>
                 <td data-etykieta="Marzenie">{r.list.marzenie}</td>
                 <td data-etykieta="Status">
                   <span className={"plakietka " + (r.status === "DOSTARCZONA" ? "plakietka-wolny" : ["OCZEKUJE", "POTWIERDZONA"].includes(r.status) ? "plakietka-gotowy" : "plakietka-zajety")}>

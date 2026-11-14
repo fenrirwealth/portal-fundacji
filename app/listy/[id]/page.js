@@ -1,5 +1,6 @@
+import BastionReda from "../../ui/BastionReda";
 import OdswiezStatusy from "../../ui/OdswiezStatusy";
-import { wiekPL } from "../../../lib/wiek.mjs";
+import { imieZWiekem } from "../../../lib/wiek.mjs";
 import { notFound } from "next/navigation";
 import { auth } from "../../../auth";
 import { db, listPubliczny, aktywnaEdycja, formatujTermin, WERSJA_REGULAMINU } from "../../../lib/db";
@@ -15,11 +16,11 @@ export async function generateMetadata({ params }) {
   const list = await listPubliczny(p.id);
   if (!list) return { title: "Nie znaleziono listu" };
   return {
-    title: `List nr ${list.numer} — ${list.imie}, ${wiekPL(list.wiek)}`,
+    title: `List nr ${list.numer} — ${imieZWiekem(list.imie, list.wiek)}`,
     description: `Marzenie: ${list.marzenie}. Sprawdź, jak przekazać prezent.`,
     openGraph: {
       title: list.status === "OPUBLIKOWANY" ? `Ten list nadal czeka na Mikołaja` : `Ten list ma już swojego Mikołaja`,
-      description: `${list.imie}, ${wiekPL(list.wiek)} — ${list.marzenie}`,
+      description: `${imieZWiekem(list.imie, list.wiek)} — ${list.marzenie}`,
       images: [{ url: `/api/listy/${list.id}/story?format=og`, width: 1200, height: 630 }],
     },
     // Pojedynczy list NIE trafia do wyszukiwarek. Strona zbiorcza
@@ -66,7 +67,7 @@ export default async function Szczegol({ params }) {
         <figure style={{ margin: 0 }}>
           <div className="list-zdjecie">
             {list.zdjecieUrl ? (
-              <img src={list.zdjecieUrl} alt={`Zdjęcie listu napisanego przez ${list.imie}, ${wiekPL(list.wiek)}`} />
+              <img src={list.zdjecieUrl} alt={`Zdjęcie listu napisanego przez ${imieZWiekem(list.imie, list.wiek)}`} />
             ) : (
               <div className="karta-listu-zastepnik zastepnik" aria-hidden="true">
                 <span>zdjęcie listu nr {list.numer} w przygotowaniu</span>
@@ -84,7 +85,7 @@ export default async function Szczegol({ params }) {
           <div className="karta karta-tresc">
             <p className="drobny"><strong>List nr {list.numer}</strong></p>
             <h1 style={{ fontSize: "var(--t-2xl)" }}>
-              {list.imie}, {wiekPL(list.wiek)}
+              {imieZWiekem(list.imie, list.wiek)}
             </h1>
             <p className="drobny cichy" style={{ marginTop: "var(--o-2)" }}>
               {list.wojewodztwo ? `woj. ${list.wojewodztwo.toLowerCase()} · ` : ""}{list.kategoria.toLowerCase()}
@@ -108,6 +109,7 @@ export default async function Szczegol({ params }) {
             </p>
 
             <PrzyciskRezerwacji {...rezerwacjaProps} />
+            {list.bastionReda && <BastionReda />}
             <div style={{ marginTop: "var(--o-3)" }}>
               <UdostepnijMarzenie listId={list.id} imie={list.imie} wolny={wolny} />
             </div>
@@ -128,7 +130,7 @@ export default async function Szczegol({ params }) {
           pierwszym ekranem. Pasek trzyma go zawsze w zasięgu kciuka. */}
       <div className="pasek-mobilny">
         <span className="opis">
-          List nr {list.numer} · {list.imie}, {wiekPL(list.wiek)}<br />{list.marzenie}
+          List nr {list.numer} · {imieZWiekem(list.imie, list.wiek)}<br />{list.marzenie}
         </span>
         <PrzyciskRezerwacji {...rezerwacjaProps} zwiezly />
       </div>

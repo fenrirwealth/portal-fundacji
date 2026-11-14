@@ -1,4 +1,4 @@
-import { wiekPL } from "../../../../../lib/wiek.mjs";
+import { imieZWiekem } from "../../../../../lib/wiek.mjs";
 import { ImageResponse } from "next/og";
 import QRCode from "qrcode";
 import { readFile } from "node:fs/promises";
@@ -72,7 +72,7 @@ export async function GET(request, { params }) {
 
         <div style={{ display: "flex", flexDirection: "column", maxWidth: formatOg ? 800 : 900 }}>
           <div style={{ display: "flex", color: "#D5AE62", fontFamily: "DM Sans, DM Sans Ext", fontSize: formatOg ? 24 : 30, marginBottom: 28 }}>
-            {`${list.imie}, ${wiekPL(list.wiek)}`}
+            {`${imieZWiekem(list.imie, list.wiek)}`}
           </div>
           <div style={{ display: "flex", fontSize: formatOg ? 58 : 82, lineHeight: 1.08, letterSpacing: -2 }}>
             „{cytat}”

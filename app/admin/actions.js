@@ -65,7 +65,7 @@ function sprawdzPolaListu(w) {
   else if (w.imie.length > 80) mapa.imie = "Imię jest za długie.";
 
   const wiek = Number(w.wiek);
-  if (w.wiek === "" || !Number.isInteger(wiek) || wiek < 0 || wiek > 25) {
+  if (w.wiek !== "" && (!Number.isInteger(wiek) || wiek < 0 || wiek > 25)) {
     mapa.wiek = "Podaj wiek od 0 do 25 lat; 0 oznacza dziecko poniżej roku.";
   }
   if (w.wojewodztwo && !WOJEWODZTWA.includes(w.wojewodztwo)) mapa.wojewodztwo = "Wybierz województwo z listy.";
@@ -250,7 +250,7 @@ export async function utworzList(_poprzedni, formData) {
       edycjaId: udzial?.edycjaId || edycja.id,
       placowkaId: udzial?.placowkaId || null,
       imie: w.imie,
-      wiek: Number(w.wiek),
+      wiek: w.wiek === "" ? null : Number(w.wiek),
       wojewodztwo: w.wojewodztwo,
       kategoria: w.kategoria,
       marzenie: w.marzenie,
@@ -360,7 +360,7 @@ export async function zapiszList(_poprzedni, formData) {
         where: { id, zaktualizowany: obecny.zaktualizowany },
         data: {
           imie: w.imie,
-          wiek: Number(w.wiek),
+          wiek: w.wiek === "" ? null : Number(w.wiek),
           wojewodztwo: w.wojewodztwo,
           kategoria: w.kategoria,
           marzenie: w.marzenie,

@@ -53,7 +53,7 @@ export default function FormularzNowy({ akcja, bezPlacowki = false, udzialy, ska
           <input name="imie" maxLength={80} defaultValue={w.imie || ""} />
         </PoleAdmin>
 
-        <PoleAdmin nazwa="wiek" etykieta="Wiek w latach (0 — poniżej roku)" blad={b.wiek}>
+        <PoleAdmin nazwa="wiek" etykieta="Wiek w latach, opcjonalnie (0 — poniżej roku)" blad={b.wiek}>
           <input name="wiek" type="number" min="0" max="25" defaultValue={w.wiek ?? ""} />
         </PoleAdmin>
 

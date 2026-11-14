@@ -1,4 +1,5 @@
-import { wiekPL } from "../../lib/wiek.mjs";
+import BastionReda from "./BastionReda";
+import { wiekPL, imieZWiekem } from "../../lib/wiek.mjs";
 import Link from "next/link";
 import { ArrowUpRight, Mail } from "lucide-react";
 import IskraListu from "./IskraListu";
@@ -23,7 +24,7 @@ const KLASY_STATUSU = {
 
 /**
  * @param {object} p
- * @param {{id: string, numer: number, imie: string, wiek: number, wojewodztwo: string,
+ * @param {{id: string, numer: number, imie: string, wiek: number|null, bastionReda?: boolean, wojewodztwo: string,
  *          kategoria: string, marzenie: string, rozmiar?: string|null,
  *          zdjecieUrl?: string|null, status: string}} p.list
  */
@@ -52,17 +53,18 @@ export default function KartaListu({ list }) {
         <span className="karta-listu-ikona" aria-hidden="true"><Mail /></span>
         <div className="karta-listu-meta">
           <h3>{list.imie}</h3>
-          <p><strong>List nr {list.numer}</strong> · Wiek: {wiekPL(list.wiek)}</p>
+          <p><strong>List nr {list.numer}</strong>{list.wiek == null ? "" : " · Wiek: " + wiekPL(list.wiek)}</p>
         </div>
         <p className="karta-listu-szczegoly">
           {list.wojewodztwo ? `woj. ${list.wojewodztwo.toLowerCase()} · ` : ""}{list.kategoria.toLowerCase()}
           {list.rozmiar ? ` · rozmiar ${list.rozmiar}` : ""}
         </p>
+        {list.bastionReda && <BastionReda />}
         <p className="karta-listu-marzenie">„{list.marzenie}”</p>
         <Link
           className="karta-listu-akcja"
           href={`/listy/${list.id}`}
-          aria-label={`Otwórz list nr ${list.numer}, ${list.imie}, ${wiekPL(list.wiek)}. ${opis}.`}
+          aria-label={`Otwórz list nr ${list.numer}, ${imieZWiekem(list.imie, list.wiek)}. ${opis}.`}
         >
           <span>Otwórz ten list</span><ArrowUpRight aria-hidden="true" />
         </Link>
