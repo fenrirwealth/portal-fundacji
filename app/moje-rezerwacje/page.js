@@ -47,23 +47,22 @@ export default async function MojeRezerwacje({ searchParams }) {
   });
 
   const aktywne = rezerwacje.filter((r) => ["OCZEKUJE", "POTWIERDZONA"].includes(r.status));
+  const nowa = aktywne.find((r) => r.id === p.nowa);
 
   return (
     <div className="wrap sekcja">
       <OdswiezStatusy />
       <h1 style={{ fontSize: "var(--t-3xl)" }}>Moje listy</h1>
 
-      {p.nowa === "1" && aktywne.length > 0 && (
+      {nowa && (
         <div className="karta-mikolaja" role="status" style={{ margin: "var(--o-5) 0" }}>
           <span className="karta-mikolaja-gwiazda" aria-hidden="true">✦</span>
           <div>
-            <h2>Dziękujemy za rezerwację listu!</h2>
+            <h2>Dziękujemy! List nr {nowa.list.numer} jest zarezerwowany.</h2>
             <p>To pierwszy krok do spełnienia dziecięcego marzenia. Poniżej znajdziesz informacje o tym, co zrobić dalej.</p>
-            {aktywne[0] && (
-              <div style={{ maxWidth: 340, marginTop: "var(--o-4)" }}>
-                <UdostepnijMarzenie listId={aktywne[0].list.id} imie={aktywne[0].list.imie} wolny={false} />
-              </div>
-            )}
+            <div style={{ maxWidth: 340, marginTop: "var(--o-4)" }}>
+              <UdostepnijMarzenie listId={nowa.list.id} imie={nowa.list.imie} wolny={false} />
+            </div>
           </div>
         </div>
       )}

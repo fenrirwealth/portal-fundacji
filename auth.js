@@ -2,7 +2,7 @@ import NextAuth from "next-auth";
 import Nodemailer from "next-auth/providers/nodemailer";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { db } from "./lib/db";
-import { konfiguracjaSmtp, nadawca } from "./lib/poczta";
+import { konfiguracjaSmtp, nadawca, utworzTransportSmtp } from "./lib/poczta";
 import { cookies } from "next/headers";
 import { COOKIE_ZAPAMIETAJ, dlugoscSesji } from "./lib/zasady-akcji.mjs";
 
@@ -109,6 +109,23 @@ export const { handlers, auth, signIn, signOut } = NextAuth(async () => ({
       // komputerach wspoldzielonych.
       maxAge: 30 * 60,
       normalizeIdentifier: normalizujEmail,
+      async sendVerificationRequest({ identifier, url, provider }) {
+        const wynik = await utworzTransportSmtp().sendMail({
+          to: identifier,
+          from: provider.from,
+          subject: "Link do logowania w portalu Fundacji",
+          text: [
+            "Kliknij link, aby zalogować się do portalu Fundacji Lepszy Dom Lepsze Jutro:",
+            url,
+            "Link jest ważny przez 30 minut i działa tylko raz.",
+            "Aby zarezerwować wybrany list, po zalogowaniu wróć na jego stronę i potwierdź rezerwację. Otrzymasz wtedy osobny e-mail z numerem listu.",
+            "Jeśli nie prosisz o link do logowania, możesz zignorować tę wiadomość.",
+          ].join("\n\n"),
+        });
+        if (!wynik.accepted.length || wynik.rejected.length || wynik.pending?.length) {
+          throw new Error("Serwer pocztowy nie przyjął wiadomości z linkiem do logowania.");
+        }
+      },
     }),
   ],
   callbacks: {

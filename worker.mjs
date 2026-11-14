@@ -85,7 +85,7 @@ const worker = new Worker(NAZWA, async (zadanie) => {
     }
     if (typ === "REZERWACJA") {
       await transport.sendMail({ from: nadawca(), to: r.user.email,
-        subject: `List nr ${r.list.numer} zarezerwowany — zadzwoń do Fundacji`,
+        subject: `Potwierdzenie rezerwacji listu nr ${r.list.numer} — zadzwoń do Fundacji`,
         text: `Dziękujemy za rezerwację listu od ${r.list.imie}! Zadzwoń do Fundacji: ${TELEFON_FUNDACJI}, aby ustalić szczegóły. Administrator musi potwierdzić rozmowę do ${terminKontaktu} (48 godzin od rezerwacji). Bez tego list wróci do puli. Szczegóły: ${panel}`,
         html: htmlEmail("Dziękujemy za rezerwację listu!", `<p>List nr <b>${r.list.numer}</b> od <b>${esc(r.list.imie)}</b> został zarezerwowany dla Ciebie.</p><p>Zadzwoń pod <b>${TELEFON_FUNDACJI}</b> i umów szczegóły.</p><p>Fundacja musi potwierdzić rozmowę do <b>${terminKontaktu}</b> — w ciągu 48 godzin od rezerwacji. Bez potwierdzenia administratora list automatycznie wróci do puli.</p>`, "Sprawdź swoją rezerwację", panel) });
     } else if (typ === "PRZYPOMNIENIE") {
