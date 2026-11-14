@@ -1810,11 +1810,13 @@ main { min-width: 0; }
     color: var(--papier-50);
     background: rgba(7,17,38,.98);
     box-shadow: 0 30px 90px rgba(0,0,0,.5);
-    transform: translateX(calc(100% + 28px));
+    transform: translateX(12px);
+    opacity: 0;
+    pointer-events: none;
     visibility: hidden;
     transition: transform 450ms cubic-bezier(.22,1,.36,1), visibility 450ms;
   }
-  .menu.menu-otwarte { transform: none; visibility: visible; }
+  .menu.menu-otwarte { transform: none; visibility: visible; opacity: 1; pointer-events: auto; }
   .menu a,
   .menu .btn-tekstowy {
     justify-content: flex-start;

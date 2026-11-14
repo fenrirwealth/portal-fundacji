@@ -55,6 +55,18 @@ const worker = new Worker(NAZWA, async (zadanie) => {
     await wyslijKopieListow({ db, transport, od: nadawca(), planowanaData: new Date(zadanie.opts.prevMillis) });
     return;
   }
+  if (zadanie.name === "POTWIERDZ_NOWE_LISTY" || zadanie.name === "NOWE_LISTY") {
+    const zapis = await db.powiadomienieListy.findUnique({ where: { id: zadanie.data.id } });
+    if (!zapis || (zadanie.name === "NOWE_LISTY" && (!zapis.potwierdzony || zapis.wyslano))) return;
+    const link = portal + "/powiadomienia?token=" + zapis.token;
+    const potwierdzenie = zadanie.name === "POTWIERDZ_NOWE_LISTY";
+    await transport.sendMail({ from: nadawca(), to: zapis.email,
+      subject: potwierdzenie ? "Potwierdź powiadomienie o nowych listach" : "Kolejne listy czekają na Mikołajów",
+      text: potwierdzenie ? "Potwierdź zapis lub usuń go: " + link : "Sprawdź dostępne listy: " + portal + "/listy?wolne=1. Dostępność może się zmieniać. To jednorazowe powiadomienie. Usuń zapis: " + link,
+    });
+    if (!potwierdzenie) await db.powiadomienieListy.updateMany({ where: { id: zapis.id }, data: { wyslano: new Date() } });
+    return;
+  }
   const typ = zadanie.name.replace(/^FUNDACJA_/, "");
   const dlaFundacji = zadanie.name.startsWith("FUNDACJA_");
   if (["REZERWACJA", "PRZYPOMNIENIE", "PRZYPOMNIENIE_DOSTARCZENIA", "KONTAKT_POTWIERDZONY", "PODZIEKOWANIE"].includes(typ)) {

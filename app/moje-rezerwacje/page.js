@@ -97,7 +97,7 @@ export default async function MojeRezerwacje({ searchParams }) {
               <th>Dziecko</th>
               <th>Marzenie</th>
               <th>Status</th>
-              <th>Termin</th>
+              <th>Twój następny krok</th>
               <th />
             </tr>
           </thead>
@@ -118,10 +118,10 @@ export default async function MojeRezerwacje({ searchParams }) {
                 </td>
                 <td data-etykieta="Termin">
                   {r.status === "OCZEKUJE"
-                    ? "kontakt do " + terminPL(r.wygasa)
+                    ? "Zadzwoń do Fundacji do " + terminPL(r.wygasa)
                     : r.status === "POTWIERDZONA"
-                      ? (termin ? "prezent do " + termin : "prezent w terminie akcji")
-                      : "—"}
+                      ? (termin ? "Dostarcz paczkę do " + termin : "Dostarcz paczkę w terminie akcji")
+                      : r.status === "DOSTARCZONA" ? (r.list.status === "PRZEKAZANY" ? "Dziękujemy! Prezent dotarł do placówki." : "Paczka jest w Fundacji. Czekamy na przekazanie placówce.") : "Możesz wybrać kolejny wolny list."}
                 </td>
                 <td data-etykieta="Akcje" style={{ textAlign: "right" }}>
                   <Akcje id={r.id} status={r.status} imie={r.list.imie} />

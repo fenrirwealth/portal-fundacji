@@ -1,3 +1,4 @@
+import { WARUNKI_PUBLIKACJI } from "../../../../lib/db";
 import { db } from "../../../../lib/db";
 import { poprawnyTokenCron } from "../../../../lib/cron.mjs";
 import { kolejkujEmail, kolejkujPowiadomienieRezerwacji } from "../../../../lib/kolejka-email";
@@ -150,6 +151,18 @@ export async function POST(request) {
     where: { tokenPrzesylaniaWygasa: { lt: teraz }, tokenPrzesylaniaHash: { not: null } },
     data: { tokenPrzesylaniaHash: null, tokenPrzesylaniaWygasa: null },
   });
+
+  const noweListy = await db.list.findFirst({
+    where: { ...WARUNKI_PUBLIKACJI, status: "OPUBLIKOWANY", edycja: { aktywna: true } },
+    orderBy: { zaktualizowany: "desc" }, select: { zaktualizowany: true },
+  });
+  if (noweListy) {
+    const zapisy = await db.powiadomienieListy.findMany({
+      where: { potwierdzony: true, wyslano: null, utworzony: { lt: noweListy.zaktualizowany } }, take: 100,
+    });
+    for (const zapis of zapisy) await kolejkujEmail("NOWE_LISTY", { id: zapis.id }, "nowe-listy-" + zapis.id + "-" + zapis.utworzony.getTime());
+  }
+  await db.powiadomienieListy.deleteMany({ where: { utworzony: { lt: new Date(Date.now() - 90 * 86400000) } } });
 
   return Response.json(
     { wygasle, sprawdzone: pierwsze.length + koncowe.length + dostarczenia.length, zakolejkowane, bledy, usunieteSkany: stareSkany.length },

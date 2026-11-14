@@ -511,3 +511,12 @@ model ZgloszeniePotrzeby {
 
   @@index([status])
 }
+
+model PowiadomienieListy {
+  id String @id @default(cuid())
+  email String @unique
+  token String @unique
+  potwierdzony Boolean @default(false)
+  utworzony DateTime @default(now())
+  wyslano DateTime?
+}

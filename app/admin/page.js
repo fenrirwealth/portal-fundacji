@@ -99,6 +99,12 @@ export default async function Admin({ searchParams }) {
     orderBy: { wygasa: "asc" }, take: 100,
   });
 
+  const paczki = await db.list.findMany({
+    where: { status: "ZAREZERWOWANY", edycja: { aktywna: true } },
+    select: { id: true, numer: true, imie: true, edycja: { select: { terminDostarczenia: true } } },
+    orderBy: [{ edycja: { terminDostarczenia: "asc" } }, { numer: "asc" }], take: 100,
+  });
+
   const licznik = Object.fromEntries(liczby.map((l) => [l.status, l._count]));
   const wszystkich = liczby.reduce((s, l) => s + l._count, 0);
 
@@ -117,7 +123,8 @@ export default async function Admin({ searchParams }) {
       {p.sukces && <p className="info" role="status">{p.sukces === "reczna" ? "List oznaczony jako zarezerwowany przez Fundację." : p.sukces === "usuniety" ? "List usunięty ze strony i przeniesiony do archiwum." : "Operacja zakończona poprawnie."}</p>}
 
       <section className="kontakt-rezerwacji">
-        <h2>Rezerwacje czekające na kontakt telefoniczny ({kontakty.length})</h2>
+        <h2>Dzisiaj do obsłużenia</h2>
+        <h3>Kontakt telefoniczny ({kontakty.length})</h3>
         <p className="drobny cichy">Potwierdź dopiero po rozmowie z darczyńcą. Bez potwierdzenia rezerwacja wygasa po 48 godzinach.</p>
         {kontakty.length === 0 ? <p>Wszystkie bieżące kontakty są obsłużone.</p> : <div className="tabela-przewijana"><table className="tabela">
           <thead><tr><th>List</th><th>Darczyńca</th><th>Potwierdź do</th><th>Kontakt</th></tr></thead>
@@ -134,6 +141,11 @@ export default async function Admin({ searchParams }) {
             <td><form action={potwierdzKontaktTelefoniczny}><input type="hidden" name="rezerwacjaId" value={r.id} /><button className="btn" type="submit">Kontakt telefoniczny odbył się</button></form></td>
           </tr>)}</tbody>
         </table></div>}
+      </section>
+
+      <section className="kontakt-rezerwacji">
+        <h3>Paczki do odebrania ({paczki.length})</h3>
+        {paczki.length === 0 ? <p>Brak paczek oczekujących na odbiór.</p> : <details><summary>Pokaż listy według terminu dostarczenia</summary><ul>{paczki.map((list) => <li key={list.id}><Link href={`/admin/listy/${list.id}`}>List nr {list.numer} · {list.imie}</Link> — {terminPL(list.edycja.terminDostarczenia)}</li>)}</ul></details>}
       </section>
 
       <section style={{ marginTop: "var(--o-7)" }}>

@@ -71,12 +71,14 @@ async function Wyniki({ params }) {
   const cos = listy.length > 0;
   const stan = await licznik();
 
+  const pulaPusta = wolne && stan.wolne === 0;
+
   return (
     <>
       <p className="listy-wynik" role="status">
         {cos
           ? `Pokazujemy ${listy.length} z ${stan.wszystkie} listów`
-          : stan.wszystkie === 0 ? "" : "Żaden list nie pasuje do wybranych filtrów"}
+          : pulaPusta ? "Wszystkie dostępne listy mają już swoich Mikołajów" : stan.wszystkie === 0 ? "" : "Żaden list nie pasuje do wybranych filtrów"}
       </p>
 
       <div className="siatka siatka-listy listy-siatka">
@@ -84,9 +86,9 @@ async function Wyniki({ params }) {
 
         {!cos && (
           <div className="pusto listy-pusto">
-            <h3>{stan.wszystkie === 0 ? "Listy pojawią się wkrótce" : "Nic tu nie ma przy tych filtrach"}</h3>
+            <h3>{pulaPusta ? "Kolejne listy już wkrótce" : stan.wszystkie === 0 ? "Listy pojawią się wkrótce" : "Nic tu nie ma przy tych filtrach"}</h3>
             <p>
-              {stan.wszystkie === 0
+              {pulaPusta ? "Akcja trwa. Przygotowujemy kolejne listy. Zapisz się na powiadomienie w banerze powyżej." : stan.wszystkie === 0
                 ? "Zbieramy listy od placówek opiekuńczo-wychowawczych. Każdy przechodzi weryfikację, zanim trafi na stronę."
                 : "Spróbuj zmienić wiek, kategorię albo wyczyścić wyszukiwanie."}
             </p>
