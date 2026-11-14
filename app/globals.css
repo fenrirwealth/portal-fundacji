@@ -1046,7 +1046,7 @@ select.pole-kontrolka {
 .fundusz-gwiazda-znak { display:grid; width:64px; height:64px; place-items:center; margin-bottom:24px; border:1px solid rgba(213,174,98,.38); border-radius:50%; color:#d5ae62; background:rgba(255,255,255,.055); box-shadow:0 0 38px rgba(213,174,98,.22),inset 0 1px rgba(255,255,255,.08); }
 .fundusz-gwiazda-znak svg { width:31px; height:31px; }
 .fundusz-premium-nadtytul,.fundusz-etykieta { margin:0 0 18px; color:#d5ae62; font-size:.72rem; font-weight:650; letter-spacing:.18em; text-transform:uppercase; }
-.fundusz-premium-hero h1 { max-width:13ch; color:#f3e5cb; font-size:clamp(3.2rem,7vw,6.3rem); font-weight:500; line-height:.94; letter-spacing:-.04em; text-shadow:0 18px 55px rgba(0,0,0,.4); }
+.fundusz-premium-hero h1 { max-width:13ch; color:#f3e5cb; font-size:clamp(3.2rem,7vw,6.3rem); font-weight:500; line-height:1.2; letter-spacing:-.015em; overflow-wrap:anywhere; text-shadow:0 18px 55px rgba(0,0,0,.4); }
 .fundusz-premium-hero h1 em { display:block; color:#d5ae62; font-style:italic; }
 .fundusz-premium-hero > p:last-child { max-width:64ch; margin-top:32px; color:rgba(255,249,240,.75); font-size:clamp(1.05rem,1.7vw,1.23rem); font-weight:350; line-height:1.85; }
 .fundusz-moduly { display:grid; gap:30px; margin-top:clamp(70px,9vw,108px); }
@@ -1117,7 +1117,7 @@ select.pole-kontrolka {
 .o-akcji-znak svg { width:23px; }
 .o-akcji-nadtytul,.o-akcji-sekcja-etykieta { margin:0 0 18px; color:#d5ae62; font-size:.72rem; font-weight:650; letter-spacing:.18em; text-transform:uppercase; }
 .o-akcji-hero h1 { max-width:14ch; color:#f3e5cb; font-size:clamp(3.2rem,7vw,6.4rem); font-weight:500; line-height:.94; letter-spacing:-.04em; text-shadow:0 18px 55px rgba(0,0,0,.38); }
-.o-akcji-hero h1 em { display:block; color:#d5ae62; font-style:italic; }
+.o-akcji-hero h1 em { display:block; margin-top:.12em; color:#d5ae62; font-style:italic; }
 .o-akcji-wstep { max-width:64ch; margin-top:32px; color:rgba(255,249,240,.74); font-size:clamp(1.05rem,1.7vw,1.23rem); font-weight:350; line-height:1.85; }
 .o-akcji-karty { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:28px; margin-top:clamp(70px,9vw,108px); }
 .o-akcji-karta,.o-akcji-zasady { position:relative; overflow:hidden; border:1px solid rgba(213,174,98,.2); background:linear-gradient(145deg,rgba(255,255,255,.075),rgba(255,255,255,.025)); box-shadow:0 28px 70px rgba(0,0,0,.3),inset 0 1px rgba(255,255,255,.08); backdrop-filter:blur(22px); }
@@ -1127,7 +1127,7 @@ select.pole-kontrolka {
 .o-akcji-karta-ikona { display:grid; width:58px; height:58px; place-items:center; border:1px solid rgba(213,174,98,.25); border-radius:18px; color:#d5ae62; background:rgba(213,174,98,.08); }
 .o-akcji-karta-ikona svg { width:28px; }
 .o-akcji-karta-numer { position:absolute; top:34px; right:38px; margin:0; color:rgba(213,174,98,.25); font:500 2.8rem/1 var(--krój-tytuł); }
-.o-akcji-karta h2 { max-width:14ch; margin-top:72px; color:#d5ae62; font-size:clamp(2rem,3.7vw,2.8rem); font-weight:500; line-height:1.05; }
+.o-akcji-karta h2 { max-width:14ch; margin-top:72px; color:#d5ae62; font-size:clamp(2rem,3.7vw,2.8rem); font-weight:500; line-height:1.2; }
 .o-akcji-karta > p:last-child { margin-top:24px; color:rgba(255,249,240,.75); font-size:1.05rem; font-weight:350; line-height:1.8; }
 .o-akcji-zasady { margin-top:32px; padding:clamp(34px,6vw,64px); border-radius:30px; }
 .o-akcji-zasady::before { content:""; position:absolute; inset:0 auto auto 0; width:100%; height:1px; background:linear-gradient(90deg,transparent,#d5ae62aa,transparent); }
@@ -1879,7 +1879,7 @@ main { min-width: 0; }
 @media(prefers-reduced-motion:reduce){.pracownia-swiateczna *{animation:none!important}.pracownia-pyl{display:none}.pracownia-pauza-przycisk{display:none}}
 
 /* Świąteczna zbiórka: burgund i złoto z plakatu Fundacji. */
-.akcja-plakat{position:relative;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:clamp(28px,5vw,72px);align-items:center;padding:clamp(24px,4vw,64px);margin:0 0 80px;border:1px solid rgba(234,191,115,.4);border-radius:28px;overflow:hidden;background:radial-gradient(ellipse at 0 0,rgba(173,45,33,.38),transparent 65%),linear-gradient(135deg,#4d1018,#210f1e 60%,#101c30);box-shadow:0 28px 85px rgba(0,0,0,.24);color:#fff6e6}
+.akcja-plakat{position:relative;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:clamp(28px,5vw,72px);align-items:center;padding:clamp(24px,4vw,64px);margin:56px 0 80px;border:1px solid rgba(234,191,115,.4);border-radius:28px;overflow:hidden;background:radial-gradient(ellipse at 0 0,rgba(173,45,33,.38),transparent 65%),linear-gradient(135deg,#4d1018,#210f1e 60%,#101c30);box-shadow:0 28px 85px rgba(0,0,0,.24);color:#fff6e6}
 .akcja-plakat-tekst,.akcja-plakat-figura{position:relative;min-width:0}.akcja-plakat-edycja{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#e9c580;margin:0 0 24px}.akcja-plakat h2{font:400 clamp(34px,4.3vw,60px)/1.1 Georgia,serif;letter-spacing:-.025em;margin:0 0 26px}.akcja-plakat h2 em{display:block;color:#efd294;font-weight:400}.akcja-plakat-tekst>p:not(.akcja-plakat-edycja){font-size:16px;line-height:1.8;color:#e5d9d7}.akcja-plakat-termin{margin:28px 0;padding:18px 22px;border-left:2px solid #e8bf77;background:rgba(255,231,186,.06)}.akcja-plakat-termin span{display:block;font-size:12px;color:#dccfc9}.akcja-plakat-termin strong{display:block;font-size:clamp(23px,2.7vw,32px);font-weight:500;color:#f9dfac}.akcja-plakat h3{font-size:19px;color:#fff6e6;margin:28px 0 12px}.akcja-plakat-dary{list-style:none;padding:0;margin:0 0 24px;display:grid;gap:10px;color:#f0e4dc;font-size:15px;line-height:1.6}.akcja-plakat-dary li{padding-left:22px;position:relative}.akcja-plakat-dary li:before{content:"✦";position:absolute;left:0;color:#e7bd73;font-size:12px}.akcja-plakat .akcja-plakat-dopisek{font-size:14px!important;color:#d4c5c5!important}.akcja-plakat-przyciski{display:flex;gap:12px;flex-wrap:wrap;margin:24px 0}.akcja-plakat .akcja-plakat-kontakt{font-size:13px!important;line-height:1.8}.akcja-plakat-kontakt a{color:#f2d49c;text-decoration:underline;text-underline-offset:4px}.akcja-plakat-figura{margin:0;transform:rotate(1deg)}.akcja-plakat-figura>a{display:block;border:1px solid rgba(255,220,156,.45);border-radius:8px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.45)}.akcja-plakat-figura img{display:block;width:100%;height:auto}.akcja-plakat-figura figcaption{margin-top:18px;font-size:12px;line-height:1.6;text-align:center;color:#d8c6b6}
 @media(max-width:800px){.akcja-plakat{grid-template-columns:minmax(0,1fr);gap:34px;padding:28px 22px;margin-bottom:44px;border-radius:20px}.akcja-plakat-figura{width:min(100%,430px);margin-inline:auto;transform:none}.akcja-plakat-przyciski{flex-direction:column}.akcja-plakat h2{font-size:clamp(33px,9vw,46px)}}
 
