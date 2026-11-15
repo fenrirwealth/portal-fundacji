@@ -4,27 +4,29 @@ import { uporzadkujListy, OKRES_ROTACJI_LISTOW } from '../lib/kolejnosc-listow.m
 
 const list = (numer, status = 'OPUBLIKOWANY') => ({ id: String(numer), numer, status });
 
-test('sześć najnowszych listów jest na górze bez względu na status', () => {
-  const dane = [list(1), list(7, 'ZAREZERWOWANY'), list(4), list(2), list(5), list(3), list(6)];
-  assert.deepEqual(uporzadkujListy(dane, OKRES_ROTACJI_LISTOW).map((l) => l.numer), [7, 6, 5, 4, 3, 2, 1]);
-  assert.deepEqual(dane.map((l) => l.numer), [1, 7, 4, 2, 5, 3, 6]);
+test('wszystkie wolne listy są na górze, od najnowszego', () => {
+  const wolne = Array.from({ length: 7 }, (_, i) => list(i + 1));
+  const dane = [list(8, 'ZAREZERWOWANY'), ...wolne];
+  const wynik = uporzadkujListy(dane, OKRES_ROTACJI_LISTOW);
+
+  assert.deepEqual(wynik.map((l) => l.numer), [7, 6, 5, 4, 3, 2, 1, 8]);
+  assert.deepEqual(dane.map((l) => l.numer), [8, 1, 2, 3, 4, 5, 6, 7]);
 });
 
-test('każdy starszy list trafia na pierwsze miejsce pod najnowszymi', () => {
-  const dane = [list(1, 'ZAREZERWOWANY'), ...Array.from({ length: 8 }, (_, i) => list(i + 2))];
-  const pierwsze = [];
-  for (let i = 0; i < 3; i++) {
-    const czas = i * OKRES_ROTACJI_LISTOW;
+test('zajęte listy rotują co 15 minut pod wolnymi', () => {
+  const dane = [list(3, 'ZAREZERWOWANY'), list(2, 'OPLACONY'), list(4), list(5, 'PRZEKAZANY'), list(1)];
+  const kolejnosci = [[5, 3, 2], [3, 2, 5], [2, 5, 3], [5, 3, 2]];
+  for (const [okres, zajete] of kolejnosci.entries()) {
+    const czas = okres * OKRES_ROTACJI_LISTOW;
     const wynik = uporzadkujListy(dane, czas);
-    assert.deepEqual(wynik.slice(0, 6).map((l) => l.numer), [9, 8, 7, 6, 5, 4]);
-    pierwsze.push(wynik[6].numer);
-    assert.equal(new Set(wynik.map((l) => l.id)).size, dane.length);
+    assert.deepEqual(wynik.map((l) => l.numer), [4, 1, ...zajete]);
     assert.deepEqual(uporzadkujListy(dane, czas + 1000), wynik);
   }
-  assert.deepEqual(pierwsze, [3, 2, 1]);
 });
 
-test('puste i krótkie wyniki zachowują komplet listów', () => {
+test('pusty katalog i katalog zawierający wyłącznie wolne lub zajęte listy', () => {
   assert.deepEqual(uporzadkujListy([], 0), []);
   assert.deepEqual(uporzadkujListy([list(2), list(4)], 0), [list(4), list(2)]);
+  const zajete = [list(4, 'ZAREZERWOWANY'), list(2, 'ZAREZERWOWANY')];
+  assert.deepEqual(uporzadkujListy(zajete, OKRES_ROTACJI_LISTOW), [zajete[1], zajete[0]]);
 });
