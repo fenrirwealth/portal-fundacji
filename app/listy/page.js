@@ -1,4 +1,4 @@
-import BanerKolejneListy from "./BanerKolejneListy";
+import BanerZbiorki from "./BanerZbiorki";
 import OdswiezStatusy from "../ui/OdswiezStatusy";
 import PracowniaSwiateczna from "../ui/PracowniaSwiateczna";
 import { Suspense } from "react";
@@ -86,10 +86,10 @@ async function Wyniki({ params }) {
 
         {!cos && (
           <div className="pusto listy-pusto">
-            <h3>{pulaPusta ? "Kolejne listy już wkrótce" : stan.wszystkie === 0 ? "Listy pojawią się wkrótce" : "Nic tu nie ma przy tych filtrach"}</h3>
+            <h3>{pulaPusta ? "Brak listów do rezerwacji" : stan.wszystkie === 0 ? "Obecnie nie ma opublikowanych listów" : "Nic tu nie ma przy tych filtrach"}</h3>
             <p>
-              {pulaPusta ? "Akcja trwa. Przygotowujemy kolejne listy. Zapisz się na powiadomienie w banerze powyżej." : stan.wszystkie === 0
-                ? "Zbieramy listy od placówek opiekuńczo-wychowawczych. Każdy przechodzi weryfikację, zanim trafi na stronę."
+              {pulaPusta ? "Możesz nadal pomóc, wpłacając na zbiórkę Fundacji na Siepomaga." : stan.wszystkie === 0
+                ? "Listy publikujemy po weryfikacji przez Fundację."
                 : "Spróbuj zmienić wiek, kategorię albo wyczyścić wyszukiwanie."}
             </p>
             {stan.wszystkie > 0 && (
@@ -134,7 +134,7 @@ export default async function Listy({ searchParams }) {
             nazwisk, nazwy placówki, miejscowości, adresu ani wizerunku dziecka.
           </p>
         </header>
-        {edycja && <BanerKolejneListy />}
+        {edycja && <BanerZbiorki />}
 
         <PracowniaSwiateczna />
 

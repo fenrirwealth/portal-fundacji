@@ -6,7 +6,7 @@ import HeroMagia from "./ui/HeroMagia";
 import LancuchDobra from "./ui/LancuchDobra";
 import Wejscie from "./ui/Wejscie";
 import ArchiwumListow from "./ui/ArchiwumListow";
-import BanerKolejneListy from "./listy/BanerKolejneListy";
+import BanerZbiorki from "./listy/BanerZbiorki";
 
 export const dynamic = "force-dynamic";
 
@@ -51,7 +51,7 @@ export default async function Start() {
         brakWolnychListow={brakWolnychListow} />
       {tryb === "TRWA" && (
         <div className="wrap">
-          <BanerKolejneListy />
+          <BanerZbiorki />
         </div>
       )}
       <PracowniaSwiateczna />

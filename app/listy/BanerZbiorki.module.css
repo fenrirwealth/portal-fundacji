@@ -62,7 +62,8 @@
   line-height: 1.58;
 }
 
-.tresc strong { color: #ffda98; }
+.tresc > a { margin-top: 1rem; }
+.telefon { color: #ffda98; text-decoration: underline; white-space: nowrap; }
 
 @media (max-width: 720px) {
   .baner { min-height: 0; display: flex; flex-direction: column; }

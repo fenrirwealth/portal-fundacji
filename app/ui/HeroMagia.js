@@ -6,6 +6,8 @@ import { useEffect, useRef, useState } from "react";
 import { useReducedMotion } from "motion/react";
 import Koperta3D from "./Koperta3D";
 import KinoweWejscie from "./KinoweWejscie";
+import styl from "./HeroKontakt.module.css";
+import { TELEFON_FUNDACJI, TELEFON_HREF, ZBIORKA_SIEPOMAGA_HREF } from "../../lib/zasady-akcji.mjs";
 
 /** @param {{etykieta:string, saListy:boolean, termin:string|null, brakWolnychListow?:boolean}} props */
 export default function HeroMagia({ etykieta, saListy, termin, brakWolnychListow = false }) {
@@ -33,8 +35,8 @@ export default function HeroMagia({ etykieta, saListy, termin, brakWolnychListow
           <p className="nadtytul"><span /> {etykieta}</p>
           {brakWolnychListow ? (
             <>
-              <h1>Kolejne listy <em>już wkrótce.</em></h1>
-              <p className="hero-opis">Wszystkie dotychczasowe listy mają już swoich Mikołajów. Akcja trwa. Zajrzyj ponownie, gdy opublikujemy kolejne listy.</p>
+              <h1>Razem podarujmy dzieciom <em>święta.</em></h1>
+              <p className="hero-opis">Wszystkie dostępne listy mają już swoich Mikołajów. Nadal możesz pomóc, wspierając naszą zbiórkę na świąteczne prezenty dla dzieci z domów dziecka i rodzin zastępczych.</p>
             </>
           ) : (
             <>
@@ -44,11 +46,18 @@ export default function HeroMagia({ etykieta, saListy, termin, brakWolnychListow
             </>
           )}
           <div className="hero-akcje">
-            <Link className="btn btn-magiczny btn-duzy" href={saListy ? "/listy" : "#jak-to-dziala"}>
-              {brakWolnychListow ? "Zobacz listy" : saListy ? "Zostań Mikołajem tego listu" : "Poznaj akcję"}<span aria-hidden="true">↗</span>
-            </Link>
+            {brakWolnychListow ? (
+              <a className="btn btn-magiczny btn-duzy" href={ZBIORKA_SIEPOMAGA_HREF}>
+                Wesprzyj zbiórkę na Siepomaga <span aria-hidden="true">↗</span>
+              </a>
+            ) : (
+              <Link className="btn btn-magiczny btn-duzy" href={saListy ? "/listy" : "#jak-to-dziala"}>
+                {saListy ? "Zostań Mikołajem tego listu" : "Poznaj akcję"}<span aria-hidden="true">↗</span>
+              </Link>
+            )}
             {saListy && !brakWolnychListow && <Link prefetch={false} className="btn btn-szklany btn-duzy" href="/listy/losowy" onClick={losuj} aria-busy={otwarta}>{otwarta ? "Magia wybiera Twój list…" : "Niech list wybierze mnie"}</Link>}
           </div>
+          {brakWolnychListow && <p className={styl.kontakt}>Więcej informacji pod numerem <a href={TELEFON_HREF}>{TELEFON_FUNDACJI}</a>.</p>}
           {termin && <p className="hero-termin">Prezenty przyjmujemy do {termin}.</p>}
           <p className="hero-zaufanie"><span aria-hidden="true">✧</span> Zweryfikowane listy. Chroniona prywatność. Prawdziwa pomoc.</p>
         </div>
