@@ -8,8 +8,8 @@ export default function BanerZbiorki() {
         <div className={styl.blask} />
       </div>
       <div className={styl.tresc}>
-        <h2 id="zbiorka-tytul">Pomóż nam kupić świąteczne prezenty</h2>
-        <p>Każda wpłata na naszą zbiórkę na Siepomaga pomaga przygotować prezenty dla dzieci z domów dziecka i rodzin zastępczych.</p>
+        <h2 id="zbiorka-tytul">Pomóż skompletować świąteczne paczki</h2>
+        <p>Przygotujemy paczki zbiorcze z prezentami dla naszych podopiecznych z domów dziecka i rodzin zastępczych. Wspierając zbiórkę na Siepomaga, pomagasz nam kupić prezenty do tych paczek.</p>
         <a href={ZBIORKA_SIEPOMAGA_HREF} className="btn btn-magiczny">Wesprzyj zbiórkę na Siepomaga</a>
         <p>Więcej informacji pod numerem <a className={styl.telefon} href={TELEFON_HREF}>{TELEFON_FUNDACJI}</a>.</p>
       </div>

@@ -88,7 +88,7 @@ async function Wyniki({ params }) {
           <div className="pusto listy-pusto">
             <h3>{pulaPusta ? "Brak listów do rezerwacji" : stan.wszystkie === 0 ? "Obecnie nie ma opublikowanych listów" : "Nic tu nie ma przy tych filtrach"}</h3>
             <p>
-              {pulaPusta ? "Możesz nadal pomóc, wpłacając na zbiórkę Fundacji na Siepomaga." : stan.wszystkie === 0
+              {pulaPusta ? "Możesz nadal pomóc w przygotowaniu paczek zbiorczych dla naszych podopiecznych, wspierając zbiórkę na Siepomaga." : stan.wszystkie === 0
                 ? "Listy publikujemy po weryfikacji przez Fundację."
                 : "Spróbuj zmienić wiek, kategorię albo wyczyścić wyszukiwanie."}
             </p>

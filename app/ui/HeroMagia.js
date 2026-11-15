@@ -35,8 +35,8 @@ export default function HeroMagia({ etykieta, saListy, termin, brakWolnychListow
           <p className="nadtytul"><span /> {etykieta}</p>
           {brakWolnychListow ? (
             <>
-              <h1>Razem podarujmy dzieciom <em>święta.</em></h1>
-              <p className="hero-opis">Wszystkie dostępne listy mają już swoich Mikołajów. Nadal możesz pomóc, wspierając naszą zbiórkę na świąteczne prezenty dla dzieci z domów dziecka i rodzin zastępczych.</p>
+              <h1>Świąteczne paczki dla <em>naszych podopiecznych</em></h1>
+              <p className="hero-opis">Wszystkie dostępne listy mają już swoich Mikołajów. Przygotujemy również paczki zbiorcze dla dzieci z domów dziecka i rodzin zastępczych. Twoja wpłata na Siepomaga pomoże nam kupić prezenty, które trafią do tych paczek.</p>
             </>
           ) : (
             <>
