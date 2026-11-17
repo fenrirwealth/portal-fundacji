@@ -88,13 +88,13 @@ async function Wyniki({ params }) {
           <div className="pusto listy-pusto">
             <h3>{pulaPusta ? "Brak listów do rezerwacji" : stan.wszystkie === 0 ? "Obecnie nie ma opublikowanych listów" : "Nic tu nie ma przy tych filtrach"}</h3>
             <p>
-              {pulaPusta ? "Możesz nadal pomóc w przygotowaniu paczek zbiorczych dla naszych podopiecznych, wspierając zbiórkę na Siepomaga." : stan.wszystkie === 0
+              {pulaPusta ? "Nadal możesz przeczytać listy, które mają już swoich Mikołajów." : stan.wszystkie === 0
                 ? "Listy publikujemy po weryfikacji przez Fundację."
                 : "Spróbuj zmienić wiek, kategorię albo wyczyścić wyszukiwanie."}
             </p>
             {stan.wszystkie > 0 && (
-              <Link className="btn listy-btn-szklany" href="/listy">
-                Wyczyść filtry
+              <Link className="btn listy-btn-szklany" href="/listy#katalog-listow">
+                {pulaPusta ? "Pokaż wszystkie listy" : "Wyczyść filtry"}
               </Link>
             )}
           </div>
@@ -126,7 +126,11 @@ export default async function Listy({ searchParams }) {
         <header className="listy-hero">
           <span className="listy-hero-ikona" aria-hidden="true"><MailOpen /></span>
           <p className="listy-nadtytul"><Sparkles /> Magiczne archiwum życzeń</p>
-          <h1>Wybierz list, który czeka na <em>swojego Mikołaja</em></h1>
+          {stan.wszystkie > 0 && stan.wolne === 0 ? (
+            <h1>Przeczytaj <em>listy do Mikołaja</em></h1>
+          ) : (
+            <h1>Wybierz list, który czeka na <em>swojego Mikołaja</em></h1>
+          )}
           <p className="listy-wstep">
             Każdy list przeszedł weryfikację Fundacji. Publikujemy imię,
             wiek, województwo, opis marzenia i kategorię prezentu, w razie potrzeby
@@ -140,7 +144,7 @@ export default async function Listy({ searchParams }) {
 
         <LicznikNaZywo poczatkowy={stan} termin={formatujTermin(edycja?.terminDostarczenia)} />
 
-        <section className="listy-filtry-panel" aria-label="Filtry">
+        <section id="katalog-listow" className="listy-filtry-panel" aria-label="Filtry listów">
           <Szukajka poczatkowa={params.szukaj || ""} />
 
           <div className="filtry listy-filtry">
