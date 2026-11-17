@@ -47,17 +47,17 @@ export default function HeroMagia({ etykieta, saListy, termin, brakWolnychListow
           )}
           <div className="hero-akcje">
             {brakWolnychListow ? (
-              <>
-                <a className="btn btn-magiczny btn-duzy" href={ZBIORKA_SIEPOMAGA_HREF}>
-                  Wesprzyj zbiórkę na Siepomaga <span aria-hidden="true">↗</span>
-                </a>
-                <Link className="btn btn-szklany btn-duzy" href="/listy#katalog-listow">
-                  Przeglądaj listy dzieci
-                </Link>
-              </>
+              <a className="btn btn-magiczny btn-duzy" href={ZBIORKA_SIEPOMAGA_HREF}>
+                Wesprzyj zbiórkę na Siepomaga <span aria-hidden="true">↗</span>
+              </a>
             ) : (
               <Link className="btn btn-magiczny btn-duzy" href={saListy ? "/listy" : "#jak-to-dziala"}>
                 {saListy ? "Zostań Mikołajem tego listu" : "Poznaj akcję"}<span aria-hidden="true">↗</span>
+              </Link>
+            )}
+            {saListy && (
+              <Link className="btn btn-szklany btn-duzy" href="/listy#katalog-listow">
+                Przeglądaj listy dzieci
               </Link>
             )}
             {saListy && !brakWolnychListow && <Link prefetch={false} className="btn btn-szklany btn-duzy" href="/listy/losowy" onClick={losuj} aria-busy={otwarta}>{otwarta ? "Magia wybiera Twój list…" : "Niech list wybierze mnie"}</Link>}
