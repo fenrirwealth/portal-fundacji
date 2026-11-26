@@ -1,0 +1,57 @@
+name: Build deployment image
+on:
+  push:
+    branches: [main, ci/ovh-images]
+  workflow_dispatch:
+concurrency:
+  group: images-${{ github.ref }}
+  cancel-in-progress: false
+permissions:
+  contents: read
+  packages: write
+jobs:
+  image:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+      - name: Build and publish the tested image
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          image="ghcr.io/$GITHUB_REPOSITORY:$GITHUB_SHA"
+          printf '%s' "$GH_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+          docker buildx build --push \
+            --label "org.opencontainers.image.source=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" \
+            --label "org.opencontainers.image.revision=$GITHUB_SHA" \
+            --tag "$image" .
+          if [[ "$GITHUB_REF" == refs/heads/main ]]; then
+            head=$(gh api "repos/$GITHUB_REPOSITORY/commits/main" --jq .sha)
+            if [[ "$head" == "$GITHUB_SHA" ]]; then
+              docker buildx imagetools create --prefer-index=false -t "${image%:*}:main" "$image"
+            fi
+          fi
+
+  release:
+    needs: image
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Notify Coolify after image publication
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          api="repos/$GITHUB_REPOSITORY/git"
+          head=$(gh api "$api/ref/heads/main" --jq .object.sha)
+          [[ "$head" == "$GITHUB_SHA" ]] || exit 0
+          if gh api "$api/ref/heads/coolify-release" --silent; then
+            gh api --method PATCH "$api/refs/heads/coolify-release" -f sha="$GITHUB_SHA" -F force=false --silent
+          else
+            gh api --method POST "$api/refs" -f ref=refs/heads/coolify-release -f sha="$GITHUB_SHA" --silent
+          fi
