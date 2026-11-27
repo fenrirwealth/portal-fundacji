@@ -37,7 +37,8 @@ export const viewport = {
 
 const daneFundacji = {
   "@context": "https://schema.org",
-  "@type": "Organization",
+  "@type": "NGO",
+  "@id": "https://fundacjalepszydomlepszejutro.pl/#organization",
   name: "Fundacja Lepszy Dom Lepsze Jutro",
   url: "https://fundacjalepszydomlepszejutro.pl",
   email: "kontakt@fundacjalepszydomlepszejutro.pl",
